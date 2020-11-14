@@ -7,4 +7,9 @@ public class StatisticServices {
     public static List<Country> getStatistic(List<Country> countryList, Charttype charttype, List<Criteria> criteriaList){
         return null;
     }
+
+    public static void logAction(List<Country> countryList, Charttype charttype, List<Criteria> criteriaList){
+
+    }
+
 }
