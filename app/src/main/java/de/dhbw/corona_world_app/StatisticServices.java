@@ -4,11 +4,12 @@ import java.util.List;
 
 public class StatisticServices {
 
-    public static List<Country> getStatistic(List<Country> countryList, Charttype charttype, List<Criteria> criteriaList){
+    public static List<Country> getStatistic(List<String> countryList, Charttype charttype, List<Criteria> criteriaList){
+        logAction(countryList,charttype,criteriaList);
         return null;
     }
 
-    public static void logAction(List<Country> countryList, Charttype charttype, List<Criteria> criteriaList){
+    private static void logAction(List<String> countryList, Charttype charttype, List<Criteria> criteriaList){
 
     }
 
