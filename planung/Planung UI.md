@@ -16,6 +16,7 @@ Oben rechts im Bildschirm können die **Einstellungen** der App aufgerufen werde
 Die main_activity wird über eine Navigationsleiste an der unteren Hälfte des Bildschirms gesteuert.
 In der Mitte des Bildschirm wird das jeweilige Modul angezeigt, was ausgewählt wurde.
 Dies ist das Design der main_aktivity:
+
 <img src="Dark%20Mode%20Hauptbildschirm.png" width=250>
 <img src="Light%20Mode%20Hauptbildschirm.png" width=250>
 
