@@ -3,4 +3,5 @@
     <string name="title_world">World Map</string>
     <string name="title_statistic">Statistic</string>
     <string name="title_backlog">History</string>
+    <string name="settings">Settings</string>
 </resources>
