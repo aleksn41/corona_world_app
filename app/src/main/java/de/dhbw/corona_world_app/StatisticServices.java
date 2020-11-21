@@ -10,7 +10,7 @@ public class StatisticServices {
     }
 
     private static void logAction(List<String> countryList, Charttype charttype, List<Criteria> criteriaList){
-
+        //gibt hier die Daten an das Backlog weiter
     }
 
 }
