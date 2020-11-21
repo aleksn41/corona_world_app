@@ -34,15 +34,15 @@ Die Auswahl der Statistik wird über mehrere Dropdowns ermöglicht, die Auswahlm
 # Modul Verlauf
 In dem Modul Verlauf werden die Favoriten aus der Statistik-Auswahl angezeigt und alle Statistik-Auswahlen die der User ausgewählt hat (es ist begrenzt wie viele angezeigt bzw. gespeichert werden). Diese können ausgewählt werden, um sie zu löschen oder um sie in der Statistik anzuzeigen.
 
-#Navigation
+# Navigation
 Die Navigation sorgt dafür, dass der User durch die App navigieren kann.
 Um die Hauptmodule zu erreichen, kann der Nutzer die Navigationsleiste unten am Bildschirm nutzen.
 Um die Einstellungen zu öffnen, kann der Nutzer die 3 Punkte oben rechts anklicken.
 Der Nutzer ist in der Lage Mithilfe der Zurücktaste das anzuzeigen, was er vorher getan hat.
 
-#Einstellungen
+# Einstellungen
 Zeigt eine Liste von Einstellungen, die angeklickt werden können (steht noch nicht fest, welche diese sind).
 
-#Verschiedene Größen von Layouts:
+# Verschiedene Größen von Layouts:
 Layout wird an die Größe des Handys angepasst. Genaue Pläne stehen noch nicht fest.
 
