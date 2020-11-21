@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_world">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="de.dhbw.corona_world_app.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:id="@+id/navigation_world"
+        android:name="de.dhbw.corona_world_app.ui.map.MapFragment"
+        android:label="@string/title_world"
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="de.dhbw.corona_world_app.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
+        android:id="@+id/navigation_statistic"
+        android:name="de.dhbw.corona_world_app.ui.statistic.StatisticFragment"
+        android:label="@string/title_statistic"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="de.dhbw.corona_world_app.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
+        android:id="@+id/navigation_backlog"
+        android:name="de.dhbw.corona_world_app.ui.backlog.BacklogFragment"
+        android:label="@string/title_backlog"
         tools:layout="@layout/fragment_notifications" />
 </navigation>
