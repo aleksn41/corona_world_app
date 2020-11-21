@@ -9,7 +9,7 @@ Hier wird  das API-Management und dessen Funktion in der Applikation vorgestellt
 
 ## Methoden
 
-  - getData -> Parameter: Länder, Art der angefragten Daten (Gesund, Infiziert, etc.), Zeitraum (LocalDateTime); Rückgabe: Liste der angefragten Länder angereichert mit deren Daten
+  - getData -> Parameter: Länder, Art der angefragten Daten (Gesund, Infiziert, etc.), Zeitraum[] (LocalDateTime); Rückgabe: Liste der angefragten Länder angereichert mit deren Daten
   - enableCache
   - disableCache
   
