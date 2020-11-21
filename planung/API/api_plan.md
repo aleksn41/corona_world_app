@@ -12,6 +12,9 @@ Hier wird  das API-Management und dessen Funktion in der Applikation vorgestellt
   - getData -> Parameter: Länder, Art der angefragten Daten (Gesund, Infiziert, etc.), Zeitraum[] (LocalDateTime); Rückgabe: Liste der angefragten Länder angereichert mit deren Daten
   - enableCache
   - disableCache
+  - enableLongTermStorage
+  - disableLongTermStorage
+  - saveData -> Parameter: Länder, Art der angefragten Daten (Gesund, Infiziert, etc.), Zeitraum[] (LocalDateTime); Rückgabe: void (speichert Statistik im Langzeitspeicher ab)
   
 ## Aufgerufene APIs
 
