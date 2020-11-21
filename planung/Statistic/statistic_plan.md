@@ -5,7 +5,7 @@ Hier wird der Plan für die Statistik-Komponente der Applikation dargelegt.
 # Features
 
   - gibt eine fertige Statistik zurück 
-  - loggt die Eingabe des Nutzers im Backlog (zum späteren Anzeigen des Verlaufs)
+  - gibt die Eingabe des Nutzers an das Backlog weiter (zum späteren Anzeigen des Verlaufs)
 
 ## Parameter
 
