@@ -1,16 +1,16 @@
-package de.dhbw.corona_world_app.ui.home;
+package de.dhbw.corona_world_app.ui.backlog;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class HomeViewModel extends ViewModel {
+public class BacklogViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public HomeViewModel() {
+    public BacklogViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+        mText.setValue("Backlog");
     }
 
     public LiveData<String> getText() {
