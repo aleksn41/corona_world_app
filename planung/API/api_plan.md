@@ -5,7 +5,7 @@ Hier wird  das API-Management und dessen Funktion in der Applikation vorgestellt
 # Features
 
   - Ruft verschiedene APIs auf, um die angefragten Daten (Infizierte, Tode, etc.) zu erhalten
-  - chached (bei aktivierter Einstellung) Daten zwischen um die Abrufzeit zu verringern
+  - cached (bei aktivierter Einstellung) Daten zwischen um die Abrufzeit zu verringern
 
 ## Methoden
 
