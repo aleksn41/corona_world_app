@@ -1,4 +1,4 @@
-package de.dhbw.corona_world_app.ui.history;
+package de.dhbw.corona_world_app.ui.tools;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6,12 +6,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.List;
 
 import de.dhbw.corona_world_app.R;
 
@@ -29,9 +26,9 @@ class StatisticCallViewHolder extends RecyclerView.ViewHolder {
 }
 
 //#TODO Change String to StatisticCall
-public class HistoryAdapter extends ListAdapter<String,StatisticCallViewHolder> {
+public class StatisticCallAdapter extends ListAdapter<String,StatisticCallViewHolder> {
 
-    public HistoryAdapter() {
+    public StatisticCallAdapter() {
         super(DIFF_CALLBACK);
     }
 

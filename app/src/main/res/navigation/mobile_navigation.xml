@@ -18,8 +18,15 @@
         tools:layout="@layout/fragment_statistic" />
 
     <fragment
-        android:id="@+id/navigation_backlog"
+        android:id="@+id/navigation_favourites"
+        android:name="de.dhbw.corona_world_app.ui.favourites.FavouriteFragment"
+        android:label="@string/title_favourites"
+        tools:layout="@layout/fragment_favourites" />
+
+    <fragment
+        android:id="@+id/navigation_history"
         android:name="de.dhbw.corona_world_app.ui.history.HistoryFragment"
         android:label="@string/title_history"
         tools:layout="@layout/fragment_history" />
+
 </navigation>

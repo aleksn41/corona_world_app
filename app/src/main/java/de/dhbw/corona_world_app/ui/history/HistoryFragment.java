@@ -8,21 +8,19 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapter;
 
 public class HistoryFragment extends Fragment {
 
     private HistoryViewModel historyViewModel;
-    protected RecyclerView mRecyclerView;
-    protected HistoryAdapter mAdapter;
-    protected RecyclerView.LayoutManager mLayoutManager;
+    protected RecyclerView mHistoryRecyclerView;
+    protected StatisticCallAdapter mStatisticCallAdapter;
+    protected RecyclerView.LayoutManager mHistoryLayoutManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,14 +33,17 @@ public class HistoryFragment extends Fragment {
         historyViewModel =
                 new ViewModelProvider(this).get(HistoryViewModel.class);
         View root = inflater.inflate(R.layout.fragment_history, container, false);
-        mRecyclerView=root.findViewById(R.id.favRecyclerView);
-        mLayoutManager=new LinearLayoutManager(getActivity());
+        mHistoryRecyclerView =root.findViewById(R.id.historyRecyclerView);
+        mHistoryLayoutManager =new LinearLayoutManager(getActivity());
         //TODO read about Saved Instances (sample app)
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.scrollToPosition(0);
-        mAdapter=new HistoryAdapter();
-        historyViewModel.mFavourites.observe(getViewLifecycleOwner(), strings -> mAdapter.submitList(strings));
-        mRecyclerView.setAdapter(mAdapter);
+        //setup Favourite List
+        
+        mHistoryRecyclerView.setLayoutManager(mHistoryLayoutManager);
+        mHistoryRecyclerView.scrollToPosition(0);
+        mStatisticCallAdapter =new StatisticCallAdapter();
+        historyViewModel.mHistory.observe(getViewLifecycleOwner(), strings -> mStatisticCallAdapter.submitList(strings));
+        mHistoryRecyclerView.setAdapter(mStatisticCallAdapter);
+
         return root;
     }
 
