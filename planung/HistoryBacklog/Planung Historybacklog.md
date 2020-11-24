@@ -7,12 +7,12 @@ Es können über eine Schnittstelle Daten über den Verlauf der Anfragen gestell
 
 # Implementierung
 Das Modul Backlog/Verlauf enthält eine statische Methode, die eine Anfrage erhält und diese permanent in den App spezifischen Daten abspeichert.
-Beim starten der App werden diese Daten aus dem internen Speicher geladen und bei jedem neuen Eintrag geupdatet.
+Beim Starten der App werden diese Daten aus dem internen Speicher geladen und bei jedem neuen Eintrag geupdatet.
 
 # Schnittstellen
 Es existieren folgende Schnittstellen in diesem Modul:
 
 - Eintrag einer Anfrage (addRequest)
-- Holen einer Listen von Anfragen aus dem Verlauf (getRequests)
+- Holen einer Liste von Anfragen aus dem Verlauf (getRequests)
 
 Mehr Infos zu den Schnittstellen gibt es [hier](/Documentation/History)
