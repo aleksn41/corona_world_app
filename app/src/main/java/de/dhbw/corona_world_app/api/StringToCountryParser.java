@@ -1,11 +1,17 @@
 package de.dhbw.corona_world_app.api;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
+
+import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
 //TODO use professional stuff for JSON parsing
 public class StringToCountryParser {
 
     public static Country parseFromHeroOneCountry(String toParse, Country country){
-
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
@@ -16,6 +22,33 @@ public class StringToCountryParser {
             }
         }
         return country;
+    }
+
+    public static Country parseFromHeroOneCountry(String toParse){
+        Country country = new Country();
+        String[] splitArray = toParse.split(",");
+        for (String string : splitArray) {
+            String[] tuple = string.split(":");
+            switch (tuple[0]) {
+                case"\"country\"":country.setName(tuple[1]);
+                case"\"deaths\"":country.setDeaths(Integer.parseInt(tuple[1]));
+                case"\"cases\"":country.setInfected(Integer.parseInt(tuple[1]));
+                case"\"recovered\"":country.setRecovered(Integer.parseInt(tuple[1]));
+            }
+        }
+        return country;
+    }
+
+    public static List<Country> parseFromHeroMultiCountry(String toParse, List<Country> countryList){
+        try {
+            JSONArray jsonArray = new JSONArray(toParse);
+            for(int i = 0; i < jsonArray.length(); i++) {
+                countryList.add(parseFromHeroOneCountry(jsonArray.get(i).toString()));
+            }
+        } catch (JSONException e) {
+            Logger.logE("ParsingException","Error parsing JSON: "+e);
+        }
+        return countryList;
     }
 
     public static Country parsePopCount(String toParse, Country country){

@@ -12,6 +12,10 @@ public class Country {
 
     private long population;
 
+    public Country(){
+
+    }
+
     public Country(String name) {
         this.name = name;
     }

@@ -3,7 +3,6 @@ package de.dhbw.corona_world_app;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import de.dhbw.corona_world_app.api.APIManager;
@@ -62,6 +61,18 @@ public class APIManagerTests {
             criteriaList.add(Criteria.POPULATION);
             assertNotNull(manager.getData(clist,criteriaList,null));
             System.out.println(manager.getData(clist,criteriaList,null));
+        } else {
+            throw new RuntimeException("No Connection to the Internet found!");
+        }
+    }
+
+    @Test
+    public void testGetDataWorld(){
+        APIManager manager = new APIManager(true,false);
+        manager.disableLogsForTesting();
+        if(manager.createAPICall("https://google.de")!=null) {
+            assertNotNull(manager.getDataWorld());
+            System.out.println(manager.getDataWorld());
         } else {
             throw new RuntimeException("No Connection to the Internet found!");
         }

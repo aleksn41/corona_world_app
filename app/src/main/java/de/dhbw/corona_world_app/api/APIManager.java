@@ -1,5 +1,7 @@
 package de.dhbw.corona_world_app.api;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,12 +23,30 @@ public class APIManager {
 
     private boolean longTermStorageEnabled;
 
+    private String heroURL = "https://coronavirus-19-api.herokuapp.com";
     private Map<String, String> heroMap = new HashMap<>();
 
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
         this.cacheEnabled = cacheEnabled;
         this.longTermStorageEnabled = longTermStorageEnabled;
         heroMap.put("UnitedStates","USA");
+    }
+
+    public List<Country> getDataWorld(){
+        Logger.logD("getDataWorld","Getting Data for every Country");
+        String url = heroURL;
+        url += "/countries";
+
+        List<Country> returnList = new ArrayList<>();
+        String apiReturn = createAPICall(url);
+
+        try {
+            StringToCountryParser.parseFromHeroMultiCountry(apiReturn,returnList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return returnList;
     }
 
     public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame){
@@ -36,11 +56,11 @@ public class APIManager {
 
         //building url
         for (ISOCountry isoCountry:countryList) {
-            String url = "https://coronavirus-19-api.herokuapp.com";
+            String url = heroURL;
             url += "/countries";
 
             //in/decrease countryList.size if necessary -> todo performance
-            if (countryList != null && countryList.size()<10) {
+            if (countryList != null) {
                 String attachString = "";
                 if(heroMap.containsKey(isoCountry.toString())) {
                     attachString = heroMap.get(isoCountry.toString());
