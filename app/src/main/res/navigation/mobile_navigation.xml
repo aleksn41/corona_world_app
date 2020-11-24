@@ -9,17 +9,17 @@
         android:id="@+id/navigation_world"
         android:name="de.dhbw.corona_world_app.ui.map.MapFragment"
         android:label="@string/title_world"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/navigation_statistic"
         android:name="de.dhbw.corona_world_app.ui.statistic.StatisticFragment"
         android:label="@string/title_statistic"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_statistic" />
 
     <fragment
         android:id="@+id/navigation_backlog"
-        android:name="de.dhbw.corona_world_app.ui.backlog.BacklogFragment"
-        android:label="@string/title_backlog"
-        tools:layout="@layout/fragment_notifications" />
+        android:name="de.dhbw.corona_world_app.ui.history.HistoryFragment"
+        android:label="@string/title_history"
+        tools:layout="@layout/fragment_history" />
 </navigation>

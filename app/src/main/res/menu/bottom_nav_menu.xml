@@ -14,6 +14,6 @@
     <item
         android:id="@+id/navigation_backlog"
         android:icon="@drawable/ic_backlog_dp24"
-        android:title="@string/title_backlog" />
+        android:title="@string/title_history" />
 
 </menu>
