@@ -55,4 +55,10 @@ public class Country {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "Country [name=" + name + ", deaths=" + deaths + ", infected=" + infected + ", recovered=" + recovered
+                + ", population=" + population + "]";
+    }
 }

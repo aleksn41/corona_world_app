@@ -3,7 +3,9 @@ package de.dhbw.corona_world_app.api;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
@@ -19,36 +21,50 @@ public class APIManager {
 
     private boolean longTermStorageEnabled;
 
+    private Map<String, String> heroMap = new HashMap<>();
+
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
         this.cacheEnabled = cacheEnabled;
         this.longTermStorageEnabled = longTermStorageEnabled;
+        heroMap.put("UnitedStates","USA");
     }
 
     public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame){
+        Logger.logD("getData","Getting data according to following parameters: "+countryList+" ; "+criteriaList+" ; "+timeFrame);
+
         List<Country> returnList = new ArrayList<>();
-        String url = "https://coronavirus-19-api.herokuapp.com";
-        url += "/countries";
-        String apiReturn = createAPICall(url);
 
+        //building url
+        for (ISOCountry isoCountry:countryList) {
+            String url = "https://coronavirus-19-api.herokuapp.com";
+            url += "/countries";
 
-        Country country = new Country(countryList.get(0).toString());
-        switch (criteriaList.get(0)){
-            case DEATHS:country.setDeaths(1);
-            case INFECTED:country.setInfected(1);
-            case RECOVERED:country.setRecovered(1);
+            //in/decrease countryList.size if necessary -> todo performance
+            if (countryList != null && countryList.size()<10) {
+                String attachString = "";
+                if(heroMap.containsKey(isoCountry.toString())) {
+                    attachString = heroMap.get(isoCountry.toString());
+                } else {
+                    attachString = isoCountry.toString();
+                }
+                url += "/" + attachString;
+            }
+
+            //make api-call
+            String apiReturn = createAPICall(url);
+
+            //parse api-return into country and return
+            Country country = new Country(isoCountry.toString());
+            StringToCountryParser.parseFromHeroOneCountry(apiReturn, country);
+
+            //check if popCount is to be shown
+            if (criteriaList.contains(Criteria.POPULATION)) {
+                StringToCountryParser.parsePopCount(createAPICall("https://restcountries.eu/rest/v2/name/" + isoCountry.getISOCode() + "?fullText=true"), country);
+            }
+            returnList.add(country);
         }
-        returnList.add(country);
+
         return returnList;
-    }
-
-    private String evaluateCriteria(Criteria criteria){
-        String returnString = "";
-        switch (criteria){
-            case DEATHS:returnString = "deaths";
-            case RECOVERED:returnString = "recovered";
-            case INFECTED:returnString = "confirmed";
-        }
-        return returnString;
     }
 
     public String createAPICall(String url){

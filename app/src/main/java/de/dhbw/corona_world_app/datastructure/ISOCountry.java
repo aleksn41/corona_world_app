@@ -492,7 +492,7 @@ public enum ISOCountry {
     ISOCountry(String ISOCode){
         this.ISOCode = ISOCode;
     }
-    private String getISOCode(){
+    public String getISOCode(){
         return this.ISOCode;
     }
 }
