@@ -12,8 +12,17 @@ public class Country {
 
     private long population;
 
-    public Country(){
+    private double pop_inf_ratio;
 
+    public Country(){
+    }
+
+    public double getPop_inf_ratio() {
+        return pop_inf_ratio;
+    }
+
+    public void setPop_inf_ratio(double pop_inf_ratio) {
+        this.pop_inf_ratio = pop_inf_ratio;
     }
 
     public Country(String name) {
@@ -50,6 +59,7 @@ public class Country {
 
     public void setPopulation(long population) {
         this.population = population;
+        this.pop_inf_ratio = (double) infected / population;
     }
 
     public String getName() {
@@ -62,7 +72,13 @@ public class Country {
 
     @Override
     public String toString() {
-        return "Country [name=" + name + ", deaths=" + deaths + ", infected=" + infected + ", recovered=" + recovered
-                + ", population=" + population + "]";
+        return "Country{" +
+                "name='" + name + '\'' +
+                ", deaths=" + deaths +
+                ", infected=" + infected +
+                ", recovered=" + recovered +
+                ", population=" + population +
+                ", pop_inf_ratio=" + pop_inf_ratio +
+                '}';
     }
 }

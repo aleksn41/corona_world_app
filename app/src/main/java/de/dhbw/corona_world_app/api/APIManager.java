@@ -1,5 +1,6 @@
 package de.dhbw.corona_world_app.api;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
@@ -25,13 +27,15 @@ public class APIManager {
 
     private String heroURL = "https://coronavirus-19-api.herokuapp.com";
     private Map<String, String> heroMap = new HashMap<>();
+    private Map<String, String> popToNameMap = new HashMap<>();
 
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
         this.cacheEnabled = cacheEnabled;
         this.longTermStorageEnabled = longTermStorageEnabled;
-        heroMap.put("UnitedStates","USA");
+        this.setMapData();
     }
 
+    //TODO add all Countries into <Name,Alias> Map
     public List<Country> getDataWorld(){
         Logger.logD("getDataWorld","Getting Data for every Country");
         String url = heroURL;
@@ -40,12 +44,24 @@ public class APIManager {
         List<Country> returnList = new ArrayList<>();
         String apiReturn = createAPICall(url);
 
-        try {
-            StringToCountryParser.parseFromHeroMultiCountry(apiReturn,returnList);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        StringToCountryParser.parseFromHeroMultiCountry(apiReturn,returnList);
+        Map<String, Long> popMap = getAllCountriesPopData();
 
+        int cnt = 0;
+        for (Country country:returnList) {
+            if(popMap.containsKey(country.getName())) {
+                country.setPopulation(popMap.get(country.getName()));
+            } else if(popToNameMap.containsKey(country.getName())) {
+                country.setPopulation(popMap.get(popToNameMap.get(country.getName())));
+            } else {
+                cnt+=1;
+                System.out.println("\""+country.getName()+"\"s popCount could not be set");
+                Logger.logD("getDataWorld","country \""+country.getName()+"\" has no popCount\nINFO: Try adding an according entry into the <Name,Alias> Map");
+            }
+        }
+        System.out.println(popMap);
+        System.out.println("count of countries with no popCount: "+cnt);
+        Logger.logD("getDataWorld","count of countries with no popCount: "+cnt);
         return returnList;
     }
 
@@ -87,6 +103,20 @@ public class APIManager {
         return returnList;
     }
 
+    private Map<String,Long> getAllCountriesPopData(){
+        String apiReturn = createAPICall("https://restcountries.eu/rest/v2/all");
+        Map<String,Long> returnMap = new HashMap<>();
+        try {
+            JSONArray jsonArray = new JSONArray(apiReturn);
+            for(int i = 0; i < jsonArray.length(); i++) {
+                returnMap.put(jsonArray.getJSONObject(i).getString("name"),jsonArray.getJSONObject(i).getLong("population"));
+            }
+        } catch (JSONException e) {
+            Logger.logE("ParsingException","Error parsing JSON: "+e);
+        }
+        return returnMap;
+    }
+
     public String createAPICall(String url){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -99,6 +129,14 @@ public class APIManager {
             Logger.logE("OkHTTPException","GET-Request "+ url +" failed");
         }
         return null;
+    }
+
+    private <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
+        Map<Va,Ke> reverseMap = new HashMap<>();
+        for(Map.Entry<Ke, Va> entry : inMap.entrySet()){
+            reverseMap.put(entry.getValue(), entry.getKey());
+        }
+        return reverseMap;
     }
 
     public void enableCache(){
@@ -119,5 +157,12 @@ public class APIManager {
 
     public void disableLogsForTesting(){
         Logger.disableLogging();
+    }
+
+    public void setMapData(){
+        heroMap.put("UnitedStates","USA");
+        popToNameMap.put("USA","United States of America");
+        popToNameMap.put("UK","United Kingdom of Great Britain and Northern Ireland");
+
     }
 }
