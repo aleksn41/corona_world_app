@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
@@ -26,7 +25,7 @@ public class APIManager {
     private boolean longTermStorageEnabled;
 
     private String heroURL = "https://coronavirus-19-api.herokuapp.com";
-    private Map<String, String> heroMap = new HashMap<>();
+    private Map<String, String> heroToPopMap = new HashMap<>();
     private Map<String, String> popToNameMap = new HashMap<>();
 
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
@@ -78,8 +77,8 @@ public class APIManager {
             //in/decrease countryList.size if necessary -> todo performance
             if (countryList != null) {
                 String attachString = "";
-                if(heroMap.containsKey(isoCountry.toString())) {
-                    attachString = heroMap.get(isoCountry.toString());
+                if(heroToPopMap.containsKey(isoCountry.toString())) {
+                    attachString = heroToPopMap.get(isoCountry.toString());
                 } else {
                     attachString = isoCountry.toString();
                 }
@@ -160,7 +159,7 @@ public class APIManager {
     }
 
     public void setMapData(){
-        heroMap.put("UnitedStates","USA");
+        heroToPopMap.put("UnitedStates","USA");
         popToNameMap.put("USA","United States of America");
         popToNameMap.put("UK","United Kingdom of Great Britain and Northern Ireland");
 
