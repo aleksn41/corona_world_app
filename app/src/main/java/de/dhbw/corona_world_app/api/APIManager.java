@@ -34,7 +34,6 @@ public class APIManager {
         this.setMapData();
     }
 
-    //TODO add all Countries into <Name,Alias> Map
     public List<Country> getDataWorld(){
         Logger.logD("getDataWorld","Getting Data for every Country");
         String url = heroURL;
