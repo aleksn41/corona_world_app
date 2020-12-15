@@ -1,5 +1,6 @@
 package de.dhbw.corona_world_app.ui.tools;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,41 +12,46 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.ui.history.HistoryViewModel;
 
-class StatisticCallViewHolder extends RecyclerView.ViewHolder {
-    private final TextView textView;
+import org.jetbrains.annotations.NotNull;
 
-    public StatisticCallViewHolder(View view) {
-        super(view);
-        textView =  view.findViewById(R.id.itemTextView);
-    }
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Objects;
 
-    public TextView getTextView() {
-        return textView;
-    }
-}
-
-//#TODO Change String to StatisticCall
-public class StatisticCallAdapter extends ListAdapter<String,StatisticCallViewHolder> {
-
-    private int itemLayoutID;
-    public StatisticCallAdapter(int itemLayoutID) {
+//TODO Change String to StatisticCall
+public class StatisticCallAdapter<VH extends RecyclerView.ViewHolder&StatisticCallViewHolderInterface> extends ListAdapter<String,VH> {
+    private final int itemLayoutID;
+    private final Class<VH> vhClass;
+    public StatisticCallAdapter(int itemLayoutID,Class<VH> classOfVH) {
         super(DIFF_CALLBACK);
         this.itemLayoutID=itemLayoutID;
+        vhClass=classOfVH;
     }
 
-    @NonNull
+
+    @NotNull
     @Override
-    public StatisticCallViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(itemLayoutID, parent, false);
-        return new StatisticCallViewHolder(view);
+        //use reflection to instantiate ViewHolder
+        VH t = null;
+        try {
+            t=vhClass.getConstructor(View.class).newInstance(view);
+        } catch (InstantiationException | NoSuchMethodException | InvocationTargetException| IllegalAccessException e) {
+            Log.e(this.getClass().getName(), Arrays.toString(e.getStackTrace()));
+            System.exit(1);
+        }
+        //TODO cannot be null
+        return Objects.requireNonNull(t);
     }
 
-
     @Override
-    public void onBindViewHolder(@NonNull StatisticCallViewHolder holder, int position) {
-        holder.getTextView().setText(getItem(position));
+    public void onBindViewHolder(@NonNull VH holder, int position) {
+        //holder.getTextView().setText(getItem(position));
+        holder.setItem(getItem(position));
     }
 
     public static final DiffUtil.ItemCallback<String> DIFF_CALLBACK =

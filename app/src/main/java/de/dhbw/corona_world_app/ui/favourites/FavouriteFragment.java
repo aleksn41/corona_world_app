@@ -13,13 +13,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.ui.history.HistoryItemViewHolder;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapter;
 
 public class FavouriteFragment extends Fragment {
 
     private FavouriteViewModel favouriteViewModel;
     protected RecyclerView mFavouriteRecyclerView;
-    protected StatisticCallAdapter mFavouriteAdapter;
+    protected StatisticCallAdapter<FavouriteItemViewHolder> mFavouriteAdapter;
     protected RecyclerView.LayoutManager mFavouriteLayoutManager;
 
     @Override
@@ -40,7 +41,7 @@ public class FavouriteFragment extends Fragment {
 
         mFavouriteRecyclerView.setLayoutManager(mFavouriteLayoutManager);
         mFavouriteRecyclerView.scrollToPosition(0);
-        mFavouriteAdapter =new StatisticCallAdapter(R.layout.favourite_row_item);
+        mFavouriteAdapter =new StatisticCallAdapter<>(R.layout.favourite_row_item, FavouriteItemViewHolder.class);
         favouriteViewModel.mFavourites.observe(getViewLifecycleOwner(), strings -> mFavouriteAdapter.submitList(strings));
         mFavouriteRecyclerView.setAdapter(mFavouriteAdapter);
 
