@@ -12,7 +12,7 @@ public class MapServices {
             "\t\t\t  // Note: you will need to get a mapsApiKey for your project.\n" +
             "\t\t\t  // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings\n" +
             "\t\t\t  // https://developers.google.com/maps/documentation/javascript/get-api-key\n" +
-            "\t\t\t  'mapsApiKey': ''\n" +
+            "\t\t\t  'mapsApiKey': '"+APIKeyGetter.apiKey+"'\n" +
             "\t\t\t});\n" +
             "\t\t\tgoogle.charts.setOnLoadCallback(drawRegionsMap);\n" +
             "\t\t\t\n" +
