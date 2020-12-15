@@ -2,6 +2,9 @@
     <string name="app_name">corona_world_app</string>
     <string name="title_world">World Map</string>
     <string name="title_statistic">Statistic</string>
-    <string name="title_backlog">History</string>
+    <string name="title_history">History</string>
+    <string name="title_favourites">Favourites</string>
     <string name="settings">Settings</string>
+    <string name="default_elem_text">No Data</string>
+    <string name="allHistory">History</string>
 </resources>
