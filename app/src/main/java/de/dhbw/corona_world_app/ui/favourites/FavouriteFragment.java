@@ -40,7 +40,7 @@ public class FavouriteFragment extends Fragment {
 
         mFavouriteRecyclerView.setLayoutManager(mFavouriteLayoutManager);
         mFavouriteRecyclerView.scrollToPosition(0);
-        mFavouriteAdapter =new StatisticCallAdapter();
+        mFavouriteAdapter =new StatisticCallAdapter(R.layout.favourite_row_item);
         favouriteViewModel.mFavourites.observe(getViewLifecycleOwner(), strings -> mFavouriteAdapter.submitList(strings));
         mFavouriteRecyclerView.setAdapter(mFavouriteAdapter);
 

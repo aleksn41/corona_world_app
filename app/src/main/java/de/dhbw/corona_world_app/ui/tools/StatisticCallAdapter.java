@@ -28,15 +28,17 @@ class StatisticCallViewHolder extends RecyclerView.ViewHolder {
 //#TODO Change String to StatisticCall
 public class StatisticCallAdapter extends ListAdapter<String,StatisticCallViewHolder> {
 
-    public StatisticCallAdapter() {
+    private int itemLayoutID;
+    public StatisticCallAdapter(int itemLayoutID) {
         super(DIFF_CALLBACK);
+        this.itemLayoutID=itemLayoutID;
     }
 
     @NonNull
     @Override
     public StatisticCallViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.text_row_item, parent, false);
+                .inflate(itemLayoutID, parent, false);
         return new StatisticCallViewHolder(view);
     }
 
