@@ -1,7 +1,10 @@
 package de.dhbw.corona_world_app.map;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class MapServices {
 
@@ -47,6 +50,11 @@ public class MapServices {
             }
 
             public String putEntries(Map<String,Double> entryMap){
-                return null;
+                List<Map.Entry<String,Double>> entryList = entryMap.entrySet().stream().collect(Collectors.toList());
+                String returnString = "";
+                for (Map.Entry<String,Double> entry: entryList) {
+                    returnString += ",['"+entry.getKey()+"',"+entry.getValue()+"]";
+                }
+                return returnString;
             }
 }
