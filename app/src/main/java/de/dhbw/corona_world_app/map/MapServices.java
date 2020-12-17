@@ -46,7 +46,7 @@ public class MapServices {
             "</html>";
 
             public String putEntry(String countryName, double infected_healthy_ratio){
-                return WebViewStart + "[" + countryName + "," + infected_healthy_ratio + "]" + WebViewEnd;
+                return WebViewStart + ",[" + countryName + "," + infected_healthy_ratio + "]" + WebViewEnd;
             }
 
             public String putEntries(Map<String,Double> entryMap){
@@ -55,6 +55,6 @@ public class MapServices {
                 for (Map.Entry<String,Double> entry: entryList) {
                     returnString += ",['"+entry.getKey()+"',"+entry.getValue()+"]";
                 }
-                return returnString;
+                return WebViewStart + returnString + WebViewEnd;
             }
 }
