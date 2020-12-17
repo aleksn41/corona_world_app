@@ -19,7 +19,7 @@ public class HistoryFragment extends Fragment {
 
     private HistoryViewModel historyViewModel;
     protected RecyclerView mHistoryRecyclerView;
-    protected StatisticCallAdapter<HistoryItemViewHolder> mStatisticCallAdapter;
+    protected StatisticCallAdapter<String,HistoryItemViewHolder> mStatisticCallAdapter;
     protected RecyclerView.LayoutManager mHistoryLayoutManager;
 
     @Override
@@ -40,7 +40,7 @@ public class HistoryFragment extends Fragment {
         
         mHistoryRecyclerView.setLayoutManager(mHistoryLayoutManager);
         mHistoryRecyclerView.scrollToPosition(0);
-        mStatisticCallAdapter =new StatisticCallAdapter<>(R.layout.history_row_item,HistoryItemViewHolder.class);
+        mStatisticCallAdapter =new StatisticCallAdapter<>(R.layout.history_row_item,HistoryItemViewHolder.class,null);
         historyViewModel.mHistory.observe(getViewLifecycleOwner(), strings -> mStatisticCallAdapter.submitList(strings));
         mHistoryRecyclerView.setAdapter(mStatisticCallAdapter);
 

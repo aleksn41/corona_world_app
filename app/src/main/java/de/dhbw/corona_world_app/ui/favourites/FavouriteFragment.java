@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.favourites;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,19 +9,24 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ui.history.HistoryItemViewHolder;
+import de.dhbw.corona_world_app.ui.tools.Pair;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapter;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapterItemOnActionCallback;
 
 public class FavouriteFragment extends Fragment {
 
     private FavouriteViewModel favouriteViewModel;
     protected RecyclerView mFavouriteRecyclerView;
-    protected StatisticCallAdapter<FavouriteItemViewHolder> mFavouriteAdapter;
+    protected StatisticCallAdapter<Pair<String,Boolean>,FavouriteItemViewHolder> mFavouriteAdapter;
     protected RecyclerView.LayoutManager mFavouriteLayoutManager;
 
     @Override
@@ -41,8 +47,15 @@ public class FavouriteFragment extends Fragment {
 
         mFavouriteRecyclerView.setLayoutManager(mFavouriteLayoutManager);
         mFavouriteRecyclerView.scrollToPosition(0);
-        mFavouriteAdapter =new StatisticCallAdapter<>(R.layout.favourite_row_item, FavouriteItemViewHolder.class);
-        favouriteViewModel.mFavourites.observe(getViewLifecycleOwner(), strings -> mFavouriteAdapter.submitList(strings));
+        mFavouriteAdapter =new StatisticCallAdapter<>(R.layout.favourite_row_item, FavouriteItemViewHolder.class, itemID -> {
+            favouriteViewModel.toggleFavMark(itemID);
+            Log.d(this.getClass().getName(),"Item "+itemID+" changed");
+        });
+        favouriteViewModel.mFavourites.observe(getViewLifecycleOwner(), pairs -> {
+            mFavouriteAdapter.submitList(pairs);
+            Log.v(this.getClass().getName(),"updated Favourite List");
+        });
+
         mFavouriteRecyclerView.setAdapter(mFavouriteAdapter);
 
         return root;
