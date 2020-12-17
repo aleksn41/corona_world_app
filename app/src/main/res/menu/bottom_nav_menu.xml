@@ -12,8 +12,14 @@
         android:title="@string/title_statistic" />
 
     <item
-        android:id="@+id/navigation_backlog"
+        android:id="@+id/navigation_favourites"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/title_favourites" />
+
+    <item
+        android:id="@+id/navigation_history"
         android:icon="@drawable/ic_backlog_dp24"
-        android:title="@string/title_backlog" />
+        android:title="@string/title_history" />
+
 
 </menu>
