@@ -4,14 +4,19 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Country;
+import de.dhbw.corona_world_app.map.MapServices;
 
 public class MapViewModel extends ViewModel {
 
     private APIManager manager;
+
+    private MapServices services;
 
     private MutableLiveData<String> mText;
 
@@ -20,7 +25,24 @@ public class MapViewModel extends ViewModel {
     public MapViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("World Map");
+        countryList = new MutableLiveData<>();
         countryList.setValue(manager.getDataWorld());
+    }
+
+    public String getWebViewString(){
+        Map<String,Double> countryMap = new HashMap<>();
+        for (Country country:countryList.getValue()) {
+            countryMap.put(country.getName(),country.getPop_inf_ratio());
+        }
+        return services.putEntries(countryMap);
+    }
+
+    public String getWebViewStringCustom(List<Country> countryList){
+        Map<String,Double> countryMap = new HashMap<>();
+        for (Country country:countryList) {
+            countryMap.put(country.getName(),country.getPop_inf_ratio());
+        }
+        return services.putEntries(countryMap);
     }
 
     public LiveData<String> getText() {
