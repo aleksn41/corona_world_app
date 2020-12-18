@@ -10,13 +10,13 @@ import java.util.Map;
 
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Country;
-import de.dhbw.corona_world_app.map.MapServices;
+import de.dhbw.corona_world_app.map.MapData;
 
 public class MapViewModel extends ViewModel {
 
     private APIManager manager;
 
-    private MapServices services;
+    private MapData services;
 
     private MutableLiveData<String> mText;
 
