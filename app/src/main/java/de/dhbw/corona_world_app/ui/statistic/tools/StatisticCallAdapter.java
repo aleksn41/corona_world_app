@@ -1,11 +1,10 @@
-package de.dhbw.corona_world_app.ui.tools;
+package de.dhbw.corona_world_app.ui.statistic.tools;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,23 +12,15 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
-import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
-
 import de.dhbw.corona_world_app.R;
 
 //TODO Change String to StatisticCall
-public class StatisticCallAdapter<T, VH extends RecyclerView.ViewHolder & StatisticCallViewHolderInterface<T>> extends ListAdapter<T, VH> {
-    private final int itemLayoutID;
-    private final Class<VH> vhClass;
+public class StatisticCallAdapter extends ListAdapter<Pair<String,Boolean>, StatisticCallViewHolder> {
     private boolean multiSelectForDeleteActivated=false;
 
     //used in order to figure out fast if an item is to be deleted or not
@@ -76,44 +67,33 @@ public class StatisticCallAdapter<T, VH extends RecyclerView.ViewHolder & Statis
     //used to Inform the List-Owner if an Item is supposed to be deleted
     private final StatisticCallDeleteInterface deleteInterface;
 
-    public StatisticCallAdapter(int itemLayoutID, Class<VH> classOfVH, StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface) {
-        super(new DiffUtil.ItemCallback<T>() {
+    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface) {
+        super(new DiffUtil.ItemCallback<Pair<String,Boolean>>() {
+
             @Override
-            public boolean areItemsTheSame(@NonNull T oldItem, @NonNull T newItem) {
+            public boolean areItemsTheSame(@NonNull Pair<String, Boolean> oldItem, @NonNull Pair<String, Boolean> newItem) {
                 return oldItem.equals(newItem);
             }
 
-            @SuppressLint("DiffUtilEquals")
             @Override
-            public boolean areContentsTheSame(@NonNull T oldItem, @NonNull T newItem) {
+            public boolean areContentsTheSame(@NonNull Pair<String, Boolean> oldItem, @NonNull Pair<String, Boolean> newItem) {
                 return oldItem.equals(newItem);
             }
         });
         this.itemOnActionCallback=itemOnActionCallback;
         this.deleteInterface = deleteInterface;
-        this.itemLayoutID = itemLayoutID;
-        vhClass = classOfVH;
     }
 
     @NotNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public StatisticCallViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(itemLayoutID, parent, false);
-        //use reflection to instantiate ViewHolder
-        VH t = null;
-        try {
-            t = vhClass.getConstructor(View.class).newInstance(view);
-        } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            Log.e(this.getClass().getName(), Arrays.toString(e.getStackTrace()));
-            System.exit(1);
-        }
-        //TODO cannot be null
-        return Objects.requireNonNull(t);
+                .inflate(R.layout.statistic_call_row_item, parent, false);
+        return new StatisticCallViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH holder, int position) {
+    public void onBindViewHolder(@NonNull StatisticCallViewHolder holder, int position) {
         //give the itemOnActionCallback Interface to the Item, such that it can implement its own logic
         holder.setItem(getItem(position),position,itemOnActionCallback);
 
@@ -137,7 +117,7 @@ public class StatisticCallAdapter<T, VH extends RecyclerView.ViewHolder & Statis
         });
     }
 
-    private void selectItemToDelete(int itemID,@NonNull VH holder){
+    private void selectItemToDelete(int itemID,@NonNull StatisticCallViewHolder holder){
         Log.d(this.getClass().getName(),"selecting Item to be deleted");
         if(selectedItemsToDelete.contains(itemID)) {
             selectedItemsToDelete.remove(itemID);

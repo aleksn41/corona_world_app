@@ -1,4 +1,4 @@
-package de.dhbw.corona_world_app.ui.tools;
+package de.dhbw.corona_world_app.ui.statistic.tools;
 
 
 import android.view.ActionMode;
