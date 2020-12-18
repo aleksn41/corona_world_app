@@ -35,11 +35,15 @@ public class StatisticCallAdapter<T, VH extends RecyclerView.ViewHolder & Statis
     //used in order to figure out fast if an item is to be deleted or not
     private final HashSet<Integer> selectedItemsToDelete =new HashSet<>();
 
+    //need to hold a reference to the ActionMode in order to manually close it if 0 items are selected
+    private ActionMode mActionMode;
+
+    //used to load new Actionbar if item is selected for deleting
     private final ActionMode.Callback actionMode= new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.getMenu().close();
             mode.getMenuInflater().inflate(R.menu.top_action_bar_delete_menu,menu);
+            mActionMode=mode;
             return true;
         }
 
@@ -64,6 +68,7 @@ public class StatisticCallAdapter<T, VH extends RecyclerView.ViewHolder & Statis
             notifyDataSetChanged();
         }
     };
+
 
     //used to add an Callback when an certain Action is performed on an item
     private final StatisticCallAdapterItemOnActionCallback itemOnActionCallback;
@@ -137,6 +142,7 @@ public class StatisticCallAdapter<T, VH extends RecyclerView.ViewHolder & Statis
         if(selectedItemsToDelete.contains(itemID)) {
             selectedItemsToDelete.remove(itemID);
             holder.itemView.setAlpha(1f);
+            if(selectedItemsToDelete.isEmpty())mActionMode.finish();
         }else{
             selectedItemsToDelete.add(itemID);
             holder.itemView.setAlpha(0.3f);
