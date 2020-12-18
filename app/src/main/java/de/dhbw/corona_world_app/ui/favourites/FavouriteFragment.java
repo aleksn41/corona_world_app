@@ -1,50 +1,27 @@
 package de.dhbw.corona_world_app.ui.favourites;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.Pair;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import java.util.LinkedList;
+import java.util.List;
 
-import de.dhbw.corona_world_app.R;
-import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapter;
+import de.dhbw.corona_world_app.ui.statistic.tools.StatisticCallRecyclerViewFragment;
+import de.dhbw.corona_world_app.ui.statistic.tools.StatisticCallViewModel;
 
-public class FavouriteFragment extends Fragment {
+public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
-    private FavouriteViewModel favouriteViewModel;
-    protected RecyclerView mFavouriteRecyclerView;
-    protected StatisticCallAdapter mFavouriteAdapter;
-    protected RecyclerView.LayoutManager mFavouriteLayoutManager;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //TODO: get Data from local File Storage
+    public void setupOnCreateViewAfterInitOfRecyclerView() {
+
     }
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        favouriteViewModel =
-                new ViewModelProvider(this).get(FavouriteViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_favourites, container, false);
-        mFavouriteRecyclerView =root.findViewById(R.id.favRecyclerView);
-        mFavouriteLayoutManager =new LinearLayoutManager(getActivity());
-        //TODO read about Saved Instances (sample app)
-        //setup Favourite List
-
-        mFavouriteRecyclerView.setLayoutManager(mFavouriteLayoutManager);
-        mFavouriteRecyclerView.scrollToPosition(0);
-        mFavouriteAdapter =new StatisticCallAdapter();
-        favouriteViewModel.mFavourites.observe(getViewLifecycleOwner(), strings -> mFavouriteAdapter.submitList(strings));
-        mFavouriteRecyclerView.setAdapter(mFavouriteAdapter);
-
-        return root;
+    @Override
+    public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
+        List<Pair<String, Boolean>> testData = new LinkedList<>();
+        for (int i = 0; i < 50; ++i) {
+            testData.add(Pair.create("Item " + i, true));
+        }
+        statisticCallViewModel.mStatisticCallsAndMark.setValue(testData);
     }
-
 }
