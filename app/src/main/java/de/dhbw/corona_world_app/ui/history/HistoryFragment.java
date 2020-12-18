@@ -40,7 +40,7 @@ public class HistoryFragment extends Fragment {
         
         mHistoryRecyclerView.setLayoutManager(mHistoryLayoutManager);
         mHistoryRecyclerView.scrollToPosition(0);
-        mStatisticCallAdapter =new StatisticCallAdapter<>(R.layout.history_row_item,HistoryItemViewHolder.class,null);
+        mStatisticCallAdapter =new StatisticCallAdapter<>(R.layout.history_row_item,HistoryItemViewHolder.class,null, null );
         historyViewModel.mHistory.observe(getViewLifecycleOwner(), strings -> mStatisticCallAdapter.submitList(strings));
         mHistoryRecyclerView.setAdapter(mStatisticCallAdapter);
 

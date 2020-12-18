@@ -8,4 +8,5 @@
     <string name="default_elem_text">No Data</string>
     <string name="allHistory">History</string>
     <string name="description_Star">Favourite-star</string>
+    <string name="menu_item_delete">Delete</string>
 </resources>

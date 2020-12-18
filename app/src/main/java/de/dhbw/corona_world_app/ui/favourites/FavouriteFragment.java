@@ -2,25 +2,26 @@ package de.dhbw.corona_world_app.ui.favourites;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
 
 import de.dhbw.corona_world_app.R;
-import de.dhbw.corona_world_app.ui.history.HistoryItemViewHolder;
 import de.dhbw.corona_world_app.ui.tools.Pair;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapter;
-import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapterItemOnActionCallback;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallDeleteInterface;
 
 public class FavouriteFragment extends Fragment {
 
@@ -49,10 +50,23 @@ public class FavouriteFragment extends Fragment {
         mFavouriteRecyclerView.scrollToPosition(0);
         mFavouriteAdapter =new StatisticCallAdapter<>(R.layout.favourite_row_item, FavouriteItemViewHolder.class, itemID -> {
             favouriteViewModel.toggleFavMark(itemID);
-            Log.d(this.getClass().getName(),"Item "+itemID+" changed");
+            Log.d(this.getClass().getName(), "Item " + itemID + " changed");
+        }, new StatisticCallDeleteInterface() {
+            @Override
+            public void enterDeleteMode(ActionMode.Callback callback) {
+                Log.v(this.getClass().getName(),"entering Delete Mode for favourite Items");
+                requireActivity().startActionMode(callback);
+            }
+
+            @Override
+            public void deleteItems(ArrayList<Integer> ItemIds) {
+                Log.v(this.getClass().getName(),"deleting selected favourite Items");
+                favouriteViewModel.deleteItems(ItemIds);
+            }
         });
         favouriteViewModel.mFavourites.observe(getViewLifecycleOwner(), pairs -> {
             mFavouriteAdapter.submitList(pairs);
+            mFavouriteAdapter.notifyDataSetChanged();
             Log.v(this.getClass().getName(),"updated Favourite List");
         });
 
@@ -60,5 +74,4 @@ public class FavouriteFragment extends Fragment {
 
         return root;
     }
-
 }
