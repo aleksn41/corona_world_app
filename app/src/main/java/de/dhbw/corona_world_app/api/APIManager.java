@@ -14,6 +14,8 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -120,13 +122,21 @@ public class APIManager {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-        try (Response response = client.newCall(request).execute()){
-            Logger.logD("OkHTTP","Making GET-Request to "+ url);
-            return response.body().string();
-        } catch (IOException e) {
-            Logger.logE("OkHTTPException","GET-Request "+ url +" failed");
-        }
-        return null;
+        final String[] toReturn = new String[1];
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(final Call call, IOException e) {
+                Logger.logE("createAPICall","Error on HTTP-Request "+url+" Error: "+e.getStackTrace());
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                Logger.logD("createAPICall","Successful APICall to "+url);
+                toReturn[0] = response.body().string();
+            }
+        });
+
+        return toReturn[0];
     }
 
     private <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
