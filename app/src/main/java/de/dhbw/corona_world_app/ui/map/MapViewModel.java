@@ -23,6 +23,8 @@ public class MapViewModel extends ViewModel {
     private MutableLiveData<List<Country>> countryList;
 
     public MapViewModel() {
+        manager = new APIManager(false,false);
+        services = new MapData();
         mText = new MutableLiveData<>();
         mText.setValue("World Map");
         countryList = new MutableLiveData<>();
