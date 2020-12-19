@@ -1,4 +1,4 @@
-package de.dhbw.corona_world_app.ui.statistic.tools;
+package de.dhbw.corona_world_app.ui.tools;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,17 +22,19 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
     protected StatisticCallAdapter statisticCallAdapter;
     protected RecyclerView.LayoutManager layoutManager;
+    private ActionMode deleteMode;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         statisticCallViewModel =
                 new ViewModelProvider(this).get(StatisticCallViewModel.class);
+        Log.d(this.getClass().getName(),"initiate ViewModel Data");
         initViewModelData(statisticCallViewModel);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
         statisticCallRecyclerView =root.findViewById(R.id.statisticCallRecyclerView);
-        layoutManager =new LinearLayoutManager(getActivity());
         //TODO read about Saved Instances (sample app)
-        //setup Recyclerview with delete Mode
+        Log.d(this.getClass().getName(),"initiate RecycleView");
+        layoutManager =new LinearLayoutManager(getActivity());
         statisticCallRecyclerView.setLayoutManager(layoutManager);
         statisticCallRecyclerView.scrollToPosition(0);
         statisticCallAdapter =new StatisticCallAdapter(itemID -> {
@@ -43,7 +44,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             @Override
             public void enterDeleteMode(ActionMode.Callback callback) {
                 Log.v(this.getClass().getName(),"entering Delete Mode for favourite Items");
-                requireActivity().startActionMode(callback);
+                deleteMode =requireActivity().startActionMode(callback);
             }
 
             @Override
@@ -57,10 +58,21 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             statisticCallAdapter.notifyDataSetChanged();
             Log.v(this.getClass().getName(),"updated Favourite List");
         });
-
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
+        Log.d(this.getClass().getName(),"finished RecycleView");
+        Log.d(this.getClass().getName(),"start Custom OnCreateView Function");
         setupOnCreateViewAfterInitOfRecyclerView();
         return root;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(this.getClass().getName(),"Pausing Fragment");
+        if(deleteMode !=null){
+            deleteMode.finish();
+            deleteMode =null;
+        }
     }
 
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();
