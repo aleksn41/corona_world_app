@@ -107,6 +107,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
             }
             return true;
         });
+
         //if the item is clicked, go to Statistic with the call TODO instead show pop up with more info and a confirmation he wants to see the statistic
         holder.itemView.setOnClickListener(v -> {
             if(multiSelectForDeleteActivated){
@@ -116,18 +117,19 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
                 //goToStatistic(getItem(position))
             }
         });
+        setMarkedItem(holder,selectedItemsToDelete.contains(holder.getAdapterPosition()));
     }
 
     private void selectItemToDelete(int itemID,@NonNull StatisticCallViewHolder holder){
         Log.d(this.getClass().getName(),"selecting Item to be deleted");
-        if(selectedItemsToDelete.contains(itemID)) {
+        boolean alreadyInDeleted=selectedItemsToDelete.contains(itemID);
+        if(alreadyInDeleted) {
             selectedItemsToDelete.remove(itemID);
-            holder.itemView.setAlpha(1f);
             if(selectedItemsToDelete.isEmpty())mActionMode.finish();
         }else{
             selectedItemsToDelete.add(itemID);
-            holder.itemView.setAlpha(0.3f);
         }
+        setMarkedItem(holder,!alreadyInDeleted);
         Log.d(this.getClass().getName(),"currentList of Items selected: "+selectedItemsToDelete.toString());
     }
 
@@ -135,6 +137,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         ArrayList<Integer> sortedResult=new ArrayList<>(selectedItemsToDelete);
         Collections.sort(sortedResult);
         deleteInterface.deleteItems(sortedResult);
+    }
+
+    private void setMarkedItem(StatisticCallViewHolder holder,boolean mark){
+        holder.itemView.setAlpha(mark?0.3f:1f);
     }
 }
 
