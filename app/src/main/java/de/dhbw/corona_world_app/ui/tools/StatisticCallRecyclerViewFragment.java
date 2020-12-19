@@ -22,6 +22,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
     protected StatisticCallAdapter statisticCallAdapter;
     protected RecyclerView.LayoutManager layoutManager;
+    private ActionMode deleteMode;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -43,7 +44,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             @Override
             public void enterDeleteMode(ActionMode.Callback callback) {
                 Log.v(this.getClass().getName(),"entering Delete Mode for favourite Items");
-                requireActivity().startActionMode(callback);
+                deleteMode =requireActivity().startActionMode(callback);
             }
 
             @Override
@@ -62,6 +63,15 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         Log.d(this.getClass().getName(),"start Custom OnCreateView Function");
         setupOnCreateViewAfterInitOfRecyclerView();
         return root;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(deleteMode !=null){
+            deleteMode.finish();
+            deleteMode =null;
+        }
     }
 
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();
