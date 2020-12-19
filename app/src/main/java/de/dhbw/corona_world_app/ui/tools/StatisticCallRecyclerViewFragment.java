@@ -66,8 +66,9 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
+        Log.d(this.getClass().getName(),"Pausing Fragment");
         if(deleteMode !=null){
             deleteMode.finish();
             deleteMode =null;
