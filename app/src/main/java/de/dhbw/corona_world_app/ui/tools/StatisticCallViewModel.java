@@ -1,4 +1,4 @@
-package de.dhbw.corona_world_app.ui.statistic.tools;
+package de.dhbw.corona_world_app.ui.tools;
 
 import android.util.Pair;
 
@@ -10,18 +10,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
+
 public class StatisticCallViewModel extends ViewModel {
-    //TODO: change to Statistic-Call when StatisticCall-Class exists
-    public MutableLiveData<List<Pair<String, Boolean>>> mStatisticCallsAndMark = new MutableLiveData<>();
+    public MutableLiveData<List<Pair<StatisticCall, Boolean>>> mStatisticCallsAndMark = new MutableLiveData<>();
 
     public void toggleFavMark(int position) {
-        Pair<String, Boolean> currentItem = Objects.requireNonNull(mStatisticCallsAndMark.getValue()).get(position);
+        Pair<StatisticCall, Boolean> currentItem = Objects.requireNonNull(mStatisticCallsAndMark.getValue()).get(position);
         mStatisticCallsAndMark.getValue().set(position, Pair.create(currentItem.first, !currentItem.second));
         mStatisticCallsAndMark.postValue(mStatisticCallsAndMark.getValue());
     }
 
     public void deleteItems(ArrayList<Integer> Ids) {
-        List<Pair<String, Boolean>> newList = new LinkedList<>();
+        List<Pair<StatisticCall, Boolean>> newList = new LinkedList<>();
         int length = Objects.requireNonNull(mStatisticCallsAndMark.getValue()).size();
         int counterOfItemsToDelete = 0;
         for (int i = 0; i < length; ++i) {

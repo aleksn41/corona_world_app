@@ -1,4 +1,4 @@
-package de.dhbw.corona_world_app.ui.statistic.tools;
+package de.dhbw.corona_world_app.ui.tools;
 
 import android.util.Log;
 import android.util.Pair;
@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
-//TODO Change String to StatisticCall
-public class StatisticCallAdapter extends ListAdapter<Pair<String,Boolean>, StatisticCallViewHolder> {
+public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean>, StatisticCallViewHolder> {
     private boolean multiSelectForDeleteActivated=false;
 
     //used in order to figure out fast if an item is to be deleted or not
@@ -68,15 +68,15 @@ public class StatisticCallAdapter extends ListAdapter<Pair<String,Boolean>, Stat
     private final StatisticCallDeleteInterface deleteInterface;
 
     public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface) {
-        super(new DiffUtil.ItemCallback<Pair<String,Boolean>>() {
+        super(new DiffUtil.ItemCallback<Pair<StatisticCall,Boolean>>() {
 
             @Override
-            public boolean areItemsTheSame(@NonNull Pair<String, Boolean> oldItem, @NonNull Pair<String, Boolean> newItem) {
+            public boolean areItemsTheSame(@NonNull Pair<StatisticCall, Boolean> oldItem, @NonNull Pair<StatisticCall, Boolean> newItem) {
                 return oldItem.equals(newItem);
             }
 
             @Override
-            public boolean areContentsTheSame(@NonNull Pair<String, Boolean> oldItem, @NonNull Pair<String, Boolean> newItem) {
+            public boolean areContentsTheSame(@NonNull Pair<StatisticCall, Boolean> oldItem, @NonNull Pair<StatisticCall, Boolean> newItem) {
                 return oldItem.equals(newItem);
             }
         });
@@ -95,21 +95,21 @@ public class StatisticCallAdapter extends ListAdapter<Pair<String,Boolean>, Stat
     @Override
     public void onBindViewHolder(@NonNull StatisticCallViewHolder holder, int position) {
         //give the itemOnActionCallback Interface to the Item, such that it can implement its own logic
-        holder.setItem(getItem(position),position,itemOnActionCallback);
+        holder.setItem(getItem(holder.getAdapterPosition()),itemOnActionCallback);
 
         //tell Fragment and ViewModel that an Item should be marked for deletion and Deletion Mode should be activated if not already on
         holder.itemView.setOnLongClickListener(v -> {
             if(!multiSelectForDeleteActivated){
                 deleteInterface.enterDeleteMode(actionMode);
                 multiSelectForDeleteActivated=true;
-                selectItemToDelete(position,holder);
+                selectItemToDelete(holder.getAdapterPosition(),holder);
             }
             return true;
         });
         //if the item is clicked, go to Statistic with the call TODO instead show pop up with more info and a confirmation he wants to see the statistic
         holder.itemView.setOnClickListener(v -> {
             if(multiSelectForDeleteActivated){
-                selectItemToDelete(position,holder);
+                selectItemToDelete(holder.getAdapterPosition(),holder);
             }else{
                 //TODO
                 //goToStatistic(getItem(position))
