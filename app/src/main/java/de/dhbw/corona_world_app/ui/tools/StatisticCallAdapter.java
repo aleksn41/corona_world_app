@@ -46,7 +46,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             //delete All Items
-            Log.d(this.getClass().getName(),"clicked on Item: "+item.toString());
+            Log.d(this.getClass().getName(),"clicked on delete Item");
             deleteSelectedItems();
             mode.finish();
             return false;
@@ -54,6 +54,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            Log.v(this.getClass().getName(),"exit delete Mode");
             multiSelectForDeleteActivated=false;
             selectedItemsToDelete.clear();
             notifyDataSetChanged();
@@ -127,6 +128,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
             selectedItemsToDelete.add(itemID);
             holder.itemView.setAlpha(0.3f);
         }
+        Log.d(this.getClass().getName(),"currentList of Items selected: "+selectedItemsToDelete.toString());
     }
 
     private void deleteSelectedItems(){

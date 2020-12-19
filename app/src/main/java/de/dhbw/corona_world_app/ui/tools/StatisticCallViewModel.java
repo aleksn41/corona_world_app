@@ -1,5 +1,6 @@
 package de.dhbw.corona_world_app.ui.tools;
 
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.lifecycle.MutableLiveData;
@@ -31,5 +32,6 @@ public class StatisticCallViewModel extends ViewModel {
             else newList.add(mStatisticCallsAndMark.getValue().get(i));
         }
         mStatisticCallsAndMark.postValue(newList);
+        Log.v(this.getClass().getName(),"Items with ID "+Ids.toString()+" have been deleted");
     }
 }

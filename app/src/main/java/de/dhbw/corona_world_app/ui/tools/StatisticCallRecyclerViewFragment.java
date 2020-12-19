@@ -27,12 +27,13 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         statisticCallViewModel =
                 new ViewModelProvider(this).get(StatisticCallViewModel.class);
+        Log.d(this.getClass().getName(),"initiate ViewModel Data");
         initViewModelData(statisticCallViewModel);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
         statisticCallRecyclerView =root.findViewById(R.id.statisticCallRecyclerView);
-        layoutManager =new LinearLayoutManager(getActivity());
         //TODO read about Saved Instances (sample app)
-        //setup Recyclerview with delete Mode
+        Log.d(this.getClass().getName(),"initiate RecycleView");
+        layoutManager =new LinearLayoutManager(getActivity());
         statisticCallRecyclerView.setLayoutManager(layoutManager);
         statisticCallRecyclerView.scrollToPosition(0);
         statisticCallAdapter =new StatisticCallAdapter(itemID -> {
@@ -56,8 +57,9 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             statisticCallAdapter.notifyDataSetChanged();
             Log.v(this.getClass().getName(),"updated Favourite List");
         });
-
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
+        Log.d(this.getClass().getName(),"finished RecycleView");
+        Log.d(this.getClass().getName(),"start Custom OnCreateView Function");
         setupOnCreateViewAfterInitOfRecyclerView();
         return root;
     }
