@@ -29,8 +29,8 @@ public class ISOCountryEncoderUnitTest {
             assertTrue(test.isoCodeToCountry.containsKey(country.getISOCode()));
         }
         //each value in ISOCodeToCountry must be in ISOCountry values
-        for (ISOCountry value : test.isoCodeToCountry.values()) {
-            assertTrue(testData.contains(value));
+        for (ISOCountry country : testData) {
+            assertTrue(test.isoCodeToCountry.containsValue(country));
         }
     }
 
