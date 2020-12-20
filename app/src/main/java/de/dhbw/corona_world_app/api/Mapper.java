@@ -1,6 +1,8 @@
 package de.dhbw.corona_world_app.api;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
@@ -13,12 +15,16 @@ public class Mapper {
 
     private Map<APIs,Map<String,ISOCountry>> apisToMap;
 
+    private List<String> blackList;
+
     public Mapper(){
         herokuToStandardMap = new HashMap<>();
         restcountriesToStandardMap = new HashMap<>();
         apisToMap = new HashMap<>();
+        blackList = new LinkedList<>();
         apisToMap.put(APIs.HEROKU,herokuToStandardMap);
         apisToMap.put(APIs.RESTCOUNTRIES,restcountriesToStandardMap);
+        blackList.add("Republic of Kosovo");
     }
 
     public void initializeMap(APIs api){
@@ -56,6 +62,10 @@ public class Mapper {
                     break;
             }
         }
+    }
+
+    public boolean isInBlacklist(String countryName){
+        return blackList.contains(countryName);
     }
 
     public String mapISOCountryToName(APIs api, ISOCountry countryToBeMapped){
