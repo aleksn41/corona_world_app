@@ -58,6 +58,11 @@ public class Mapper {
         }
     }
 
+    public String mapISOCountryToName(APIs api, ISOCountry countryToBeMapped){
+        Map<ISOCountry,String> reverseMap = getReverseMap(apisToMap.get(api));
+        return reverseMap.get(countryToBeMapped);
+    }
+
     public boolean isInMap(APIs api, String countryToBeChecked){
         initializeMap(api);
         return apisToMap.get(api).containsKey(countryToBeChecked);
@@ -68,5 +73,13 @@ public class Mapper {
         initializeMap(api);
         country = apisToMap.get(api).get(countryToBeMapped);
         return country;
+    }
+
+    private <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
+        Map<Va,Ke> reverseMap = new HashMap<>();
+        for(Map.Entry<Ke, Va> entry : inMap.entrySet()){
+            reverseMap.put(entry.getValue(), entry.getKey());
+        }
+        return reverseMap;
     }
 }
