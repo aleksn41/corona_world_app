@@ -22,7 +22,7 @@ public class Mapper {
     }
 
     public void initializeMap(APIs api){
-        if(!apisToMap.get(api).isEmpty()) {
+        if(apisToMap.get(api).isEmpty()) {
             switch (api) {
                 case HEROKU:
                     herokuToStandardMap.put("USA", ISOCountry.United_States_of_America);
