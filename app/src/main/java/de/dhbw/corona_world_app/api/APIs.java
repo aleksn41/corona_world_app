@@ -26,7 +26,7 @@ public enum APIs {
         return getOne;
     }
 
-    public boolean isAcceptsISO() {
+    public boolean acceptsISO() {
         return acceptsISO;
     }
 
