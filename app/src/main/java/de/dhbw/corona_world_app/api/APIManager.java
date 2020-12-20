@@ -145,7 +145,7 @@ public class APIManager {
                 }
             }
         } catch (JSONException e) {
-            Logger.logE("getAllCountriesPopData","Error parsing JSON: "+e.getStackTrace());
+            Logger.logE("getAllCountriesPopData","Error parsing JSON\n"+e.getStackTrace());
         }
         return returnMap;
     }
