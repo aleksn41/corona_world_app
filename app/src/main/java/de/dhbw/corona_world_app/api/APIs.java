@@ -15,6 +15,8 @@ public enum APIs {
     private boolean acceptsISO;
 
     APIs(String url, String getAll, String getOne, boolean acceptsISO, String name) {
+        this.getOne = getOne;
+        this.acceptsISO = acceptsISO;
         this.url = url;
         this.getAll = getAll;
         this.name = name;
