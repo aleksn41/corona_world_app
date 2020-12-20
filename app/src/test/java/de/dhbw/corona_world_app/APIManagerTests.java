@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.api.APIs;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
@@ -53,7 +54,7 @@ public class APIManagerTests {
             List<ISOCountry> clist = new ArrayList<>();
             clist.add(ISOCountry.Germany);
             clist.add(ISOCountry.France);
-            clist.add(ISOCountry.UnitedStates);
+            clist.add(ISOCountry.United_States_of_America);
             List<Criteria> criteriaList = new ArrayList<>();
             criteriaList.add(Criteria.DEATHS);
             criteriaList.add(Criteria.INFECTED);
@@ -71,10 +72,20 @@ public class APIManagerTests {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
-            assertNotNull(manager.getDataWorld());
-            System.out.println(manager.getDataWorld());
+            assertNotNull(manager.getDataWorld(APIs.HEROKU));
+            System.out.println(manager.getDataWorld(APIs.HEROKU));
         } else {
             throw new RuntimeException("No Connection to the Internet found!");
+        }
+    }
+
+    @Test
+    public void testGetAllCountriesPopData(){
+        APIManager manager = new APIManager(true, false);
+        manager.disableLogsForTesting();
+        if(manager.createAPICall("https://google.de")!=null){
+            assertNotNull(manager.getAllCountriesPopData());
+            System.out.println(manager.getAllCountriesPopData());
         }
     }
 }
