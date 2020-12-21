@@ -2,7 +2,6 @@ package de.dhbw.corona_world_app.api;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 

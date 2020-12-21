@@ -1,50 +1,35 @@
 package de.dhbw.corona_world_app.ui.history;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.Pair;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
-import de.dhbw.corona_world_app.R;
-import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapter;
+import de.dhbw.corona_world_app.datastructure.ChartType;
+import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends StatisticCallRecyclerViewFragment {
 
-    private HistoryViewModel historyViewModel;
-    protected RecyclerView mHistoryRecyclerView;
-    protected StatisticCallAdapter mStatisticCallAdapter;
-    protected RecyclerView.LayoutManager mHistoryLayoutManager;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //TODO: get Data from local File Storage
+    public void setupOnCreateViewAfterInitOfRecyclerView() {
+
     }
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        historyViewModel =
-                new ViewModelProvider(this).get(HistoryViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_history, container, false);
-        mHistoryRecyclerView =root.findViewById(R.id.historyRecyclerView);
-        mHistoryLayoutManager =new LinearLayoutManager(getActivity());
-        //TODO read about Saved Instances (sample app)
-        //setup Favourite List
-        
-        mHistoryRecyclerView.setLayoutManager(mHistoryLayoutManager);
-        mHistoryRecyclerView.scrollToPosition(0);
-        mStatisticCallAdapter =new StatisticCallAdapter();
-        historyViewModel.mHistory.observe(getViewLifecycleOwner(), strings -> mStatisticCallAdapter.submitList(strings));
-        mHistoryRecyclerView.setAdapter(mStatisticCallAdapter);
-
-        return root;
+    @Override
+    public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
+        List<Pair<StatisticCall, Boolean>> testData = new LinkedList<>();
+        ISOCountry[] allCountries=ISOCountry.values();
+        ChartType[] allChartTypes=ChartType.values();
+        Criteria[] allCriteria=Criteria.values();
+        for (int i = 0; i < 50; ++i) {
+            testData.add(Pair.create(new StatisticCall(Collections.singletonList(allCountries[i%allCountries.length]),allChartTypes[i%allChartTypes.length],Collections.singletonList(allCriteria[i%allCriteria.length])), false));
+        }
+        statisticCallViewModel.mStatisticCallsAndMark.setValue(testData);
     }
-
 }

@@ -14,6 +14,8 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -26,7 +28,7 @@ public class APIManager {
 
     private String heroURL = "https://coronavirus-19-api.herokuapp.com";
     private Map<String, String> heroToPopMap = new HashMap<>();
-    private Map<String, String> popToNameMap = new HashMap<>();
+    private Map<String, String> heroToGoogleMap = new HashMap<>();
 
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
         this.cacheEnabled = cacheEnabled;
@@ -34,7 +36,6 @@ public class APIManager {
         this.setMapData();
     }
 
-    //TODO add all Countries into <Name,Alias> Map
     public List<Country> getDataWorld(){
         Logger.logD("getDataWorld","Getting Data for every Country");
         String url = heroURL;
@@ -50,16 +51,16 @@ public class APIManager {
         for (Country country:returnList) {
             if(popMap.containsKey(country.getName())) {
                 country.setPopulation(popMap.get(country.getName()));
-            } else if(popToNameMap.containsKey(country.getName())) {
-                country.setPopulation(popMap.get(popToNameMap.get(country.getName())));
+            } else if(heroToGoogleMap.containsKey(country.getName())) {
+                country.setPopulation(popMap.get(heroToGoogleMap.get(country.getName())));
             } else {
                 cnt+=1;
-                System.out.println("\""+country.getName()+"\"s popCount could not be set");
+                //System.out.println("\""+country.getName()+"\"s popCount could not be set");
                 Logger.logD("getDataWorld","country \""+country.getName()+"\" has no popCount\nINFO: Try adding an according entry into the <Name,Alias> Map");
             }
         }
-        System.out.println(popMap);
-        System.out.println("count of countries with no popCount: "+cnt);
+        //System.out.println(popMap);
+        //System.out.println("count of countries with no popCount: "+cnt);
         Logger.logD("getDataWorld","count of countries with no popCount: "+cnt);
         return returnList;
     }
@@ -121,13 +122,21 @@ public class APIManager {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-        try (Response response = client.newCall(request).execute()){
-            Logger.logD("OkHTTP","Making GET-Request to "+ url);
-            return response.body().string();
-        } catch (IOException e) {
-            Logger.logE("OkHTTPException","GET-Request "+ url +" failed");
-        }
-        return null;
+        final String[] toReturn = new String[1];
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(final Call call, IOException e) {
+                Logger.logE("createAPICall","Error on HTTP-Request "+url+" Error: "+e.getStackTrace());
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                Logger.logD("createAPICall","Successful APICall to "+url);
+                toReturn[0] = response.body().string();
+            }
+        });
+
+        return toReturn[0];
     }
 
     private <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
@@ -160,8 +169,40 @@ public class APIManager {
 
     public void setMapData(){
         heroToPopMap.put("UnitedStates","USA");
-        popToNameMap.put("USA","United States of America");
-        popToNameMap.put("UK","United Kingdom of Great Britain and Northern Ireland");
-
+        heroToGoogleMap.put("USA","United States of America");
+        heroToGoogleMap.put("UK","United Kingdom of Great Britain and Northern Ireland");
+        heroToGoogleMap.put("Russia","Russian Federation");
+        heroToGoogleMap.put("Iran","Iran (Islamic Republic of)");
+        heroToGoogleMap.put("Czechia","Czech Republic");
+        heroToGoogleMap.put("UAE","United Arab Emirates");
+        heroToGoogleMap.put("Bolivia","Bolivia (Plurinational State of)");
+        heroToGoogleMap.put("Moldova","Moldova (Republic of)");
+        heroToGoogleMap.put("Palestine","Palestine, State of");
+        heroToGoogleMap.put("Venezuela","Venezuela (Bolivarian Republic of)");
+        heroToGoogleMap.put("North Macedonia","Macedonia (the former Yugoslav Republic of)");
+        heroToGoogleMap.put("S. Korea","Korea (Republic of)");
+        heroToGoogleMap.put("Ivory Coast","Côte d'Ivoire");
+        heroToGoogleMap.put("DRC","Congo (Democratic Republic of the)");
+        heroToGoogleMap.put("Syria","Syrian Arab Republic");
+        heroToGoogleMap.put("Eswatini","Swaziland");
+        heroToGoogleMap.put("CAR","Central African Republic");
+        //heroNameToPopNameMap.put("Channel Islands","");
+        heroToGoogleMap.put("Vietnam","Viet Nam");
+        //heroNameToPopNameMap.put("Sint Maarten","");
+        heroToGoogleMap.put("Saint Martin","Saint Martin (French part)");
+        heroToGoogleMap.put("Turks and Caicos","Turks and Caicos Islands");
+        //heroNameToPopNameMap.put("Diamond Princess",""); //it's a ship
+        heroToGoogleMap.put("Faeroe Islands","Faroe Islands");
+        heroToGoogleMap.put("Tanzania","Tanzania, United Republic of");
+        heroToGoogleMap.put("Caribbean Netherlands","Bonaire, Sint Eustatius and Saba");
+        heroToGoogleMap.put("St. Barth","Saint Barthélemy");
+        heroToGoogleMap.put("Brunei","Brunei Darussalam");
+        heroToGoogleMap.put("St. Vincent Grenadines","Saint Vincent and the Grenadines");
+        heroToGoogleMap.put("British Virgin Islands","Virgin Islands (British)");
+        heroToGoogleMap.put("Laos","Lao People's Democratic Republic");
+        //heroNameToPopNameMap.put("Vatican City",""); //not in Google Maps
+        heroToGoogleMap.put("Falkland Islands","Falkland Islands (Malvinas)");
+        heroToGoogleMap.put("Saint Pierre Miquelon","Saint Pierre and Miquelon");
+        //heroNameToPopNameMap.put("MS Zaandam",""); //it's a ship too
     }
 }

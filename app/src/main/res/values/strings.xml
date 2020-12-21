@@ -7,4 +7,7 @@
     <string name="settings">Settings</string>
     <string name="default_elem_text">No Data</string>
     <string name="allHistory">History</string>
+    <string name="description_Star">Favourite-star</string>
+    <string name="menu_item_delete">Delete</string>
+    <string name="statistic_call_info">Country: %1$s\nCriteria: %2$s\nChart: %3$s</string>
 </resources>
