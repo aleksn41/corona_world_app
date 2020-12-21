@@ -32,6 +32,11 @@ public class Mapper {
         reverseMap = getReverseMap(herokuToStandardMap);
         reverseMapAPI = APIs.HEROKU;
         blackList.add("Republic of Kosovo");
+        blackList.add("Channel_Islands");
+        blackList.add("World");
+        blackList.add("Diamond_Princess");
+        blackList.add("Vatican_City");
+        blackList.add("MS_Zaandam");
     }
 
     public void initializeMap(APIs api){
@@ -39,6 +44,32 @@ public class Mapper {
             switch (api) {
                 case HEROKU:
                     herokuToStandardMap.put("USA", ISOCountry.United_States_of_America);
+                    herokuToStandardMap.put("Russia",ISOCountry.Russian_Federation);
+                    herokuToStandardMap.put("UK",ISOCountry.United_Kingdom_of_Great_Britain_and_Northern_Ireland);
+                    herokuToStandardMap.put("UAE",ISOCountry.United_Arab_Emirates);
+                    herokuToStandardMap.put("Palestine",ISOCountry.Palestine_State_of);
+                    herokuToStandardMap.put("North_Macedonia",ISOCountry.Macedonia);
+                    herokuToStandardMap.put("S._Korea",ISOCountry.South_Korea);
+                    herokuToStandardMap.put("Ivory_Coast",ISOCountry.C_te_d_Ivoire);
+                    herokuToStandardMap.put("DRC",ISOCountry.Democratic_Republic_Congo);
+                    herokuToStandardMap.put("Syria",ISOCountry.Syrian_Arab_Republic);
+                    herokuToStandardMap.put("Réunion",ISOCountry.R_union);
+                    herokuToStandardMap.put("Eswatini",ISOCountry.Swaziland);
+                    herokuToStandardMap.put("CAR",ISOCountry.Central_African_Republic);
+                    herokuToStandardMap.put("Curaçao",ISOCountry.Cura_ao);
+                    herokuToStandardMap.put("Guinea-Bissau",ISOCountry.Guinea_Bissau);
+                    herokuToStandardMap.put("Vietnam",ISOCountry.Viet_Nam);
+                    herokuToStandardMap.put("Turks_and_Caicos",ISOCountry.Turks_and_Caicos_Islands);
+                    herokuToStandardMap.put("Taiwan",ISOCountry.Taiwan_Province_of_China);
+                    herokuToStandardMap.put("Faeroe_Islands",ISOCountry.Faroe_Islands);
+                    herokuToStandardMap.put("Tanzania",ISOCountry.Tanzania_United_Republic_of);
+                    herokuToStandardMap.put("Caribbean_Netherlands",ISOCountry.Bonaire_Sint_Eustatius_and_Saba);
+                    herokuToStandardMap.put("St._Barth",ISOCountry.Saint_Barth_lemy);
+                    herokuToStandardMap.put("Brunei",ISOCountry.Brunei_Darussalam);
+                    herokuToStandardMap.put("St._Vincent_Grenadines",ISOCountry.Saint_Vincent_and_the_Grenadines);
+                    herokuToStandardMap.put("Laos",ISOCountry.Lao_People_s_Democratic_Republic);
+                    herokuToStandardMap.put("Timor-Leste",ISOCountry.Timor_Leste);
+                    herokuToStandardMap.put("Saint_Pierre_Miquelon", ISOCountry.Saint_Pierre_and_Miquelon);
                     break;
                 case RESTCOUNTRIES:
                     restcountriesToStandardMap.put("Åland Islands", ISOCountry.Aland_Islands);
@@ -86,6 +117,9 @@ public class Mapper {
     }
 
     private void initReverseMap(APIs api){
+        if(apisToMap.get(api).isEmpty()){
+            initializeMap(api);
+        }
         if(!reverseMapAPI.equals(api)){
             reverseMap = getReverseMap(apisToMap.get(api));
             reverseMapAPI = api;
@@ -102,6 +136,11 @@ public class Mapper {
         initializeMap(api);
         country = apisToMap.get(api).get(countryToBeMapped);
         return country;
+    }
+
+    //normalizes a country name by removing commas and replacing spaces with underscores
+    public String normalize(String countryName){
+        return countryName.replace(",","").replace(" ","_");
     }
 
     private <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
