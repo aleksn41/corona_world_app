@@ -48,7 +48,6 @@ public class APIManager {
     public List<Country> getDataWorld(APIs api){
         Logger.logD("getDataWorld","Getting Data for every Country from api "+api.getName());
 
-
         List<Country> returnList = new ArrayList<>();
         Future future = service.submit(new Callable<String>() {
                                            @Override
@@ -87,7 +86,7 @@ public class APIManager {
         return returnList;
     }
 
-    //todo mapping
+    //todo performance
     public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame){
         Logger.logD("getData","Getting data according to following parameters: "+countryList+" ; "+criteriaList+" ; "+timeFrame);
 
@@ -102,11 +101,10 @@ public class APIManager {
                                                        String url = APIs.HEROKU.getUrl();
                                                        url += APIs.HEROKU.getGetOne();
 
-                                                       //in/decrease countryList.size if necessary -> todo performance
                                                        if (countryList != null) {
                                                            String attachString = "";
-                                                           if (heroToPopMap.containsKey(isoCountry.toString())) {
-                                                               attachString = heroToPopMap.get(isoCountry.toString());
+                                                           if (mapper.isInReverseMap(APIs.HEROKU, isoCountry)) {
+                                                               attachString = mapper.mapISOCountryToName(APIs.HEROKU, isoCountry);
                                                            } else {
                                                                attachString = isoCountry.toString();
                                                            }
@@ -120,6 +118,7 @@ public class APIManager {
                 try {
                     apiReturn = future.get().toString();
                 } catch (ExecutionException e) {
+                    e.printStackTrace();
                     Logger.logE("getData", "Error executing async call\n" + e.getStackTrace());
                 } catch (InterruptedException e) {
                     Logger.logE("getData", "Interruption error\n" + e.getStackTrace());
