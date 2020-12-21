@@ -14,6 +14,10 @@ public class Mapper {
     private Map<String, ISOCountry> restcountriesToStandardMap;
 
     private Map<APIs,Map<String,ISOCountry>> apisToMap;
+    //for faster reverse mapping (so that the reverse map must not be initialized every on every function call)
+    private Map<ISOCountry, String> reverseMap;
+    //saves which api the reverse map is from
+    private APIs reverseMapAPI;
 
     private List<String> blackList;
 
@@ -24,6 +28,9 @@ public class Mapper {
         blackList = new LinkedList<>();
         apisToMap.put(APIs.HEROKU,herokuToStandardMap);
         apisToMap.put(APIs.RESTCOUNTRIES,restcountriesToStandardMap);
+        initializeMap(APIs.HEROKU);
+        reverseMap = getReverseMap(herokuToStandardMap);
+        reverseMapAPI = APIs.HEROKU;
         blackList.add("Republic of Kosovo");
     }
 
@@ -68,14 +75,26 @@ public class Mapper {
         return blackList.contains(countryName);
     }
 
-    public String mapISOCountryToName(APIs api, ISOCountry countryToBeMapped){
-        Map<ISOCountry,String> reverseMap = getReverseMap(apisToMap.get(api));
-        return reverseMap.get(countryToBeMapped);
-    }
-
     public boolean isInMap(APIs api, String countryToBeChecked){
         initializeMap(api);
         return apisToMap.get(api).containsKey(countryToBeChecked);
+    }
+
+    public boolean isInReverseMap(APIs api, ISOCountry countryToBeChecked){
+        initReverseMap(api);
+        return reverseMap.containsKey(countryToBeChecked);
+    }
+
+    private void initReverseMap(APIs api){
+        if(!reverseMapAPI.equals(api)){
+            reverseMap = getReverseMap(apisToMap.get(api));
+            reverseMapAPI = api;
+        }
+    }
+
+    public String mapISOCountryToName(APIs api, ISOCountry countryToBeMapped){
+        Map<ISOCountry,String> reverseMap = getReverseMap(apisToMap.get(api));
+        return reverseMap.get(countryToBeMapped);
     }
 
     public ISOCountry mapNameToISOCountry(APIs api, String countryToBeMapped){
