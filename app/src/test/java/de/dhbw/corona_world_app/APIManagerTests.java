@@ -47,7 +47,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataTwoCountries(){
+    public void testGetDataThreeCountries(){
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -55,6 +55,8 @@ public class APIManagerTests {
             clist.add(ISOCountry.Germany);
             clist.add(ISOCountry.France);
             clist.add(ISOCountry.United_States_of_America);
+            clist.add(ISOCountry.Chile);
+            clist.add(ISOCountry.Greece);
             List<Criteria> criteriaList = new ArrayList<>();
             criteriaList.add(Criteria.DEATHS);
             criteriaList.add(Criteria.INFECTED);
