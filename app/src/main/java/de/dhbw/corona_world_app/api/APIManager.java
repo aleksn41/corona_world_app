@@ -44,7 +44,6 @@ public class APIManager {
         service = ThreadPoolHandler.getsInstance();
     }
 
-    //todo fix mapping
     public List<Country> getDataWorld(APIs api){
         Logger.logD("getDataWorld","Getting Data for every Country from api "+api.getName());
 
@@ -67,19 +66,19 @@ public class APIManager {
             Logger.logE("getDataWorld", "Interruption error\n" + e.getStackTrace());
         }
 
-        StringToCountryParser.parseFromHeroMultiCountry(apiReturn,returnList);
+        StringToCountryParser.parseFromHeroMultiCountry(apiReturn, returnList, mapper);
 
         Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
         int cnt = 0;
         for (Country country:returnList) {
-            if(popMap.containsKey(country.getName())) {
-                country.setPopulation(popMap.get(country.getName()));
-            } else if(heroToGoogleMap.containsKey(country.getName())) {
-                country.setPopulation(popMap.get(heroToGoogleMap.get(country.getName())));
-            } else {
-                cnt+=1;
-                Logger.logD("getDataWorld","country \""+country.getName()+"\" has no popCount\nINFO: Try adding an entry into the according Map");
+            if(!mapper.isInBlacklist(country.getName())) {
+                if (popMap.containsKey(ISOCountry.valueOf(country.getName()))) {
+                    country.setPopulation(popMap.get(ISOCountry.valueOf(country.getName())));
+                } else {
+                    cnt += 1;
+                    Logger.logD("getDataWorld", "country \"" + country.getName() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                }
             }
         }
         Logger.logD("getDataWorld","count of countries with no popCount: "+cnt);
@@ -180,7 +179,7 @@ public class APIManager {
                 if(mapper.isInMap(APIs.RESTCOUNTRIES,name)) {
                     returnMap.put(mapper.mapNameToISOCountry(APIs.RESTCOUNTRIES,name), jsonArray.getJSONObject(i).getLong("population"));
                 } else {
-                    String normalizedName = normalize(name);
+                    String normalizedName = mapper.normalize(name);
                     if(!mapper.isInBlacklist(name)) {
                         returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
                     }
@@ -190,11 +189,6 @@ public class APIManager {
             Logger.logE("getAllCountriesPopData","Error parsing JSON\n"+e.getStackTrace());
         }
         return returnMap;
-    }
-
-    //normalizes a country name by removing commas and replacing spaces with underscores
-    private String normalize(String countryName){
-        return countryName.replace(",","").replace(" ","_");
     }
 
     //creates a GET-Call to an url and returns the {@code String} body
