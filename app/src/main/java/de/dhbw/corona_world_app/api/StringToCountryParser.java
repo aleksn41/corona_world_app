@@ -7,7 +7,6 @@ import java.util.List;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
-//TODO use professional stuff for JSON parsing
 public class StringToCountryParser {
 
     public static Country parseFromHeroOneCountry(String toParse, Country country){
@@ -23,13 +22,19 @@ public class StringToCountryParser {
         return country;
     }
 
-    public static Country parseFromHeroOneCountry(String toParse){
+    public static Country parseFromHeroOneCountry(String toParse, Mapper mapper){
         Country country = new Country();
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
             switch (tuple[0]) {
-                case"{\"country\"":country.setName(tuple[1].replace("\"",""));break;
+                case"{\"country\"":String normalizedName = mapper.normalize(tuple[1].replace("\"",""));
+                                   if(mapper.isInMap(APIs.HEROKU,normalizedName)) {
+                                       country.setName(mapper.mapNameToISOCountry(APIs.HEROKU, normalizedName).name());
+                                   } else {
+                                       country.setName(normalizedName);
+                                   }
+                                   break;
                 case"\"deaths\"":country.setDeaths(Integer.parseInt(collectNullToZero(tuple[1])));break;
                 case"\"cases\"":country.setInfected(Integer.parseInt(collectNullToZero(tuple[1])));break;
                 case"\"recovered\"":country.setRecovered(Integer.parseInt(collectNullToZero(tuple[1])));break;
@@ -38,16 +43,15 @@ public class StringToCountryParser {
         return country;
     }
 
-    public static List<Country> parseFromHeroMultiCountry(String toParse, List<Country> countryList){
+    public static List<Country> parseFromHeroMultiCountry(String toParse, List<Country> countryList, Mapper mapper){
         try {
             JSONArray jsonArray = new JSONArray(toParse);
             for(int i = 0; i < jsonArray.length(); i++) {
-                countryList.add(parseFromHeroOneCountry(jsonArray.get(i).toString()));
+                countryList.add(parseFromHeroOneCountry(jsonArray.get(i).toString(), mapper));
             }
         } catch (JSONException e) {
             Logger.logE("ParsingException","Error parsing JSON: "+e);
         }
-        //System.out.println(countryList);
         return countryList;
     }
 
