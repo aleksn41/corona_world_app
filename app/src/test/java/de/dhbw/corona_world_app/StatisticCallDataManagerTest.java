@@ -79,7 +79,6 @@ public class StatisticCallDataManagerTest {
     public void writeData() throws IOException {
         test = new StatisticCallDataManager(executorService, f, FAVOURITE);
         System.out.println("@Test1");
-        System.out.println(testItems);
         //listen to liveData, and look if the change is what it should do
         final boolean[] firstTime = {true};
         test.statisticCallData.observeForever(new Observer<List<Pair<StatisticCall, Boolean>>>() {
@@ -114,7 +113,6 @@ public class StatisticCallDataManagerTest {
     @Test
     public void getData() {
         System.out.println("@Test2");
-        System.out.println(test.statisticCallData.getValue());
         Future<Boolean> success = test.requestMoreData();
         try {
             if (!success.get()) fail("Data is corrupt");

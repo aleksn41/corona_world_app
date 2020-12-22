@@ -24,8 +24,6 @@ public class Enum64BitEncoderTest {
     //needed in Order to generate falsely encoded Strings
     private static final char[] DIGITS = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmno".toCharArray();
 
-    List<Class<? extends Enum<?>>> enumsToTest=new LinkedList<>();
-
     @Test
     public void encode_isCorrect(){
         encodeTest(ISOCountry.class);

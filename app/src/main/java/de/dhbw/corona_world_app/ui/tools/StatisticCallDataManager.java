@@ -32,7 +32,6 @@ public class StatisticCallDataManager {
     private static final char ITEM_SEPARATOR = ',';
     private static final char CATEGORY_SEPARATOR = '|';
     private static final int LINES_READ_PER_REQUEST = 40;
-    private static final String CONTROL_FILE_NAME = "_max_num_of_items";
     private static final char PADDING_CHAR='.';
     //TODO this is not accurate, fix later
     private static final int MAX_SIZE_ITEM=700;
@@ -47,9 +46,8 @@ public class StatisticCallDataManager {
     public boolean readAllAvailableData = false;
 
     //TODO check if Data is corrupted
-    //TODO create getCurrentFile
     public StatisticCallDataManager(@NonNull ExecutorService executorService, @NonNull File fileWhereDataIsToBeSaved, boolean isFavourite) throws IOException {
-        if (fileWhereDataIsToBeSaved.isDirectory()) throw new IllegalArgumentException();
+        if (fileWhereDataIsToBeSaved.isDirectory()) throw new IllegalArgumentException("can not save data in a directory");
         this.statisticCallData = new MutableLiveData<>();
         this.statisticCallData.setValue(new ArrayList<>());
         this.isFavourite = isFavourite;
@@ -66,7 +64,7 @@ public class StatisticCallDataManager {
     }
 
     //TODO optimize for case if user goes out of tabs and reloads already loaded data
-    //TODO use better method then RandomAccessFile (use buffer)
+    //TODO save position
     //reading file in reverse
     public Future<Boolean> requestMoreData() {
         Log.v(this.getClass().getName(),"loading more Data");
@@ -101,7 +99,6 @@ public class StatisticCallDataManager {
     //TODO if an error occurs, undo everything
     //TODO check if space is available before and request if necessary
     //TODO if memory usage is too high remove padding (costs more time if no padding exists)
-    //TODO BIG ISSUE NEW DATA NEEDS TO BE READ FROM THE BEGINNING AGAIN (possible fix append to beginning of MutableLiveData)
     //TODO only a maximum Number of MAX_SIZE entries
     //REQUIREMENT: first item is oldest
     public Future<Boolean> addData(List<StatisticCall> calls) {
@@ -115,11 +112,11 @@ public class StatisticCallDataManager {
                     for (int i = 0; i < calls.size(); i++) {
 
                         temp = isoCountryEnum64BitEncoder.encodeListOfEnums(calls.get(i).getCountryList());
-                        stringToWrite.append(ListOfStringToString(temp));
+                        stringToWrite.append(listOfStringToString(temp));
                         stringToWrite.append(CATEGORY_SEPARATOR);
 
                         temp = criteriaEnum64BitEncoder.encodeListOfEnums(calls.get(i).getCriteriaList());
-                        stringToWrite.append(ListOfStringToString(temp));
+                        stringToWrite.append(listOfStringToString(temp));
                         stringToWrite.append(CATEGORY_SEPARATOR);
 
                         stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(calls.get(i).getCharttype())).get(0));
@@ -152,16 +149,16 @@ public class StatisticCallDataManager {
         return new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria);
     }
 
-    private String ListOfStringToString(List<String> list) {
+    private String listOfStringToString(List<String> list) {
         StringBuilder stringbuilder = new StringBuilder(list.size() * 4);
         for (int i = 0; i < list.size(); i++) {
             stringbuilder.append(list.get(i));
-            stringbuilder.append(StatisticCallDataManager.ITEM_SEPARATOR);
+            stringbuilder.append(ITEM_SEPARATOR);
         }
         stringbuilder.setLength(stringbuilder.length() - 1);
         return stringbuilder.toString();
     }
-    //needs to be String with no spaces
+
     private String createPaddingString(int len) {
         char[] s=new char[len];
         for (int i = 0; i < len; i++) {
