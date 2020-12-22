@@ -9,17 +9,17 @@ import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class Mapper {
 
-    private Map<String, ISOCountry> herokuToStandardMap;
+    private static Map<String, ISOCountry> herokuToStandardMap;
 
-    private Map<String, ISOCountry> restcountriesToStandardMap;
+    private static Map<String, ISOCountry> restcountriesToStandardMap;
 
-    private Map<APIs,Map<String,ISOCountry>> apisToMap;
-    //for faster reverse mapping (so that the reverse map must not be initialized every on every function call)
-    private Map<ISOCountry, String> reverseMap;
+    private static Map<APIs,Map<String,ISOCountry>> apisToMap;
+    //for faster reverse mapping (so that the reverse map must not be initialized on every function call)
+    private static Map<ISOCountry, String> reverseMap;
     //saves which api the reverse map is from
-    private APIs reverseMapAPI;
+    private static APIs reverseMapAPI;
 
-    private List<String> blackList;
+    private static List<String> blackList;
 
     public Mapper(){
         herokuToStandardMap = new HashMap<>();
@@ -28,9 +28,7 @@ public class Mapper {
         blackList = new LinkedList<>();
         apisToMap.put(APIs.HEROKU,herokuToStandardMap);
         apisToMap.put(APIs.RESTCOUNTRIES,restcountriesToStandardMap);
-        initializeMap(APIs.HEROKU);
-        reverseMap = getReverseMap(herokuToStandardMap);
-        reverseMapAPI = APIs.HEROKU;
+        reverseMapAPI = null;
         blackList.add("Republic of Kosovo");
         blackList.add("Channel_Islands");
         blackList.add("World");
@@ -39,7 +37,7 @@ public class Mapper {
         blackList.add("MS_Zaandam");
     }
 
-    public void initializeMap(APIs api){
+    public static void initializeMap(APIs api){
         if(apisToMap.get(api).isEmpty()) {
             switch (api) {
                 case HEROKU:
@@ -102,36 +100,36 @@ public class Mapper {
         }
     }
 
-    public boolean isInBlacklist(String countryName){
+    public static boolean isInBlacklist(String countryName){
         return blackList.contains(countryName);
     }
 
-    public boolean isInMap(APIs api, String countryToBeChecked){
+    public static boolean isInMap(APIs api, String countryToBeChecked){
         initializeMap(api);
         return apisToMap.get(api).containsKey(countryToBeChecked);
     }
 
-    public boolean isInReverseMap(APIs api, ISOCountry countryToBeChecked){
+    public static boolean isInReverseMap(APIs api, ISOCountry countryToBeChecked){
         initReverseMap(api);
         return reverseMap.containsKey(countryToBeChecked);
     }
 
-    private void initReverseMap(APIs api){
+    private static void initReverseMap(APIs api){
         if(apisToMap.get(api).isEmpty()){
             initializeMap(api);
         }
-        if(!reverseMapAPI.equals(api)){
+        if(reverseMapAPI==null || !reverseMapAPI.equals(api)){
             reverseMap = getReverseMap(apisToMap.get(api));
             reverseMapAPI = api;
         }
     }
 
-    public String mapISOCountryToName(APIs api, ISOCountry countryToBeMapped){
+    public static String mapISOCountryToName(APIs api, ISOCountry countryToBeMapped){
         Map<ISOCountry,String> reverseMap = getReverseMap(apisToMap.get(api));
         return reverseMap.get(countryToBeMapped);
     }
 
-    public ISOCountry mapNameToISOCountry(APIs api, String countryToBeMapped){
+    public static ISOCountry mapNameToISOCountry(APIs api, String countryToBeMapped){
         ISOCountry country;
         initializeMap(api);
         country = apisToMap.get(api).get(countryToBeMapped);
@@ -139,11 +137,11 @@ public class Mapper {
     }
 
     //normalizes a country name by removing commas and replacing spaces with underscores
-    public String normalize(String countryName){
+    public static String normalize(String countryName){
         return countryName.replace(",","").replace(" ","_");
     }
 
-    private <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
+    private static <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
         Map<Va,Ke> reverseMap = new HashMap<>();
         for(Map.Entry<Ke, Va> entry : inMap.entrySet()){
             reverseMap.put(entry.getValue(), entry.getKey());
