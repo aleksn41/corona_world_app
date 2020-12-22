@@ -8,12 +8,6 @@ public class ThreadPoolHandler {
 
     private static ExecutorService sInstance;
 
-    public static ExecutorService executorService;
-
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
-
     public static ExecutorService getsInstance() {
         if (sInstance == null) {
             synchronized (ExecutorService.class) {
