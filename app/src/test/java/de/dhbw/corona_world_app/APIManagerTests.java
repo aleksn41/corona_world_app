@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.dhbw.corona_world_app.api.APIManager;
-import de.dhbw.corona_world_app.api.APIs;
+import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
@@ -74,8 +74,8 @@ public class APIManagerTests {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
-            assertNotNull(manager.getDataWorld(APIs.HEROKU));
-            System.out.println(manager.getDataWorld(APIs.HEROKU));
+            assertNotNull(manager.getDataWorld(API.HEROKU));
+            System.out.println(manager.getDataWorld(API.HEROKU));
         } else {
             throw new RuntimeException("No Connection to the Internet found!");
         }

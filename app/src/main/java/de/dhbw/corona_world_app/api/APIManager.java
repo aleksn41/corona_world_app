@@ -32,9 +32,6 @@ public class APIManager {
 
     public static final int MAX_COUNTRY_LIST_SIZE = 5;
 
-    private Map<String, String> heroToPopMap;
-    private Map<String, String> heroToGoogleMap;
-
     private ExecutorService service;
 
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
@@ -44,16 +41,14 @@ public class APIManager {
         service = ThreadPoolHandler.getsInstance();
     }
 
-    public List<Country> getDataWorld(APIs api){
+    public List<Country> getDataWorld(API api){
         Logger.logD("getDataWorld","Getting Data for every Country from api "+api.getName());
 
         List<Country> returnList = new ArrayList<>();
         Future future = service.submit(new Callable<String>() {
                                            @Override
                                            public String call() throws Exception {
-                                               String url = api.getUrl();
-                                               url += api.getGetAll();
-                                               return createAPICall(url);
+                                               return createAPICall(api.getUrl() + api.getGetAll());
                                            }
                                        }
         );
@@ -97,13 +92,13 @@ public class APIManager {
                 Future future = service.submit(new Callable<String>() {
                                                    @Override
                                                    public String call() throws Exception {
-                                                       String url = APIs.HEROKU.getUrl();
-                                                       url += APIs.HEROKU.getGetOne();
+                                                       String url = API.HEROKU.getUrl();
+                                                       url += API.HEROKU.getGetOne();
 
                                                        if (countryList != null) {
                                                            String attachString = "";
-                                                           if (mapper.isInReverseMap(APIs.HEROKU, isoCountry)) {
-                                                               attachString = mapper.mapISOCountryToName(APIs.HEROKU, isoCountry);
+                                                           if (mapper.isInReverseMap(API.HEROKU, isoCountry)) {
+                                                               attachString = mapper.mapISOCountryToName(API.HEROKU, isoCountry);
                                                            } else {
                                                                attachString = isoCountry.toString();
                                                            }
@@ -132,7 +127,7 @@ public class APIManager {
                     Future future2 = service.submit(new Callable<String>() {
                                                         @Override
                                                         public String call() throws Exception {
-                                                            return createAPICall(APIs.RESTCOUNTRIES.getUrl() + APIs.RESTCOUNTRIES.getGetOne() + isoCountry.getISOCode());
+                                                            return createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getGetOne() + isoCountry.getISOCode());
                                                         }
                                                     }
                     );
@@ -160,7 +155,7 @@ public class APIManager {
         Future future = service.submit(new Callable<String>() {
                                            @Override
                                            public String call() throws Exception {
-                                               return createAPICall(APIs.RESTCOUNTRIES.getUrl()+APIs.RESTCOUNTRIES.getGetAll());
+                                               return createAPICall(API.RESTCOUNTRIES.getUrl()+ API.RESTCOUNTRIES.getGetAll());
                                            }
                                        }
         );
@@ -176,8 +171,8 @@ public class APIManager {
             }
             for(int i = 0; i < jsonArray.length(); i++) {
                 String name = jsonArray.getJSONObject(i).getString("name");
-                if(mapper.isInMap(APIs.RESTCOUNTRIES,name)) {
-                    returnMap.put(mapper.mapNameToISOCountry(APIs.RESTCOUNTRIES,name), jsonArray.getJSONObject(i).getLong("population"));
+                if(mapper.isInMap(API.RESTCOUNTRIES,name)) {
+                    returnMap.put(mapper.mapNameToISOCountry(API.RESTCOUNTRIES,name), jsonArray.getJSONObject(i).getLong("population"));
                 } else {
                     String normalizedName = mapper.normalize(name);
                     if(!mapper.isInBlacklist(name)) {

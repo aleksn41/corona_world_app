@@ -1,6 +1,6 @@
 package de.dhbw.corona_world_app.api;
 
-public enum APIs {
+public enum API {
     HEROKU("https://coronavirus-19-api.herokuapp.com", "/countries", "/countries/", false, "Heroku"),
     RESTCOUNTRIES("https://restcountries.eu/rest/v2", "/all", "/alpha/", true, "RestCountries");
 
@@ -14,7 +14,7 @@ public enum APIs {
 
     private boolean acceptsISO;
 
-    APIs(String url, String getAll, String getOne, boolean acceptsISO, String name) {
+    API(String url, String getAll, String getOne, boolean acceptsISO, String name) {
         this.getOne = getOne;
         this.acceptsISO = acceptsISO;
         this.url = url;

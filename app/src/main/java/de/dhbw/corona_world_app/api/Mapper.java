@@ -13,11 +13,11 @@ public class Mapper {
 
     private static Map<String, ISOCountry> restcountriesToStandardMap;
 
-    private static Map<APIs,Map<String,ISOCountry>> apisToMap;
+    private static Map<API,Map<String,ISOCountry>> apisToMap;
     //for faster reverse mapping (so that the reverse map must not be initialized on every function call)
     private static Map<ISOCountry, String> reverseMap;
     //saves which api the reverse map is from
-    private static APIs reverseMapAPI;
+    private static API reverseMapAPI;
 
     private static List<String> blackList;
 
@@ -26,8 +26,8 @@ public class Mapper {
         restcountriesToStandardMap = new HashMap<>();
         apisToMap = new HashMap<>();
         blackList = new LinkedList<>();
-        apisToMap.put(APIs.HEROKU,herokuToStandardMap);
-        apisToMap.put(APIs.RESTCOUNTRIES,restcountriesToStandardMap);
+        apisToMap.put(API.HEROKU,herokuToStandardMap);
+        apisToMap.put(API.RESTCOUNTRIES,restcountriesToStandardMap);
         reverseMapAPI = null;
         blackList.add("Republic of Kosovo");
         blackList.add("Channel_Islands");
@@ -37,7 +37,7 @@ public class Mapper {
         blackList.add("MS_Zaandam");
     }
 
-    public static void initializeMap(APIs api){
+    public static void initializeMap(API api){
         if(apisToMap.get(api).isEmpty()) {
             switch (api) {
                 case HEROKU:
@@ -104,17 +104,17 @@ public class Mapper {
         return blackList.contains(countryName);
     }
 
-    public static boolean isInMap(APIs api, String countryToBeChecked){
+    public static boolean isInMap(API api, String countryToBeChecked){
         initializeMap(api);
         return apisToMap.get(api).containsKey(countryToBeChecked);
     }
 
-    public static boolean isInReverseMap(APIs api, ISOCountry countryToBeChecked){
+    public static boolean isInReverseMap(API api, ISOCountry countryToBeChecked){
         initReverseMap(api);
         return reverseMap.containsKey(countryToBeChecked);
     }
 
-    private static void initReverseMap(APIs api){
+    private static void initReverseMap(API api){
         if(apisToMap.get(api).isEmpty()){
             initializeMap(api);
         }
@@ -124,12 +124,12 @@ public class Mapper {
         }
     }
 
-    public static String mapISOCountryToName(APIs api, ISOCountry countryToBeMapped){
+    public static String mapISOCountryToName(API api, ISOCountry countryToBeMapped){
         Map<ISOCountry,String> reverseMap = getReverseMap(apisToMap.get(api));
         return reverseMap.get(countryToBeMapped);
     }
 
-    public static ISOCountry mapNameToISOCountry(APIs api, String countryToBeMapped){
+    public static ISOCountry mapNameToISOCountry(API api, String countryToBeMapped){
         ISOCountry country;
         initializeMap(api);
         country = apisToMap.get(api).get(countryToBeMapped);

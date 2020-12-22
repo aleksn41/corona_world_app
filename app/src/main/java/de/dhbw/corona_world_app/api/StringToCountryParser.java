@@ -29,8 +29,8 @@ public class StringToCountryParser {
             String[] tuple = string.split(":");
             switch (tuple[0]) {
                 case"{\"country\"":String normalizedName = mapper.normalize(tuple[1].replace("\"",""));
-                                   if(mapper.isInMap(APIs.HEROKU,normalizedName)) {
-                                       country.setName(mapper.mapNameToISOCountry(APIs.HEROKU, normalizedName).name());
+                                   if(mapper.isInMap(API.HEROKU,normalizedName)) {
+                                       country.setName(mapper.mapNameToISOCountry(API.HEROKU, normalizedName).name());
                                    } else {
                                        country.setName(normalizedName);
                                    }
