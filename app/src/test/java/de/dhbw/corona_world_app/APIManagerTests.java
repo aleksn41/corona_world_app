@@ -13,7 +13,6 @@ import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 import static org.junit.Assert.*;
 
-
 public class APIManagerTests {
 
     @Test
@@ -48,7 +47,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataFiveCountries() throws Throwable {
+    public void testGetDataTenCountries() throws Throwable {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -58,6 +57,11 @@ public class APIManagerTests {
             clist.add(ISOCountry.United_States_of_America);
             clist.add(ISOCountry.Chile);
             clist.add(ISOCountry.Greece);
+            clist.add(ISOCountry.Belize);
+            clist.add(ISOCountry.Martinique);
+            clist.add(ISOCountry.C_te_d_Ivoire);
+            clist.add(ISOCountry.Sao_Tome_and_Principe);
+            clist.add(ISOCountry.Democratic_Republic_Congo);
             List<Criteria> criteriaList = new ArrayList<>();
             criteriaList.add(Criteria.DEATHS);
             criteriaList.add(Criteria.INFECTED);
@@ -65,6 +69,7 @@ public class APIManagerTests {
             criteriaList.add(Criteria.POPULATION);
             assertNotNull(manager.getData(clist,criteriaList,null));
             System.out.println(manager.getData(clist,criteriaList,null));
+            //System.out.println("Size="+manager.getData(clist,criteriaList,null).size());
         } else {
             throw new RuntimeException("No Connection to the Internet found!");
         }

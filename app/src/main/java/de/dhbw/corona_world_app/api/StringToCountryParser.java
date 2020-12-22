@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,8 @@ public class StringToCountryParser {
         return country;
     }
 
-    public static List<Country> parseFromHeroMultiCountry(String toParse, List<Country> countryList){
+    public static List<Country> parseFromHeroMultiCountry(String toParse){
+        List<Country> countryList = new LinkedList<>();
         try {
             JSONArray jsonArray = new JSONArray(toParse);
             for(int i = 0; i < jsonArray.length(); i++) {
@@ -62,7 +64,8 @@ public class StringToCountryParser {
     /*
     Data can be false, then nothing will be set.
      */
-    public static Country parsePopCount(String toParse, Country country){
+    public static Country parsePopCount(String toParse, String name){
+        Country country = new Country(name);
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");

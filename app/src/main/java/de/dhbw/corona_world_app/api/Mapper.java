@@ -21,7 +21,7 @@ public class Mapper {
 
     private static List<String> blackList;
 
-    private static boolean isAlreadyInitiated;
+    private static boolean isAlreadyInitiated=false;
 
     private static void init(){
         if(!isAlreadyInitiated) {
@@ -132,7 +132,7 @@ public class Mapper {
     public static String mapISOCountryToName(API api, ISOCountry countryToBeMapped){
         initReverseMap(api);
         Map<ISOCountry,String> reverseMap = getReverseMap(apisToMap.get(api));
-        return reverseMap.get(countryToBeMapped);
+        return denormalizeISOCountryName(reverseMap.get(countryToBeMapped));
     }
 
     public static ISOCountry mapNameToISOCountry(API api, String countryToBeMapped){
@@ -143,6 +143,11 @@ public class Mapper {
     //normalizes a country name by removing commas and replacing spaces with underscores
     public static String normalizeCountryName(String countryName){
         return countryName.replace(",","").replace(" ","_");
+    }
+
+    //denormalizes an ISOCountry name by replacing all underscores with spaces
+    public static String denormalizeISOCountryName(String isoCountryName){
+        return isoCountryName.replace("_"," ");
     }
 
     private static <Ke, Va> Map<Va,Ke> getReverseMap(Map<Ke,Va> inMap){
