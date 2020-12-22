@@ -22,15 +22,16 @@ public class StringToCountryParser {
         return country;
     }
 
-    public static Country parseFromHeroOneCountry(String toParse, Mapper mapper){
+    public static Country parseFromHeroOneCountry(String toParse){
+        Mapper.init();
         Country country = new Country();
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
             switch (tuple[0]) {
-                case"{\"country\"":String normalizedName = mapper.normalize(tuple[1].replace("\"",""));
-                                   if(mapper.isInMap(API.HEROKU,normalizedName)) {
-                                       country.setName(mapper.mapNameToISOCountry(API.HEROKU, normalizedName).name());
+                case"{\"country\"":String normalizedName = Mapper.normalize(tuple[1].replace("\"",""));
+                                   if(Mapper.isInMap(API.HEROKU,normalizedName)) {
+                                       country.setName(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName).name());
                                    } else {
                                        country.setName(normalizedName);
                                    }
@@ -43,11 +44,11 @@ public class StringToCountryParser {
         return country;
     }
 
-    public static List<Country> parseFromHeroMultiCountry(String toParse, List<Country> countryList, Mapper mapper){
+    public static List<Country> parseFromHeroMultiCountry(String toParse, List<Country> countryList){
         try {
             JSONArray jsonArray = new JSONArray(toParse);
             for(int i = 0; i < jsonArray.length(); i++) {
-                countryList.add(parseFromHeroOneCountry(jsonArray.get(i).toString(), mapper));
+                countryList.add(parseFromHeroOneCountry(jsonArray.get(i).toString()));
             }
         } catch (JSONException e) {
             Logger.logE("ParsingException","Error parsing JSON: "+e);

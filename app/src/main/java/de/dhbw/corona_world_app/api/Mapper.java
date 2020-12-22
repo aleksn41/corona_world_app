@@ -21,20 +21,25 @@ public class Mapper {
 
     private static List<String> blackList;
 
-    public Mapper(){
-        herokuToStandardMap = new HashMap<>();
-        restcountriesToStandardMap = new HashMap<>();
-        apisToMap = new HashMap<>();
-        blackList = new LinkedList<>();
-        apisToMap.put(API.HEROKU,herokuToStandardMap);
-        apisToMap.put(API.RESTCOUNTRIES,restcountriesToStandardMap);
-        reverseMapAPI = null;
-        blackList.add("Republic of Kosovo");
-        blackList.add("Channel_Islands");
-        blackList.add("World");
-        blackList.add("Diamond_Princess");
-        blackList.add("Vatican_City");
-        blackList.add("MS_Zaandam");
+    private static boolean isAlreadyInitiated;
+
+    public static void init(){
+        if(!isAlreadyInitiated) {
+            herokuToStandardMap = new HashMap<>();
+            restcountriesToStandardMap = new HashMap<>();
+            apisToMap = new HashMap<>();
+            blackList = new LinkedList<>();
+            apisToMap.put(API.HEROKU, herokuToStandardMap);
+            apisToMap.put(API.RESTCOUNTRIES, restcountriesToStandardMap);
+            reverseMapAPI = null;
+            blackList.add("Republic of Kosovo");
+            blackList.add("Channel_Islands");
+            blackList.add("World");
+            blackList.add("Diamond_Princess");
+            blackList.add("Vatican_City");
+            blackList.add("MS_Zaandam");
+            isAlreadyInitiated = true;
+        }
     }
 
     public static void initializeMap(API api){
@@ -130,10 +135,8 @@ public class Mapper {
     }
 
     public static ISOCountry mapNameToISOCountry(API api, String countryToBeMapped){
-        ISOCountry country;
         initializeMap(api);
-        country = apisToMap.get(api).get(countryToBeMapped);
-        return country;
+        return apisToMap.get(api).get(countryToBeMapped);
     }
 
     //normalizes a country name by removing commas and replacing spaces with underscores

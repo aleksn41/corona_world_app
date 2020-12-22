@@ -6,9 +6,11 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -28,118 +30,93 @@ public class APIManager {
 
     private boolean longTermStorageEnabled;
 
-    private Mapper mapper;
-
     public static final int MAX_COUNTRY_LIST_SIZE = 5;
 
-    private ExecutorService service;
+    private final ExecutorService service;
 
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
         this.cacheEnabled = cacheEnabled;
         this.longTermStorageEnabled = longTermStorageEnabled;
-        mapper = new Mapper();
+        Mapper.init();
         service = ThreadPoolHandler.getsInstance();
     }
 
-    public List<Country> getDataWorld(API api){
+    public List<Country> getDataWorld(API api) throws IOException {
         Logger.logD("getDataWorld","Getting Data for every Country from api "+api.getName());
 
         List<Country> returnList = new ArrayList<>();
-        Future future = service.submit(new Callable<String>() {
-                                           @Override
-                                           public String call() throws Exception {
-                                               return createAPICall(api.getUrl() + api.getAllCountries());
-                                           }
-                                       }
-        );
-        String apiReturn = null;
-        try {
-            apiReturn = future.get().toString();
-        } catch (ExecutionException e) {
-            Logger.logE("getDataWorld", "Error executing async call\n" + e.getStackTrace());
-        } catch (InterruptedException e) {
-            Logger.logE("getDataWorld", "Interruption error\n" + e.getStackTrace());
-        }
-
-        StringToCountryParser.parseFromHeroMultiCountry(apiReturn, returnList, mapper);
-
-        Map<ISOCountry, Long> popMap = getAllCountriesPopData();
+        Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
         int cnt = 0;
-        for (Country country:returnList) {
-            if(!mapper.isInBlacklist(country.getName())) {
-                if (popMap.containsKey(ISOCountry.valueOf(country.getName()))) {
-                    country.setPopulation(popMap.get(ISOCountry.valueOf(country.getName())));
-                } else {
-                    cnt += 1;
-                    Logger.logD("getDataWorld", "country \"" + country.getName() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+
+        try {
+            String apiReturn = future.get();
+            StringToCountryParser.parseFromHeroMultiCountry(apiReturn, returnList);
+
+            Map<ISOCountry, Long> popMap = getAllCountriesPopData();
+
+            for (Country country:returnList) {
+                if(!Mapper.isInBlacklist(country.getName())) {
+                    if (popMap.containsKey(ISOCountry.valueOf(country.getName()))) {
+                        country.setPopulation(popMap.get(ISOCountry.valueOf(country.getName())));
+                    } else {
+                        cnt += 1;
+                        Logger.logD("getDataWorld", "country \"" + country.getName() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                    }
                 }
             }
+        } catch (ExecutionException e) {
+            Logger.logE("getDataWorld", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
+            throw (IOException) Objects.requireNonNull(e.getCause());
+        } catch (InterruptedException e) {
+            Logger.logE("getDataWorld", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
         }
+
         Logger.logD("getDataWorld","count of countries with no popCount: "+cnt);
         return returnList;
     }
 
     //todo performance
-    public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame){
-        Logger.logD("getData","Getting data according to following parameters: "+countryList+" ; "+criteriaList+" ; "+timeFrame);
+    public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame) throws IOException {
+        Logger.logD("getData","Getting data according to following parameters: "+countryList+" ; "+criteriaList+" ; "+ Arrays.toString(timeFrame));
 
         List<Country> returnList = new ArrayList<>();
-        if(countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
+        if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
             for (ISOCountry isoCountry : countryList) {
 
                 //make api-call
-                Future future = service.submit(new Callable<String>() {
-                                                   @Override
-                                                   public String call() throws Exception {
-                                                       String url = API.HEROKU.getUrl();
-                                                       url += API.HEROKU.getOneCountry();
+                Future<String> future = service.submit(() -> {
+                    String url = API.HEROKU.getUrl();
+                    url += API.HEROKU.getOneCountry();
 
-                                                       if (countryList != null) {
-                                                           String attachString = "";
-                                                           if (mapper.isInReverseMap(API.HEROKU, isoCountry)) {
-                                                               attachString = mapper.mapISOCountryToName(API.HEROKU, isoCountry);
-                                                           } else {
-                                                               attachString = isoCountry.toString();
-                                                           }
-                                                           url += attachString;
-                                                       }
-                                                       return createAPICall(url);
-                                                   }
-                                               }
-                );
-                String apiReturn = null;
-                try {
-                    apiReturn = future.get().toString();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                    Logger.logE("getData", "Error executing async call\n" + e.getStackTrace());
-                } catch (InterruptedException e) {
-                    Logger.logE("getData", "Interruption error\n" + e.getStackTrace());
-                }
-
-                //parse api-return into country and return
-                Country country = new Country(isoCountry.toString());
-                StringToCountryParser.parseFromHeroOneCountry(apiReturn, country);
-
-                //check if popCount is to be shown
-                if (criteriaList.contains(Criteria.POPULATION)) {
-                    Future future2 = service.submit(new Callable<String>() {
-                                                        @Override
-                                                        public String call() throws Exception {
-                                                            return createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode());
-                                                        }
-                                                    }
-                    );
-                    String apiReturn2 = null;
-                    try {
-                        apiReturn2 = future2.get().toString();
-                    } catch (ExecutionException e) {
-                        Logger.logE("getData", "Error executing async call\n" + e.getStackTrace());
-                    } catch (InterruptedException e) {
-                        Logger.logE("getData", "Interruption error\n" + e.getStackTrace());
+                    String attachString;
+                    if (Mapper.isInReverseMap(API.HEROKU, isoCountry)) {
+                        attachString = Mapper.mapISOCountryToName(API.HEROKU, isoCountry);
+                    } else {
+                        attachString = isoCountry.toString();
                     }
-                    StringToCountryParser.parsePopCount(apiReturn2, country);
+                    url += attachString;
+                    return createAPICall(url);
+                }
+                );
+                Country country = new Country(isoCountry.toString());
+                try {
+                    String apiReturn = future.get();
+                    //parse api-return into country and return
+
+                    StringToCountryParser.parseFromHeroOneCountry(apiReturn, country);
+
+                    //check if popCount is to be shown
+                    if (criteriaList.contains(Criteria.POPULATION)) {
+                        Future<String> future2 = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()));
+                        String apiReturn2 = future2.get();
+                        StringToCountryParser.parsePopCount(apiReturn2, country);
+                    }
+                } catch (ExecutionException e) {
+                    Logger.logE("getData", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
+                    throw (IOException) Objects.requireNonNull(e.getCause());
+                } catch (InterruptedException e) {
+                    Logger.logE("getData", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
                 }
                 returnList.add(country);
             }
@@ -150,54 +127,43 @@ public class APIManager {
     }
 
     //Gets a map with ISOCountries mapped to a {@code long} population count gotten by the restcountries api.
-    public Map<ISOCountry,Long> getAllCountriesPopData() {
+    public Map<ISOCountry,Long> getAllCountriesPopData() throws IOException {
         Logger.logD("getAllCountriesPopData","Getting population data...");
-        Future future = service.submit(new Callable<String>() {
-                                           @Override
-                                           public String call() throws Exception {
-                                               return createAPICall(API.RESTCOUNTRIES.getUrl()+ API.RESTCOUNTRIES.getAllCountries());
-                                           }
-                                       }
-        );
-        Map<ISOCountry,Long> returnMap = new HashMap<>();
+        Future<String> future = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl()+ API.RESTCOUNTRIES.getAllCountries()));
+        Map<ISOCountry, Long> returnMap = new HashMap<>();
         try {
-            JSONArray jsonArray = null;
-            try {
-                jsonArray = new JSONArray(future.get().toString());
-            } catch (ExecutionException e) {
-                Logger.logE("getAllCountriesPopData","Error executing async call\n"+e.getStackTrace());
-            } catch (InterruptedException e) {
-                Logger.logE("getAllCountriesPopData","Interruption error\n"+e.getStackTrace());
-            }
-            for(int i = 0; i < jsonArray.length(); i++) {
+            JSONArray jsonArray = new JSONArray(future.get());
+            for (int i = 0; i < jsonArray.length(); i++) {
                 String name = jsonArray.getJSONObject(i).getString("name");
-                if(mapper.isInMap(API.RESTCOUNTRIES,name)) {
-                    returnMap.put(mapper.mapNameToISOCountry(API.RESTCOUNTRIES,name), jsonArray.getJSONObject(i).getLong("population"));
+                if (Mapper.isInMap(API.RESTCOUNTRIES, name)) {
+                    returnMap.put(Mapper.mapNameToISOCountry(API.RESTCOUNTRIES, name), jsonArray.getJSONObject(i).getLong("population"));
                 } else {
-                    String normalizedName = mapper.normalize(name);
-                    if(!mapper.isInBlacklist(name)) {
+                    String normalizedName = Mapper.normalize(name);
+                    if (!Mapper.isInBlacklist(name)) {
                         returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
                     }
                 }
             }
+        } catch (ExecutionException e) {
+            Logger.logE("getAllCountriesPopData", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
+            throw (IOException) Objects.requireNonNull(e.getCause());
+        } catch (InterruptedException e) {
+            Logger.logE("getAllCountriesPopData", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
+
         } catch (JSONException e) {
-            Logger.logE("getAllCountriesPopData","Error parsing JSON\n"+e.getStackTrace());
+            Logger.logE("getAllCountriesPopData", "Error parsing JSON\n" + Arrays.toString(e.getStackTrace()));
         }
         return returnMap;
     }
 
     //creates a GET-Call to an url and returns the {@code String} body
-    public String createAPICall(String url) {
+    public String createAPICall(String url) throws IOException {
         OkHttpClient client = new OkHttpClient();
         final Request request = new Request.Builder()
                 .url(url)
                 .build();
-        String toReturn = "";
-        try {
-            toReturn = client.newCall(request).execute().body().string();
-        } catch (IOException e) {
-            Logger.logE("createAPICall","Error executing call "+url+"\n"+e.getStackTrace());
-        }
+        String toReturn;
+        toReturn = Objects.requireNonNull(client.newCall(request).execute().body()).string();
         return toReturn;
     }
 
