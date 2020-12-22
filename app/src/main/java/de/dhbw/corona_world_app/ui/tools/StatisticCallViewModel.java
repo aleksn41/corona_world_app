@@ -1,7 +1,7 @@
 package de.dhbw.corona_world_app.ui.tools;
 
 import android.util.Log;
-import android.util.Pair;
+import androidx.core.util.Pair;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
