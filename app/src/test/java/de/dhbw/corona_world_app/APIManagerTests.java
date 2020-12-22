@@ -29,7 +29,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataOneCountry() throws IOException {
+    public void testGetDataOneCountry() throws Throwable {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -48,7 +48,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataFiveCountries() throws IOException {
+    public void testGetDataFiveCountries() throws Throwable {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -71,7 +71,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataWorld() throws IOException {
+    public void testGetDataWorld() throws Throwable {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -83,7 +83,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetAllCountriesPopData() throws IOException {
+    public void testGetAllCountriesPopData() throws Throwable {
         APIManager manager = new APIManager(true, false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null){

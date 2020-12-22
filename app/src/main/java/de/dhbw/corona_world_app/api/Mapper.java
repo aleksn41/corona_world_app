@@ -23,7 +23,7 @@ public class Mapper {
 
     private static boolean isAlreadyInitiated;
 
-    public static void init(){
+    private static void init(){
         if(!isAlreadyInitiated) {
             herokuToStandardMap = new HashMap<>();
             restcountriesToStandardMap = new HashMap<>();
@@ -42,7 +42,8 @@ public class Mapper {
         }
     }
 
-    public static void initializeMap(API api){
+    private static void initializeMap(API api){
+        init();
         if(apisToMap.get(api).isEmpty()) {
             switch (api) {
                 case HEROKU:
@@ -106,6 +107,7 @@ public class Mapper {
     }
 
     public static boolean isInBlacklist(String countryName){
+        init();
         return blackList.contains(countryName);
     }
 
@@ -120,9 +122,7 @@ public class Mapper {
     }
 
     private static void initReverseMap(API api){
-        if(apisToMap.get(api).isEmpty()){
-            initializeMap(api);
-        }
+        initializeMap(api);
         if(reverseMapAPI==null || !reverseMapAPI.equals(api)){
             reverseMap = getReverseMap(apisToMap.get(api));
             reverseMapAPI = api;
@@ -130,6 +130,7 @@ public class Mapper {
     }
 
     public static String mapISOCountryToName(API api, ISOCountry countryToBeMapped){
+        initReverseMap(api);
         Map<ISOCountry,String> reverseMap = getReverseMap(apisToMap.get(api));
         return reverseMap.get(countryToBeMapped);
     }
@@ -140,7 +141,7 @@ public class Mapper {
     }
 
     //normalizes a country name by removing commas and replacing spaces with underscores
-    public static String normalize(String countryName){
+    public static String normalizeCountryName(String countryName){
         return countryName.replace(",","").replace(" ","_");
     }
 

@@ -27,13 +27,12 @@ public class StringToCountryParser {
     }
 
     public static Country parseFromHeroOneCountry(String toParse){
-        Mapper.init();
         Country country = new Country();
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
             switch (tuple[0]) {
-                case"{\"country\"":String normalizedName = Mapper.normalize(tuple[1].replace("\"",""));
+                case"{\"country\"":String normalizedName = Mapper.normalizeCountryName(tuple[1].replace("\"",""));
                                    if(Mapper.isInMap(API.HEROKU,normalizedName)) {
                                        country.setName(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName).name());
                                    } else {
@@ -82,7 +81,7 @@ public class StringToCountryParser {
             if (Mapper.isInMap(API.RESTCOUNTRIES, name)) {
                 returnMap.put(Mapper.mapNameToISOCountry(API.RESTCOUNTRIES, name), jsonArray.getJSONObject(i).getLong("population"));
             } else {
-                String normalizedName = Mapper.normalize(name);
+                String normalizedName = Mapper.normalizeCountryName(name);
                 if (!Mapper.isInBlacklist(name)) {
                     returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
                 }
