@@ -1,6 +1,5 @@
 package de.dhbw.corona_world_app.api;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -11,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -132,24 +130,12 @@ public class APIManager {
         Future<String> future = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl()+ API.RESTCOUNTRIES.getAllCountries()));
         Map<ISOCountry, Long> returnMap = new HashMap<>();
         try {
-            JSONArray jsonArray = new JSONArray(future.get());
-            for (int i = 0; i < jsonArray.length(); i++) {
-                String name = jsonArray.getJSONObject(i).getString("name");
-                if (Mapper.isInMap(API.RESTCOUNTRIES, name)) {
-                    returnMap.put(Mapper.mapNameToISOCountry(API.RESTCOUNTRIES, name), jsonArray.getJSONObject(i).getLong("population"));
-                } else {
-                    String normalizedName = Mapper.normalize(name);
-                    if (!Mapper.isInBlacklist(name)) {
-                        returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
-                    }
-                }
-            }
+            returnMap = StringToCountryParser.parseMultiPopCount(future.get());
         } catch (ExecutionException e) {
             Logger.logE("getAllCountriesPopData", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
             throw (IOException) Objects.requireNonNull(e.getCause());
         } catch (InterruptedException e) {
             Logger.logE("getAllCountriesPopData", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
-
         } catch (JSONException e) {
             Logger.logE("getAllCountriesPopData", "Error parsing JSON\n" + Arrays.toString(e.getStackTrace()));
         }

@@ -3,10 +3,14 @@ package de.dhbw.corona_world_app.api;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
+import de.dhbw.corona_world_app.datastructure.ISOCountry;
+
 public class StringToCountryParser {
 
     public static Country parseFromHeroOneCountry(String toParse, Country country){
@@ -68,6 +72,23 @@ public class StringToCountryParser {
             }
         }
         return country;
+    }
+
+    public static Map<ISOCountry, Long> parseMultiPopCount(String toParse) throws JSONException {
+        Map<ISOCountry, Long> returnMap = new HashMap<>();
+        JSONArray jsonArray = new JSONArray(toParse);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            String name = jsonArray.getJSONObject(i).getString("name");
+            if (Mapper.isInMap(API.RESTCOUNTRIES, name)) {
+                returnMap.put(Mapper.mapNameToISOCountry(API.RESTCOUNTRIES, name), jsonArray.getJSONObject(i).getLong("population"));
+            } else {
+                String normalizedName = Mapper.normalize(name);
+                if (!Mapper.isInBlacklist(name)) {
+                    returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
+                }
+            }
+        }
+        return returnMap;
     }
 
     /*
