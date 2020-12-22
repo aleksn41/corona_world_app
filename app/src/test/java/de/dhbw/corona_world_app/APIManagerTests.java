@@ -2,6 +2,7 @@ package de.dhbw.corona_world_app;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import static org.junit.Assert.*;
 public class APIManagerTests {
 
     @Test
-    public void testMakeAPICall(){
+    public void testMakeAPICall() throws IOException {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -28,7 +29,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataOneCountry(){
+    public void testGetDataOneCountry() throws IOException {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -47,7 +48,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataThreeCountries(){
+    public void testGetDataFiveCountries() throws IOException {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -70,7 +71,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetDataWorld(){
+    public void testGetDataWorld() throws IOException {
         APIManager manager = new APIManager(true,false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null) {
@@ -82,7 +83,7 @@ public class APIManagerTests {
     }
 
     @Test
-    public void testGetAllCountriesPopData(){
+    public void testGetAllCountriesPopData() throws IOException {
         APIManager manager = new APIManager(true, false);
         manager.disableLogsForTesting();
         if(manager.createAPICall("https://google.de")!=null){
