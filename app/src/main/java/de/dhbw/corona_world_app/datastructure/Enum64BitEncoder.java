@@ -7,11 +7,11 @@ import java.util.stream.IntStream;
 
 public class Enum64BitEncoder<T extends Enum<T>> {
     private final T[] enumConstants;
-    public Map<T, String> enumToEncodedString;
+    private Map<T, String> enumToEncodedString;
 
-    public static final int BITS = 64;
+    private static final int BITS = 64;
     //choosing these Digits as they are always on index apart in ascii, which makes decoding faster
-    public static final char[] DIGITS = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmno".toCharArray();
+    private static final char[] DIGITS = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmno".toCharArray();
 
     public Enum64BitEncoder(Class<T> enumClass) {
         enumConstants = enumClass.getEnumConstants();
@@ -37,9 +37,9 @@ public class Enum64BitEncoder<T extends Enum<T>> {
         }).collect(Collectors.toList());
     }
 
-    //based on Integer.toString (is not used as Character.MAX_RADIX<64)
+    //based on Integer.toString (is not used since Character.MAX_RADIX<64)
     //only used for ints>=0
-    public String encodeIntegerToString(int i) {
+    private String encodeIntegerToString(int i) {
         if (i < 0) throw new IllegalArgumentException();
         char[] buf = new char[33];
         int charPos = 32;
@@ -51,7 +51,7 @@ public class Enum64BitEncoder<T extends Enum<T>> {
         return new String(buf, charPos, (33 - charPos));
     }
 
-    public int decodeEncodedStringToInt(String s) throws DataException {
+    private int decodeEncodedStringToInt(String s) throws DataException {
         int res = 0;
         for (int i = 0; i < s.length()-1; i++) {
             if (s.charAt(i) < DIGITS[0] || s.charAt(i) > DIGITS[BITS - 1])
