@@ -48,7 +48,7 @@ public class APIManager {
         Future future = service.submit(new Callable<String>() {
                                            @Override
                                            public String call() throws Exception {
-                                               return createAPICall(api.getUrl() + api.getGetAll());
+                                               return createAPICall(api.getUrl() + api.getAllCountries());
                                            }
                                        }
         );
@@ -93,7 +93,7 @@ public class APIManager {
                                                    @Override
                                                    public String call() throws Exception {
                                                        String url = API.HEROKU.getUrl();
-                                                       url += API.HEROKU.getGetOne();
+                                                       url += API.HEROKU.getOneCountry();
 
                                                        if (countryList != null) {
                                                            String attachString = "";
@@ -127,7 +127,7 @@ public class APIManager {
                     Future future2 = service.submit(new Callable<String>() {
                                                         @Override
                                                         public String call() throws Exception {
-                                                            return createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getGetOne() + isoCountry.getISOCode());
+                                                            return createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode());
                                                         }
                                                     }
                     );
@@ -155,7 +155,7 @@ public class APIManager {
         Future future = service.submit(new Callable<String>() {
                                            @Override
                                            public String call() throws Exception {
-                                               return createAPICall(API.RESTCOUNTRIES.getUrl()+ API.RESTCOUNTRIES.getGetAll());
+                                               return createAPICall(API.RESTCOUNTRIES.getUrl()+ API.RESTCOUNTRIES.getAllCountries());
                                            }
                                        }
         );

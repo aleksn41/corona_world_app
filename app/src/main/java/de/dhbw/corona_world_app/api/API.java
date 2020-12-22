@@ -4,34 +4,34 @@ public enum API {
     HEROKU("https://coronavirus-19-api.herokuapp.com", "/countries", "/countries/", false, "Heroku"),
     RESTCOUNTRIES("https://restcountries.eu/rest/v2", "/all", "/alpha/", true, "RestCountries");
 
-    private String url;
+    private final String url;
 
-    private String name;
+    private final String name;
 
-    private String getAll;
+    private final String getAllCountries;
 
-    private String getOne;
+    private final String getOneCountry;
 
-    private boolean acceptsISO;
+    private final boolean acceptsISOCode;
 
-    API(String url, String getAll, String getOne, boolean acceptsISO, String name) {
-        this.getOne = getOne;
-        this.acceptsISO = acceptsISO;
+    API(String url, String getAllCountries, String getOneCountry, boolean acceptsISOCode, String name) {
+        this.getOneCountry = getOneCountry;
+        this.acceptsISOCode = acceptsISOCode;
         this.url = url;
-        this.getAll = getAll;
+        this.getAllCountries = getAllCountries;
         this.name = name;
     }
 
-    public String getGetOne() {
-        return getOne;
+    public String getOneCountry() {
+        return getOneCountry;
     }
 
-    public boolean acceptsISO() {
-        return acceptsISO;
+    public boolean acceptsISOCode() {
+        return acceptsISOCode;
     }
 
-    public String getGetAll() {
-        return getAll;
+    public String getAllCountries() {
+        return getAllCountries;
     }
 
     public String getUrl(){
