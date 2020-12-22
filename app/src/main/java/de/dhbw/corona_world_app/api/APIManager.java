@@ -113,16 +113,10 @@ public class APIManager {
                 }
                 //System.out.println("Call for " + isoCountry.name() + " ending now " + LocalDateTime.now());
             }
-
-            for (Future<String> future : futureCoronaData){
-                String currentString = future.get();
+            for (int i = 0; i < futureCoronaData.size(); i++){
+                String currentString = futureCoronaData.get(i).get();
                 Country country = StringToCountryParser.parseFromHeroOneCountry(currentString);
-                for (Future<Country> countryFuture: futurePopData) {
-                    Country country1 = countryFuture.get();
-                    if(country1.getName().equals(country.getName())){
-                        country.setPopulation(country1.getPopulation());
-                    }
-                }
+                country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
         } else {
