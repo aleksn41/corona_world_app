@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.datastructure.ChartType;
@@ -43,6 +44,7 @@ public class StatisticCallDataManager {
     private Enum64BitEncoder<ChartType> chartTypeEnum64BitEncoder;
     private final File fileWhereDataIsToBeSaved;
     private final ExecutorService executorService;
+    private long currentPositionOnFile;
     public boolean readAllAvailableData = false;
 
     //TODO check if Data is corrupted
@@ -58,6 +60,7 @@ public class StatisticCallDataManager {
 
     private void init() throws IOException {
         readAllAvailableData = fileWhereDataIsToBeSaved.createNewFile() || fileWhereDataIsToBeSaved.length() == 0;
+        currentPositionOnFile=readAllAvailableData?0:fileWhereDataIsToBeSaved.length()-(MAX_SIZE_ITEM+1)-1;
         isoCountryEnum64BitEncoder = new Enum64BitEncoder<>(ISOCountry.class);
         criteriaEnum64BitEncoder = new Enum64BitEncoder<>(Criteria.class);
         chartTypeEnum64BitEncoder = new Enum64BitEncoder<>(ChartType.class);
@@ -72,8 +75,9 @@ public class StatisticCallDataManager {
             if (readAllAvailableData) return true;
             List<Pair<StatisticCall, Boolean>> itemsToAddToData = new ArrayList<>(LINES_READ_PER_REQUEST);
             byte[] buffer =new byte[MAX_SIZE_ITEM];
+            //TODO not reading correctly (beginning is missing)
             try (RandomAccessFile r = new RandomAccessFile(fileWhereDataIsToBeSaved,"r")) {
-                r.seek(r.length()-(MAX_SIZE_ITEM+1));
+                r.seek(currentPositionOnFile);
                 for (int i = 0; i < LINES_READ_PER_REQUEST; i++) {
                     int success=r.read(buffer);
                     Log.d(this.getClass().getName(),"amount of bytes read: "+success);
@@ -83,7 +87,8 @@ public class StatisticCallDataManager {
                     }
                     r.readByte();
                     itemsToAddToData.add(Pair.create(parseData(new String(buffer, StandardCharsets.UTF_8)), isFavourite));
-                    r.seek(r.getFilePointer()-2*(MAX_SIZE_ITEM+1));
+                    currentPositionOnFile-=(MAX_SIZE_ITEM+1);
+                    r.seek(currentPositionOnFile);
                 }
             } catch (IOException|DataException e) {
                 Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
@@ -129,7 +134,8 @@ public class StatisticCallDataManager {
                     Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
                     return false;
                 }
-                statisticCallData.getValue().addAll(calls.parallelStream().map(x->new Pair<>(x,isFavourite)).collect(Collectors.toList()));
+                //TODO reverse
+                Objects.requireNonNull(statisticCallData.getValue()).addAll(calls.parallelStream().map(x->new Pair<>(x,isFavourite)).collect(Collectors.toList()));
                 statisticCallData.postValue(statisticCallData.getValue());
                 return true;
             }
@@ -142,10 +148,10 @@ public class StatisticCallDataManager {
     }
 
     private StatisticCall parseData(String s) throws DataException {
-        String[] categories = s.split(String.valueOf(CATEGORY_SEPARATOR));
-        List<ISOCountry> decodedISOCountries = isoCountryEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[0].split(String.valueOf(ITEM_SEPARATOR))));
-        List<Criteria> decodedCriteria = criteriaEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[1].split(String.valueOf(ITEM_SEPARATOR))));
-        List<ChartType> decodedChartType = chartTypeEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[2].split(String.valueOf(ITEM_SEPARATOR))));
+        String[] categories = s.split(Pattern.quote(String.valueOf(CATEGORY_SEPARATOR)));
+        List<ISOCountry> decodedISOCountries = isoCountryEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[0].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
+        List<Criteria> decodedCriteria = criteriaEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[1].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
+        List<ChartType> decodedChartType = chartTypeEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[2].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         return new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria);
     }
 
