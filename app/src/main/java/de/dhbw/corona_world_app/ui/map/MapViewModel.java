@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.map.MapData;
@@ -22,13 +23,13 @@ public class MapViewModel extends ViewModel {
 
     private MutableLiveData<List<Country>> countryList;
 
-    public MapViewModel() {
+    public MapViewModel() throws Throwable {
         manager = new APIManager(false,false);
         services = new MapData();
         mText = new MutableLiveData<>();
         mText.setValue("World Map");
         countryList = new MutableLiveData<>();
-        countryList.setValue(manager.getDataWorld());
+        countryList.setValue(manager.getDataWorld(API.HEROKU));
     }
 
     public String getWebViewString(){
@@ -51,8 +52,8 @@ public class MapViewModel extends ViewModel {
         return mText;
     }
 
-    public LiveData<List<Country>> getReloadCountryList(){
-        countryList.setValue(manager.getDataWorld());
+    public LiveData<List<Country>> getReloadCountryList() throws Throwable {
+        countryList.setValue(manager.getDataWorld(API.HEROKU));
         return countryList;
     }
 
