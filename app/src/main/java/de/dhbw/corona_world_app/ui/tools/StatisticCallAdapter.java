@@ -1,7 +1,7 @@
 package de.dhbw.corona_world_app.ui.tools;
 
 import android.util.Log;
-import android.util.Pair;
+import androidx.core.util.Pair;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;

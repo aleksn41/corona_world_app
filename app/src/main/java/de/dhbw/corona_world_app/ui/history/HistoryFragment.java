@@ -1,6 +1,6 @@
 package de.dhbw.corona_world_app.ui.history;
 
-import android.util.Pair;
+import androidx.core.util.Pair;
 
 import java.util.Collections;
 import java.util.LinkedList;
