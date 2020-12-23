@@ -6,6 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +39,7 @@ public class StatisticCallDataManagerTest {
     static StatisticCallDataManager test;
 
     static ExecutorService executorService;
-    private static final int RANDOM_ITEMS_GENERATED = 3;
+    private static final int RANDOM_ITEMS_GENERATED = 10;
     static List<StatisticCall> testItems;
     static File f;
     private static final boolean FAVOURITE = false;
@@ -81,19 +83,18 @@ public class StatisticCallDataManagerTest {
         System.out.println("@Test1");
         //listen to liveData, and look if the change is what it should do
         final boolean[] firstTime = {true};
-        test.statisticCallData.observeForever(new Observer<List<Pair<StatisticCall, Boolean>>>() {
-            @Override
-            public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
-                if(!firstTime[0]) {
-                    assertEquals(pairs.size(), testItems.size());
-                    //check that every item is equal
-                    for (int i = 0; i < testItems.size(); i++) {
-                        assertEquals(testItems.get(i), pairs.get(i).first);
-                    }
+        Observer<List<Pair<StatisticCall, Boolean>>> temp= pairs -> {
+            if(!firstTime[0]) {
+                assertEquals(pairs.size(), testItems.size());
+                //check that every item is equal
+                //new items are inserted in front of the live data in reverse Order (first item is the newest one)
+                for (int i = 0; i < testItems.size(); i++) {
+                    assertEquals(testItems.get(i), pairs.get(testItems.size()-i-1).first);
                 }
-                else firstTime[0] =false;
             }
-        });
+            else firstTime[0] =false;
+        };
+        test.statisticCallData.observeForever(temp);
 
         //writing new Data
         Future<Boolean> success = test.addData(testItems);
@@ -107,12 +108,30 @@ public class StatisticCallDataManagerTest {
         if (f.length() == (MAX_SIZE_ITEM + 1) * RANDOM_ITEMS_GENERATED) {
             fail("Either writing or padding of items has failed");
         }
+        test.statisticCallData.removeObserver(temp);
         System.out.println("@Test1 finish");
     }
 
     @Test
-    public void getData() {
+    public void getData() throws IOException {
         System.out.println("@Test2");
+        test=new StatisticCallDataManager(executorService,f,FAVOURITE);
+
+        final boolean[] firstTime = {true};
+        Observer<List<Pair<StatisticCall, Boolean>>> temp= pairs -> {
+            if(!firstTime[0]) {
+                assertEquals(pairs.size(), testItems.size());
+                //check that every item is equal
+                //new items are inserted in front of the live data in reverse Order (first item is the newest one)
+                for (int i = 0; i < testItems.size(); i++) {
+                    assertEquals(testItems.get(i), pairs.get(testItems.size()-i-1).first);
+                }
+            }
+            else firstTime[0] =false;
+        };
+        test.statisticCallData.observeForever(temp);
+
+
         Future<Boolean> success = test.requestMoreData();
         try {
             if (!success.get()) fail("Data is corrupt");
@@ -121,9 +140,9 @@ public class StatisticCallDataManagerTest {
             fail();
         }
         //check if decoded Data is equal to Original Data
-        for (int i = 0; i < testItems.size(); ++i) {
-            assertEquals(Pair.create(testItems.get(i), FAVOURITE), test.statisticCallData.getValue().get(i));
-        }
+        assertEquals(testItems.size(),test.statisticCallData.getValue().size());
+        test.statisticCallData.removeObserver(temp);
+
         System.out.println("@Test2 finish");
     }
 
@@ -137,7 +156,7 @@ public class StatisticCallDataManagerTest {
     @AfterClass
     public static void deleteFile() {
         System.out.println("@AfterClass");
-        if (!f.delete()) fail("could not delete File");
+        //if (!f.delete()) fail("could not delete File");
         System.out.println("@AfterClass finish");
     }
 

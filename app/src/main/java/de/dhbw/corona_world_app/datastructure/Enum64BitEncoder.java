@@ -55,7 +55,7 @@ public class Enum64BitEncoder<T extends Enum<T>> {
         int res = 0;
         for (int i = 0; i < s.length()-1; i++) {
             if (s.charAt(i) < DIGITS[0] || s.charAt(i) > DIGITS[BITS - 1])
-                throw new DataException("encoded String has character not in base");
+                throw new DataException("encoded String has character not in base: "+s.charAt(i));
             res += s.charAt(i) - DIGITS[0];
             res *= BITS;
         }

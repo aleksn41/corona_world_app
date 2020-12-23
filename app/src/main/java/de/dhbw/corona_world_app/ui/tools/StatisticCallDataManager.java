@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.tools;
 
 import androidx.core.util.Pair;
+
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.datastructure.ChartType;
@@ -33,9 +36,9 @@ public class StatisticCallDataManager {
     private static final char ITEM_SEPARATOR = ',';
     private static final char CATEGORY_SEPARATOR = '|';
     private static final int LINES_READ_PER_REQUEST = 40;
-    private static final char PADDING_CHAR='.';
+    private static final char PADDING_CHAR = '.';
     //TODO this is not accurate, fix later
-    private static final int MAX_SIZE_ITEM=700;
+    private static final int MAX_SIZE_ITEM = 700;
 
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallData;
     private final boolean isFavourite;
@@ -49,7 +52,8 @@ public class StatisticCallDataManager {
 
     //TODO check if Data is corrupted
     public StatisticCallDataManager(@NonNull ExecutorService executorService, @NonNull File fileWhereDataIsToBeSaved, boolean isFavourite) throws IOException {
-        if (fileWhereDataIsToBeSaved.isDirectory()) throw new IllegalArgumentException("can not save data in a directory");
+        if (fileWhereDataIsToBeSaved.isDirectory())
+            throw new IllegalArgumentException("can not save data in a directory");
         this.statisticCallData = new MutableLiveData<>();
         this.statisticCallData.setValue(new ArrayList<>());
         this.isFavourite = isFavourite;
@@ -60,46 +64,49 @@ public class StatisticCallDataManager {
 
     private void init() throws IOException {
         readAllAvailableData = fileWhereDataIsToBeSaved.createNewFile() || fileWhereDataIsToBeSaved.length() == 0;
-        currentPositionOnFile=readAllAvailableData?0:fileWhereDataIsToBeSaved.length()-(MAX_SIZE_ITEM+1)-1;
+        if(fileWhereDataIsToBeSaved.length()%(MAX_SIZE_ITEM + System.lineSeparator().length())!=0)throw new DataException("File does not have expected Format");
+        currentPositionOnFile = readAllAvailableData ? 0 : fileWhereDataIsToBeSaved.length() - (MAX_SIZE_ITEM + System.lineSeparator().length());
         isoCountryEnum64BitEncoder = new Enum64BitEncoder<>(ISOCountry.class);
         criteriaEnum64BitEncoder = new Enum64BitEncoder<>(Criteria.class);
         chartTypeEnum64BitEncoder = new Enum64BitEncoder<>(ChartType.class);
     }
 
     //TODO optimize for case if user goes out of tabs and reloads already loaded data
-    //TODO save position
+    //TODO if padding has more Characters than the information most of the time reverse Algorithm that finds the beginning of the padding
     //reading file in reverse
     public Future<Boolean> requestMoreData() {
-        Log.v(this.getClass().getName(),"loading more Data");
+        Log.v(this.getClass().getName(), "loading more Data");
         return executorService.submit(() -> {
             if (readAllAvailableData) return true;
             List<Pair<StatisticCall, Boolean>> itemsToAddToData = new ArrayList<>(LINES_READ_PER_REQUEST);
-            byte[] buffer =new byte[MAX_SIZE_ITEM];
+            byte[] buffer = new byte[MAX_SIZE_ITEM + System.lineSeparator().length()];
             //TODO not reading correctly (beginning is missing)
-            try (RandomAccessFile r = new RandomAccessFile(fileWhereDataIsToBeSaved,"r")) {
-                r.seek(currentPositionOnFile);
+            try (RandomAccessFile r = new RandomAccessFile(fileWhereDataIsToBeSaved, "r")) {
                 for (int i = 0; i < LINES_READ_PER_REQUEST; i++) {
-                    int success=r.read(buffer);
-                    Log.d(this.getClass().getName(),"amount of bytes read: "+success);
-                    if(success==-1){
+                    if(currentPositionOnFile<0) {
                         readAllAvailableData=true;
                         break;
                     }
-                    r.readByte();
-                    itemsToAddToData.add(Pair.create(parseData(new String(buffer, StandardCharsets.UTF_8)), isFavourite));
-                    currentPositionOnFile-=(MAX_SIZE_ITEM+1);
                     r.seek(currentPositionOnFile);
+                    int success = r.read(buffer);
+                    Log.d(this.getClass().getName(), "amount of bytes read: " + success);
+                    int positionOfStringWithoutPadding = getStartingPositionOfPadding(buffer);
+                    if (positionOfStringWithoutPadding == 0)
+                        throw new DataException("Line in Data consists only of Padding");
+                    itemsToAddToData.add(Pair.create(parseData(new String(buffer, 0, positionOfStringWithoutPadding, StandardCharsets.UTF_8)), isFavourite));
+                    currentPositionOnFile -= (MAX_SIZE_ITEM + System.lineSeparator().length());
                 }
-            } catch (IOException|DataException e) {
+            } catch (IOException | DataException e) {
                 Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
                 return false;
             }
             Objects.requireNonNull(statisticCallData.getValue()).addAll(itemsToAddToData);
             statisticCallData.postValue(statisticCallData.getValue());
-            Log.v(this.getClass().getName(),"Data has been successfully loaded");
+            Log.v(this.getClass().getName(), "Data has been successfully loaded");
             return true;
         });
     }
+
 
     //TODO if an error occurs, undo everything
     //TODO check if space is available before and request if necessary
@@ -110,7 +117,7 @@ public class StatisticCallDataManager {
         return executorService.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() {
-                try(FileWriter writer = new FileWriter(fileWhereDataIsToBeSaved, true)) {
+                try (FileWriter writer = new FileWriter(fileWhereDataIsToBeSaved, true)) {
                     //TODO replace with constants
                     StringBuilder stringToWrite = new StringBuilder(2 + (4 * 10) + (2 * 4) + 1);
                     List<String> temp;
@@ -125,7 +132,7 @@ public class StatisticCallDataManager {
                         stringToWrite.append(CATEGORY_SEPARATOR);
 
                         stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(calls.get(i).getCharttype())).get(0));
-                        stringToWrite.append(createPaddingString(MAX_SIZE_ITEM-stringToWrite.length()));
+                        stringToWrite.append(createPaddingString(MAX_SIZE_ITEM - stringToWrite.length()));
                         stringToWrite.append(System.lineSeparator());
                         writer.write(stringToWrite.toString());
                         stringToWrite.setLength(0);
@@ -135,7 +142,13 @@ public class StatisticCallDataManager {
                     return false;
                 }
                 //TODO reverse
-                Objects.requireNonNull(statisticCallData.getValue()).addAll(calls.parallelStream().map(x->new Pair<>(x,isFavourite)).collect(Collectors.toList()));
+                Objects.requireNonNull(statisticCallData.getValue()).addAll(calls.parallelStream().map(x -> new Pair<>(x, isFavourite)).collect(Collector.of(
+                        ArrayDeque::new,
+                        ArrayDeque::addFirst,
+                        (d1, d2) -> {
+                            d2.addAll(d1);
+                            return d2;
+                        })));
                 statisticCallData.postValue(statisticCallData.getValue());
                 return true;
             }
@@ -166,12 +179,17 @@ public class StatisticCallDataManager {
     }
 
     private String createPaddingString(int len) {
-        char[] s=new char[len];
+        char[] s = new char[len];
         for (int i = 0; i < len; i++) {
-            s[i]=PADDING_CHAR;
+            s[i] = PADDING_CHAR;
         }
         return new String(s);
     }
 
-
+    private int getStartingPositionOfPadding(byte[] buffer) {
+        for (int i = buffer.length - 1 - System.lineSeparator().length(); i >= 0; --i) {
+            if (buffer[i] != PADDING_CHAR) return i + 1;
+        }
+        return 0;
+    }
 }
