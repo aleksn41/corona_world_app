@@ -1,5 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -17,47 +19,39 @@ public class MapViewModel extends ViewModel {
 
     private APIManager manager;
 
-    private MapData services;
+    private MapData services = new MapData();
 
-    private MutableLiveData<String> mText;
+    //private MutableLiveData<String> mText;
 
-    private MutableLiveData<List<Country>> countryList;
+    public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
 
-    public MapViewModel() throws Throwable {
-        manager = new APIManager(false,false);
-        services = new MapData();
-        mText = new MutableLiveData<>();
-        mText.setValue("World Map");
-        countryList = new MutableLiveData<>();
-        countryList.setValue(manager.getDataWorld(API.HEROKU));
+    public void init(){
+        if(services!=null){
+            services = new MapData();
+        }
     }
 
-    public String getWebViewString(){
-        Map<String,Double> countryMap = new HashMap<>();
-        for (Country country:countryList.getValue()) {
-            countryMap.put(country.getName(),country.getPop_inf_ratio());
-        }
-        return services.putEntries(countryMap);
+    public void initCountryList() throws Throwable {
+        manager = new APIManager(false,false);
+        //mText = new MutableLiveData<>();
+        //mText.postValue("World Map");
+        mCountryList.postValue(manager.getDataWorld(API.HEROKU));
+        //Map<String, Double> countryMap = new HashMap<>();
+        //return services.putEntries(countryMap);
     }
 
     public String getWebViewStringCustom(List<Country> countryList){
         Map<String,Double> countryMap = new HashMap<>();
+        Log.v(this.getClass().getName(),"Putting gotten countries into map");
         for (Country country:countryList) {
-            countryMap.put(country.getName(),country.getPop_inf_ratio());
+            countryMap.put(country.getName(), country.getPop_inf_ratio());
         }
+        Log.v(this.getClass().getName(),"Executing service to build WebViewString");
         return services.putEntries(countryMap);
     }
 
-    public LiveData<String> getText() {
-        return mText;
-    }
+   // public LiveData<String> getText() {
+   //     return mText;
+   // }
 
-    public LiveData<List<Country>> getReloadCountryList() throws Throwable {
-        countryList.setValue(manager.getDataWorld(API.HEROKU));
-        return countryList;
-    }
-
-    public LiveData<List<Country>> getCountryList(){
-        return countryList;
-    }
 }

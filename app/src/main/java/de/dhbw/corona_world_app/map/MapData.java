@@ -1,5 +1,8 @@
 package de.dhbw.corona_world_app.map;
 
+import android.util.Base64;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,7 +14,7 @@ public class MapData {
             "\t\t<title>World Map</title>\n" +
             "\t\t<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>\n" +
             "\t\t<script type=\"text/javascript\">\n" +
-            "\t\t\tgoogle.charts.load('current', {\n" +
+            "\t\t\tgoogle.charts.load('visualization', {\n" +
             "\t\t\t  'packages':['geochart'],\n" +
             "\t\t\t  // Note: you will need to get a mapsApiKey for your project.\n" +
             "\t\t\t  // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings\n" +
@@ -39,7 +42,8 @@ public class MapData {
             "\t\t</script>\n" +
             "\t</head>\n" +
             "\t<body>\n" +
-            "\t\t<div id=\"geochart-colors\" style=\"width: 100%; height: 100%;\"></div>\n" +
+                    "\t<h1>World Map</h1>" +
+            "\t\t<div id=\"geochart-colors\" style=\"width: 900px; height: 500px;\"></div>\n" +
             "\t</body>\n" +
             "</html>";
 
@@ -47,12 +51,15 @@ public class MapData {
                 return WebViewStart + ",[" + countryName + "," + infected_healthy_ratio + "]" + WebViewEnd;
             }
 
-            public String putEntries(Map<String,Double> entryMap){
-                List<Map.Entry<String,Double>> entryList = entryMap.entrySet().stream().collect(Collectors.toList());
+            //todo use StringBuilder
+            public String putEntries(Map<String, Double> entryMap){
+                List<Map.Entry<String,Double>> entryList = new ArrayList<>(entryMap.entrySet());
                 String returnString = "";
                 for (Map.Entry<String,Double> entry: entryList) {
                     returnString += ",['"+entry.getKey()+"',"+entry.getValue()+"]";
                 }
-                return WebViewStart + returnString + WebViewEnd;
+                //System.out.println("Return="+returnString);
+                return Base64.encodeToString((WebViewStart + returnString + WebViewEnd).getBytes(), Base64.NO_PADDING);
+                //return WebViewStart + ",['Germany',100]" + WebViewEnd;
             }
 }
