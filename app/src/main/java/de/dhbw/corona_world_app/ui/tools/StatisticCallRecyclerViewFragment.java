@@ -43,7 +43,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         }, new StatisticCallDeleteInterface() {
             @Override
             public void enterDeleteMode(ActionMode.Callback callback) {
-                Log.v(this.getClass().getName(),"entering Delete Mode for favourite Items");
+                Log.v(this.getClass().getName(),"entering Delete Mode");
                 deleteMode =requireActivity().startActionMode(callback);
             }
 
@@ -56,7 +56,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel.mStatisticCallsAndMark.observe(getViewLifecycleOwner(), pairs -> {
             statisticCallAdapter.submitList(pairs);
             statisticCallAdapter.notifyDataSetChanged();
-            Log.v(this.getClass().getName(),"updated Favourite List");
+            Log.v(this.getClass().getName(),"updated List");
         });
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
         Log.d(this.getClass().getName(),"finished RecycleView");
