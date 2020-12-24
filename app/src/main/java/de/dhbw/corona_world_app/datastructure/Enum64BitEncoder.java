@@ -61,4 +61,8 @@ public class Enum64BitEncoder<T extends Enum<T>> {
         }
         return res+s.charAt(s.length()-1)-DIGITS[0];
     }
+
+    public int getMaxPossibleEncodedStringSize(){
+        return (int)Math.ceil(Math.log(enumConstants.length)/Math.log(BITS));
+    }
 }

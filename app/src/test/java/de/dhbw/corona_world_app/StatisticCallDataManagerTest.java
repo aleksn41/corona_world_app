@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
@@ -41,10 +42,9 @@ public class StatisticCallDataManagerTest {
     static List<StatisticCall> testItems;
     File f;
 
-    //Constants needed to test Class (MAX_SIZE_ITEM must be the same as in the original class, cannot be accessed as it is private)
+    //Constants needed to test Class (test.MAX_SIZE_ITEM must be the same as in the original class, cannot be accessed as it is private)
     private static final int RANDOM_ITEMS_GENERATED = 10;
     private static final boolean FAVOURITE = false;
-    private static final int MAX_SIZE_ITEM = 700;
 
     @Rule
     public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
@@ -57,7 +57,7 @@ public class StatisticCallDataManagerTest {
         testItems = new LinkedList<>();
         Random r = new Random();
         for (int i = 0; i < RANDOM_ITEMS_GENERATED; i++) {
-            int isoCountryItemsSize = r.nextInt(ISOCountry.values().length - 1) + 1;
+            int isoCountryItemsSize = r.nextInt(APIManager.MAX_COUNTRY_LIST_SIZE-1) + 1;
             int criteriaItemsSize = r.nextInt(Criteria.values().length - 1) + 1;
             ChartType temp3 = ChartType.values()[r.nextInt(ChartType.values().length)];
             List<ISOCountry> temp1 = new LinkedList<>(Arrays.asList(ISOCountry.values()).subList(0, isoCountryItemsSize));
@@ -109,7 +109,7 @@ public class StatisticCallDataManagerTest {
             fail();
         }
         //checking if new Data is also written to File
-        if (f.length() == (MAX_SIZE_ITEM + 1) * RANDOM_ITEMS_GENERATED) {
+        if (f.length() == (test.MAX_SIZE_ITEM + 1) * RANDOM_ITEMS_GENERATED) {
             fail("Either writing or padding of items has failed");
         }
         test.statisticCallData.removeObserver(temp);
@@ -146,7 +146,7 @@ public class StatisticCallDataManagerTest {
             fail();
         }
         //check if decoded Data is equal to lines in Files
-        assertEquals(testItems.size(), f.length()/(MAX_SIZE_ITEM+System.lineSeparator().length()));
+        assertEquals(testItems.size(), f.length()/(test.MAX_SIZE_ITEM+System.lineSeparator().length()));
         test.statisticCallData.removeObserver(temp);
     }
 

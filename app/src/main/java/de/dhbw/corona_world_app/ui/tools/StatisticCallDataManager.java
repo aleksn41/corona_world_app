@@ -7,7 +7,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -16,7 +15,6 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -34,6 +32,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.DataException;
@@ -47,8 +46,6 @@ public class StatisticCallDataManager {
     private static final int LINES_READ_PER_REQUEST = 40;
     private static final char PADDING_CHAR = '.';
     private static final String NAME_OF_TEMP_FILE = "_temp";
-    //TODO this is not accurate, fix later
-    private static final int MAX_SIZE_ITEM = 700;
 
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallData;
     private final boolean isFavourite;
@@ -59,6 +56,8 @@ public class StatisticCallDataManager {
     private final ExecutorService executorService;
     private long currentPositionOnFile;
     public boolean readAllAvailableData = false;
+    //technically a constant but dependent on another constant which could change, which is why its dynamically generated
+    public int MAX_SIZE_ITEM;
 
     //TODO check if Data is corrupted
     public StatisticCallDataManager(@NonNull ExecutorService executorService, @NonNull File fileWhereDataIsToBeSaved, boolean isFavourite) throws IOException {
@@ -73,17 +72,20 @@ public class StatisticCallDataManager {
     }
 
     private void init() throws IOException {
-        readAllAvailableData = fileWhereDataIsToBeSaved.createNewFile() || fileWhereDataIsToBeSaved.length() == 0;
-        if (fileWhereDataIsToBeSaved.length() % (MAX_SIZE_ITEM + System.lineSeparator().length()) != 0)
-            throw new DataException("File does not have expected Format");
-        currentPositionOnFile = readAllAvailableData ? 0 : fileWhereDataIsToBeSaved.length() - (MAX_SIZE_ITEM + System.lineSeparator().length());
         isoCountryEnum64BitEncoder = new Enum64BitEncoder<>(ISOCountry.class);
         criteriaEnum64BitEncoder = new Enum64BitEncoder<>(Criteria.class);
         chartTypeEnum64BitEncoder = new Enum64BitEncoder<>(ChartType.class);
+        MAX_SIZE_ITEM = getMaxSizeForItem();
+        readAllAvailableData = fileWhereDataIsToBeSaved.createNewFile() || fileWhereDataIsToBeSaved.length() == 0;
+
+        if (fileWhereDataIsToBeSaved.length() % (MAX_SIZE_ITEM + System.lineSeparator().length()) != 0)
+            throw new DataException("File does not have expected Format");
+        currentPositionOnFile = readAllAvailableData ? 0 : fileWhereDataIsToBeSaved.length() - (MAX_SIZE_ITEM + System.lineSeparator().length());
     }
 
     //TODO optimize for case if user goes out of tabs and reloads already loaded data
     //TODO if padding has more Characters than the information most of the time reverse Algorithm that finds the beginning of the padding
+    //TODO if user corrupts Data may cause an array out of bounds exception
     //reading file in reverse
     public Future<Boolean> requestMoreData() {
         Log.v(this.getClass().getName(), "loading more Data");
@@ -175,7 +177,7 @@ public class StatisticCallDataManager {
             @Override
             public Boolean call() throws ExecutionException, InterruptedException {
                 int linesInCurrentFile = (int) fileWhereDataIsToBeSaved.length() / (MAX_SIZE_ITEM + System.lineSeparator().length());
-                if(indices.size()==linesInCurrentFile) return deleteAllData().get();
+                if (indices.size() == linesInCurrentFile) return deleteAllData().get();
                 File temp = new File(fileWhereDataIsToBeSaved + NAME_OF_TEMP_FILE);
                 try {
                     if (!temp.createNewFile()) {
@@ -246,6 +248,11 @@ public class StatisticCallDataManager {
         List<Criteria> decodedCriteria = criteriaEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[1].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         List<ChartType> decodedChartType = chartTypeEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[2].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         return new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria);
+    }
+
+    //returns the maximum size a String representing an Item can have (excludes lineSeparator)
+    private int getMaxSizeForItem() {
+        return (isoCountryEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * APIManager.MAX_COUNTRY_LIST_SIZE + chartTypeEnum64BitEncoder.getMaxPossibleEncodedStringSize() + (criteriaEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * Criteria.values().length;
     }
 
     private String listOfStringToString(List<String> list) {
