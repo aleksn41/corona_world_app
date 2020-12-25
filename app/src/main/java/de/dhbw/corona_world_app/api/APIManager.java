@@ -54,12 +54,12 @@ public class APIManager {
             Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
             for (Country country:returnList) {
-                if(!Mapper.isInBlacklist(country.getName())) {
-                    if (popMap.containsKey(ISOCountry.valueOf(country.getName()))) {
-                        country.setPopulation(popMap.get(ISOCountry.valueOf(country.getName())));
+                if(country.getISOCountry()!=null && !Mapper.isInBlacklist(country.getISOCountry().name())) {
+                    if (popMap.containsKey(country.getISOCountry())) {
+                        country.setPopulation(popMap.get(country.getISOCountry()));
                     } else {
                         cnt += 1;
-                        Logger.logD("APIManager.getDataWorld", "country \"" + country.getName() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                        Logger.logD("APIManager.getDataWorld", "country \"" + country.getISOCountry().name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
                     }
                 }
             }

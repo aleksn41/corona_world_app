@@ -44,7 +44,9 @@ public class MapViewModel extends ViewModel {
         Map<String,Double> countryMap = new HashMap<>();
         Log.v(this.getClass().getName(),"Putting gotten countries into map");
         for (Country country:countryList) {
-            countryMap.put(country.getName(), country.getPop_inf_ratio());
+            if(country.getISOCountry()!=null) {
+                countryMap.put(country.getISOCountry().getISOCode(), country.getPop_inf_ratio());
+            }
         }
         Log.v(this.getClass().getName(),"Executing service to build WebViewString");
         return services.putEntries(countryMap);

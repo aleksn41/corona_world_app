@@ -35,9 +35,10 @@ public class StringToCountryParser {
             switch (tuple[0]) {
                 case"{\"country\"":String normalizedName = Mapper.normalizeCountryName(tuple[1].replace("\"",""));
                                    if(Mapper.isInMap(API.HEROKU,normalizedName)) {
-                                       country.setName(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName).name());
-                                   } else {
-                                       country.setName(normalizedName);
+                                       country.setISOCountry(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName));
+                                   } else if(!Mapper.isInBlacklist(normalizedName)){
+                                       System.out.println(normalizedName);
+                                       country.setISOCountry(ISOCountry.valueOf(normalizedName));
                                    }
                                    break;
                 case"\"deaths\"":country.setDeaths(Integer.parseInt(collectNullToZero(tuple[1])));break;
@@ -65,7 +66,7 @@ public class StringToCountryParser {
     Data can be false, then nothing will be set.
      */
     public static Country parsePopCount(String toParse, String name){
-        Country country = new Country(name);
+        Country country = new Country(ISOCountry.valueOf(name));
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
