@@ -27,7 +27,9 @@ public class MapFragment extends Fragment {
 
     MutableLiveData<String> webViewString = new MutableLiveData<>();
 
-    //todo look after webview -> is not working (maybe webviewclient)
+    //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
+    //todo establish order
+    //todo @Aleks -> insert loading screen to overshadow short white screen
     @SuppressLint("SetJavaScriptEnabled")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(getClass().getName(),"Creating MapFragment view");
