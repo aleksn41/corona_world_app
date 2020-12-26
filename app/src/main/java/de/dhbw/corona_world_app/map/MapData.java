@@ -51,16 +51,13 @@ public class MapData {
                 return WebViewStart + ",[" + countryName + "," + infected_healthy_ratio + "]" + WebViewEnd;
             }
 
-            //todo use StringBuilder
             public String putEntries(Map<String, Double> entryMap){
+                StringBuilder builder = new StringBuilder();
                 List<Map.Entry<String,Double>> entryList = new ArrayList<>(entryMap.entrySet());
-                String returnString = "";
                 for (Map.Entry<String,Double> entry: entryList) {
-                    returnString += ",['"+entry.getKey()+"',"+entry.getValue()+"]";
+                    builder.append(",['"+entry.getKey()+"',"+entry.getValue()+"]");
                 }
-                //System.out.println("Return="+returnString);
-                System.out.println(returnString);
-                return Base64.encodeToString((WebViewStart + returnString + WebViewEnd).getBytes(), Base64.NO_PADDING);
-                //return WebViewStart + ",['Germany',100]" + WebViewEnd;
+
+                return Base64.encodeToString((WebViewStart + builder.toString() + WebViewEnd).getBytes(), Base64.NO_PADDING);
             }
 }
