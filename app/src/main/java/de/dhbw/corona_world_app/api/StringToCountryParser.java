@@ -1,5 +1,7 @@
 package de.dhbw.corona_world_app.api;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -13,6 +15,8 @@ import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class StringToCountryParser {
+
+    private static final String TAG = StringToCountryParser.class.getSimpleName();
 
     public static Country parseFromHeroOneCountry(String toParse, Country country){
         String[] splitArray = toParse.split(",");
@@ -34,10 +38,9 @@ public class StringToCountryParser {
             String[] tuple = string.split(":");
             switch (tuple[0]) {
                 case"{\"country\"":String normalizedName = Mapper.normalizeCountryName(tuple[1].replace("\"",""));
-                                   if(Mapper.isInMap(API.HEROKU,normalizedName)) {
+                                   if(Mapper.isInMap(API.HEROKU, normalizedName)) {
                                        country.setISOCountry(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName));
                                    } else if(!Mapper.isInBlacklist(normalizedName)){
-                                       System.out.println(normalizedName);
                                        country.setISOCountry(ISOCountry.valueOf(normalizedName));
                                    }
                                    break;
@@ -50,6 +53,7 @@ public class StringToCountryParser {
     }
 
     public static List<Country> parseFromHeroMultiCountry(String toParse){
+        Log.v(TAG, "Parsing multiple countries from api "+API.HEROKU.getName()+"...");
         List<Country> countryList = new LinkedList<>();
         try {
             JSONArray jsonArray = new JSONArray(toParse);
@@ -57,8 +61,9 @@ public class StringToCountryParser {
                 countryList.add(parseFromHeroOneCountry(jsonArray.get(i).toString()));
             }
         } catch (JSONException e) {
-            Logger.logE("ParsingException","Error parsing JSON: "+e);
+            Logger.logE(TAG, "Error parsing JSON: "+e);
         }
+        Log.v(TAG, "Finished parsing multiple countries from "+API.HEROKU.getName()+"!");
         return countryList;
     }
 
@@ -78,6 +83,7 @@ public class StringToCountryParser {
     }
 
     public static Map<ISOCountry, Long> parseMultiPopCount(String toParse) throws JSONException {
+        Log.v(TAG,"Parsing multiple population counts of countries from String...");
         Map<ISOCountry, Long> returnMap = new HashMap<>();
         JSONArray jsonArray = new JSONArray(toParse);
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -91,6 +97,7 @@ public class StringToCountryParser {
                 }
             }
         }
+        Log.v(TAG,"Finished parsing the population count from String!");
         return returnMap;
     }
 

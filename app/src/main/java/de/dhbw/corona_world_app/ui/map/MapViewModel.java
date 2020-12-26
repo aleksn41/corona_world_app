@@ -17,6 +17,8 @@ import de.dhbw.corona_world_app.map.MapData;
 
 public class MapViewModel extends ViewModel {
 
+    private static final String TAG = MapViewModel.class.getSimpleName();
+
     private APIManager manager;
 
     private MapData services = new MapData();
@@ -42,13 +44,15 @@ public class MapViewModel extends ViewModel {
 
     public String getWebViewStringCustom(List<Country> countryList){
         Map<String,Double> countryMap = new HashMap<>();
-        Log.v(this.getClass().getName(),"Putting gotten countries into map");
+        Log.v(TAG,"Putting gotten countries into map...");
+        int cnt = 0;
         for (Country country:countryList) {
             if(country.getISOCountry()!=null) {
+                cnt++;
                 countryMap.put(country.getISOCountry().getISOCode(), country.getPop_inf_ratio());
             }
         }
-        Log.v(this.getClass().getName(),"Executing service to build WebViewString");
+        Log.v(TAG,"Finished constructing map of size "+cnt+"!\nExecuting service to build WebViewString...");
         return services.putEntries(countryMap);
     }
 

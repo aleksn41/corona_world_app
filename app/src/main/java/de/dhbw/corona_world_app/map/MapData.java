@@ -30,14 +30,14 @@ public class MapData {
             String WebViewEnd = "\t\t\t  ]);\n" +
             "\t\t\t\n" +
             "\t\t\t  var options = {\n" +
-            "\t\t\t    colorAxis: {colors: ['#00853f', 'black', '#e31b23']},\n" +
+            "\t\t\t    colorAxis: {colors: ['#00853f', '#e31b23']},\n" +
             "\t\t\t    backgroundColor: '#81d4fa',\n" +
             "\t\t\t    datalessRegionColor: '#f8bbd0',\n" +
             "\t\t\t    defaultColor: '#f5f5f5',\n" +
             "\t\t\t  };\n" +
             "\t\t\t\n" +
             "\t\t\t  var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));\n" +
-            "\t\t\t  chart.draw(data);\n" +
+            "\t\t\t  chart.draw(data, options);\n" +
             "\t\t\t};\n" +
             "\t\t</script>\n" +
             "\t</head>\n" +
@@ -59,6 +59,7 @@ public class MapData {
                     returnString += ",['"+entry.getKey()+"',"+entry.getValue()+"]";
                 }
                 //System.out.println("Return="+returnString);
+                System.out.println(returnString);
                 return Base64.encodeToString((WebViewStart + returnString + WebViewEnd).getBytes(), Base64.NO_PADDING);
                 //return WebViewStart + ",['Germany',100]" + WebViewEnd;
             }
