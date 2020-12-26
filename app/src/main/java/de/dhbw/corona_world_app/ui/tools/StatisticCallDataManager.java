@@ -60,7 +60,7 @@ public class StatisticCallDataManager {
     public int MAX_SIZE_ITEM;
 
     //TODO check if Data is corrupted
-    public StatisticCallDataManager(@NonNull ExecutorService executorService, @NonNull File fileWhereDataIsToBeSaved, boolean isFavourite) throws IOException {
+    public StatisticCallDataManager(@NonNull ExecutorService executorService, @NonNull File fileWhereDataIsToBeSaved, boolean isFavourite) throws IOException, DataException {
         if (fileWhereDataIsToBeSaved.isDirectory())
             throw new IllegalArgumentException("can not save data in a directory");
         this.statisticCallData = new MutableLiveData<>();
@@ -71,7 +71,7 @@ public class StatisticCallDataManager {
         init();
     }
 
-    private void init() throws IOException {
+    private void init() throws IOException, DataException {
         isoCountryEnum64BitEncoder = new Enum64BitEncoder<>(ISOCountry.class);
         criteriaEnum64BitEncoder = new Enum64BitEncoder<>(Criteria.class);
         chartTypeEnum64BitEncoder = new Enum64BitEncoder<>(ChartType.class);
@@ -87,36 +87,41 @@ public class StatisticCallDataManager {
     //TODO if padding has more Characters than the information most of the time reverse Algorithm that finds the beginning of the padding
     //TODO if user corrupts Data may cause an array out of bounds exception
     //reading file in reverse
-    public Future<Boolean> requestMoreData() {
+
+    /**
+     * @return
+     * @throws IOException
+     * @throws DataException
+     */
+    public Future<Void> requestMoreData() {
         Log.v(this.getClass().getName(), "loading more Data");
-        return executorService.submit(() -> {
-            if (readAllAvailableData) return true;
-            List<Pair<StatisticCall, Boolean>> itemsToAddToData = new ArrayList<>(LINES_READ_PER_REQUEST);
-            byte[] buffer = new byte[MAX_SIZE_ITEM + System.lineSeparator().length()];
-            //TODO not reading correctly (beginning is missing)
-            try (RandomAccessFile r = new RandomAccessFile(fileWhereDataIsToBeSaved, "r")) {
-                for (int i = 0; i < LINES_READ_PER_REQUEST; i++) {
-                    if (currentPositionOnFile < 0) {
-                        readAllAvailableData = true;
-                        break;
+        return executorService.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                if (readAllAvailableData) return null;
+                List<Pair<StatisticCall, Boolean>> itemsToAddToData = new ArrayList<>(LINES_READ_PER_REQUEST);
+                byte[] buffer = new byte[MAX_SIZE_ITEM + System.lineSeparator().length()];
+                try (RandomAccessFile r = new RandomAccessFile(fileWhereDataIsToBeSaved, "r")) {
+                    for (int i = 0; i < LINES_READ_PER_REQUEST; i++) {
+                        if (currentPositionOnFile < 0) {
+                            readAllAvailableData = true;
+                            break;
+                        }
+                        r.seek(currentPositionOnFile);
+                        int success = r.read(buffer);
+                        Log.d(this.getClass().getName(), "amount of bytes read: " + success);
+                        int positionOfStringWithoutPadding = getStartingPositionOfPadding(buffer);
+                        if (positionOfStringWithoutPadding == 0)
+                            throw new DataException("Line in Data consists only of Padding");
+                        itemsToAddToData.add(Pair.create(parseData(new String(buffer, 0, positionOfStringWithoutPadding, StandardCharsets.UTF_8)), isFavourite));
+                        currentPositionOnFile -= (MAX_SIZE_ITEM + System.lineSeparator().length());
                     }
-                    r.seek(currentPositionOnFile);
-                    int success = r.read(buffer);
-                    Log.d(this.getClass().getName(), "amount of bytes read: " + success);
-                    int positionOfStringWithoutPadding = getStartingPositionOfPadding(buffer);
-                    if (positionOfStringWithoutPadding == 0)
-                        throw new DataException("Line in Data consists only of Padding");
-                    itemsToAddToData.add(Pair.create(parseData(new String(buffer, 0, positionOfStringWithoutPadding, StandardCharsets.UTF_8)), isFavourite));
-                    currentPositionOnFile -= (MAX_SIZE_ITEM + System.lineSeparator().length());
                 }
-            } catch (IOException | DataException e) {
-                Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
-                return false;
+                Objects.requireNonNull(statisticCallData.getValue()).addAll(itemsToAddToData);
+                statisticCallData.postValue(statisticCallData.getValue());
+                Log.v(this.getClass().getName(), "Data has been successfully loaded");
+                return null;
             }
-            Objects.requireNonNull(statisticCallData.getValue()).addAll(itemsToAddToData);
-            statisticCallData.postValue(statisticCallData.getValue());
-            Log.v(this.getClass().getName(), "Data has been successfully loaded");
-            return true;
         });
     }
 
@@ -126,45 +131,45 @@ public class StatisticCallDataManager {
     //TODO if memory usage is too high remove padding (costs more time if no padding exists)
     //TODO only a maximum Number of MAX_SIZE entries
     //REQUIREMENT: first item is oldest
-    public Future<Boolean> addData(List<StatisticCall> calls) {
-        return executorService.submit(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                try (FileWriter writer = new FileWriter(fileWhereDataIsToBeSaved, true)) {
-                    //TODO replace with constants
-                    StringBuilder stringToWrite = new StringBuilder(2 + (4 * 10) + (2 * 4) + 1);
-                    List<String> temp;
-                    for (int i = 0; i < calls.size(); i++) {
 
-                        temp = isoCountryEnum64BitEncoder.encodeListOfEnums(calls.get(i).getCountryList());
-                        stringToWrite.append(listOfStringToString(temp));
-                        stringToWrite.append(CATEGORY_SEPARATOR);
+    /**
+     * @param calls
+     * @return
+     * @throws IOException
+     */
+    public Future<Void> addData(List<StatisticCall> calls) {
+        return executorService.submit((Callable<Void>) () -> {
+            try (FileWriter writer = new FileWriter(fileWhereDataIsToBeSaved, true)) {
+                //TODO replace with constants
+                StringBuilder stringToWrite = new StringBuilder(2 + (4 * 10) + (2 * 4) + 1);
+                List<String> temp;
+                for (int i = 0; i < calls.size(); i++) {
 
-                        temp = criteriaEnum64BitEncoder.encodeListOfEnums(calls.get(i).getCriteriaList());
-                        stringToWrite.append(listOfStringToString(temp));
-                        stringToWrite.append(CATEGORY_SEPARATOR);
+                    temp = isoCountryEnum64BitEncoder.encodeListOfEnums(calls.get(i).getCountryList());
+                    stringToWrite.append(listOfStringToString(temp));
+                    stringToWrite.append(CATEGORY_SEPARATOR);
 
-                        stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(calls.get(i).getCharttype())).get(0));
-                        stringToWrite.append(createPaddingString(MAX_SIZE_ITEM - stringToWrite.length()));
-                        stringToWrite.append(System.lineSeparator());
-                        writer.write(stringToWrite.toString());
-                        stringToWrite.setLength(0);
-                    }
-                } catch (IOException e) {
-                    Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
-                    return false;
+                    temp = criteriaEnum64BitEncoder.encodeListOfEnums(calls.get(i).getCriteriaList());
+                    stringToWrite.append(listOfStringToString(temp));
+                    stringToWrite.append(CATEGORY_SEPARATOR);
+
+                    stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(calls.get(i).getCharttype())).get(0));
+                    stringToWrite.append(createPaddingString(MAX_SIZE_ITEM - stringToWrite.length()));
+                    stringToWrite.append(System.lineSeparator());
+                    writer.write(stringToWrite.toString());
+                    stringToWrite.setLength(0);
                 }
-                //mapping items and reversing List
-                Objects.requireNonNull(statisticCallData.getValue()).addAll(calls.parallelStream().map(x -> new Pair<>(x, isFavourite)).collect(Collector.of(
-                        ArrayDeque::new,
-                        ArrayDeque::addFirst,
-                        (d1, d2) -> {
-                            d2.addAll(d1);
-                            return d2;
-                        })));
-                statisticCallData.postValue(statisticCallData.getValue());
-                return true;
             }
+            //mapping items and reversing List
+            Objects.requireNonNull(statisticCallData.getValue()).addAll(calls.parallelStream().map(x -> new Pair<>(x, isFavourite)).collect(Collector.of(
+                    ArrayDeque::new,
+                    ArrayDeque::addFirst,
+                    (d1, d2) -> {
+                        d2.addAll(d1);
+                        return d2;
+                    })));
+            statisticCallData.postValue(statisticCallData.getValue());
+            return null;
         });
     }
 
@@ -172,73 +177,59 @@ public class StatisticCallDataManager {
     //TODO if slow maybe load lines that are already in ram instead of in file
     //TODO load in chunks if all Data cannot be loaded at once
     //TODO check if input is correct (if necessary)
-    public Future<Boolean> deleteData(Set<Integer> indices) {
-        return executorService.submit(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws ExecutionException, InterruptedException {
-                int linesInCurrentFile = (int) fileWhereDataIsToBeSaved.length() / (MAX_SIZE_ITEM + System.lineSeparator().length());
-                if (indices.size() == linesInCurrentFile) return deleteAllData().get();
-                File temp = new File(fileWhereDataIsToBeSaved + NAME_OF_TEMP_FILE);
-                try {
-                    if (!temp.createNewFile()) {
-                        if (!temp.delete())
-                            throw new IOException("could not create nor delete Temp File");
-                        if (!temp.createNewFile())
-                            throw new IOException("this should not be possible");
-                    }
 
-                } catch (IOException e) {
-                    Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
-                    e.printStackTrace();
-                }
-                try (RandomAccessFile reader = new RandomAccessFile(fileWhereDataIsToBeSaved, "r")) {
-                    byte[] dataOfNewFile = new byte[(MAX_SIZE_ITEM + System.lineSeparator().length()) * (linesInCurrentFile - indices.size())];
-                    int skipped = 0;
-                    for (int i = 0; i < linesInCurrentFile; i++) {
-                        if (indices.contains(linesInCurrentFile - i - 1)) {
-                            skipped += 1;
-                        } else {
-                            reader.seek((MAX_SIZE_ITEM + System.lineSeparator().length()) * (i));
-                            reader.read(dataOfNewFile, (MAX_SIZE_ITEM + System.lineSeparator().length()) * (i - skipped), MAX_SIZE_ITEM + System.lineSeparator().length());
-                        }
-                    }
-                    reader.close();
-                    Files.write(temp.toPath(), dataOfNewFile, StandardOpenOption.WRITE);
-                    if (!fileWhereDataIsToBeSaved.delete()) {
-                        temp.delete();
-                        throw new IOException("could not delete old File");
-                    }
-                    if (!temp.renameTo(fileWhereDataIsToBeSaved)) {
-                        //TODO restore File if this happens
-                        throw new IOException("could not rename temp File");
-                    }
-                    fileWhereDataIsToBeSaved = temp;
-                } catch (IOException e) {
-                    Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
-                    return false;
-                }
-                //remove deleted entries from MutableLiveData and update it
-                statisticCallData.postValue(IntStream.range(0, Objects.requireNonNull(statisticCallData.getValue()).size()).parallel().boxed().filter(o -> !indices.contains(o)).map(i -> statisticCallData.getValue().get(i)).collect(Collectors.toList()));
-                return true;
+    /**
+     * @param indices
+     * @return
+     * @throws IOException
+     */
+    public Future<Void> deleteData(Set<Integer> indices) {
+        return executorService.submit((Callable<Void>) () -> {
+            int linesInCurrentFile = (int) fileWhereDataIsToBeSaved.length() / (MAX_SIZE_ITEM + System.lineSeparator().length());
+            if (indices.size() == linesInCurrentFile) deleteAllData().get();
+            File temp = new File(fileWhereDataIsToBeSaved + NAME_OF_TEMP_FILE);
+            if (!temp.createNewFile()) {
+                if (!temp.delete()) throw new IOException("could not create nor delete Temp File");
+                if (!temp.createNewFile()) throw new IOException("this should not be possible");
             }
+            try (RandomAccessFile reader = new RandomAccessFile(fileWhereDataIsToBeSaved, "r")) {
+                byte[] dataOfNewFile = new byte[(MAX_SIZE_ITEM + System.lineSeparator().length()) * (linesInCurrentFile - indices.size())];
+                int skipped = 0;
+                for (int i = 0; i < linesInCurrentFile; i++) {
+                    if (indices.contains(linesInCurrentFile - i - 1)) {
+                        skipped += 1;
+                    } else {
+                        reader.seek((MAX_SIZE_ITEM + System.lineSeparator().length()) * (i));
+                        reader.read(dataOfNewFile, (MAX_SIZE_ITEM + System.lineSeparator().length()) * (i - skipped), MAX_SIZE_ITEM + System.lineSeparator().length());
+                    }
+                }
+                reader.close();
+                Files.write(temp.toPath(), dataOfNewFile, StandardOpenOption.WRITE);
+                if (!fileWhereDataIsToBeSaved.delete()) {
+                    temp.delete();
+                    throw new IOException("could not delete old File");
+                }
+                if (!temp.renameTo(fileWhereDataIsToBeSaved)) {
+                    //TODO restore File if this happens
+                    throw new IOException("could not rename temp File");
+                }
+                fileWhereDataIsToBeSaved = temp;
+            }
+            //remove deleted entries from MutableLiveData and update it
+            statisticCallData.postValue(IntStream.range(0, Objects.requireNonNull(statisticCallData.getValue()).size()).parallel().boxed().filter(o -> !indices.contains(o)).map(i -> statisticCallData.getValue().get(i)).collect(Collectors.toList()));
+            return null;
         });
     }
 
-    public Future<Boolean> deleteAllData() {
-        return executorService.submit(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                //delete data of File
-                try (FileChannel channel = new FileOutputStream(fileWhereDataIsToBeSaved, true).getChannel()) {
-                    channel.truncate(0);
-                } catch (IOException e) {
-                    Log.e(this.getClass().getName(), Objects.requireNonNull(e.getMessage()));
-                    return false;
-                }
-                //delete Live Data
-                statisticCallData.postValue(new ArrayList<>());
-                return true;
+    public Future<Void> deleteAllData() {
+        return executorService.submit(() -> {
+            //delete data of File
+            try (FileChannel channel = new FileOutputStream(fileWhereDataIsToBeSaved, true).getChannel()) {
+                channel.truncate(0);
             }
+            //delete Live Data
+            statisticCallData.postValue(new ArrayList<>());
+            return null;
         });
     }
 

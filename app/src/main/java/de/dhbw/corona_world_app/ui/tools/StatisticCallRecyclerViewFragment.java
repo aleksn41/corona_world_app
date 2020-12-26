@@ -13,54 +13,59 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 
 import de.dhbw.corona_world_app.R;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
-    private StatisticCallViewModel statisticCallViewModel;
+    protected StatisticCallDataManager statisticCallDataManager;
     protected RecyclerView statisticCallRecyclerView;
     protected StatisticCallAdapter statisticCallAdapter;
     protected RecyclerView.LayoutManager layoutManager;
+    private StatisticCallViewModel statisticCallViewModel;
     private ActionMode deleteMode;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         statisticCallViewModel =
                 new ViewModelProvider(this).get(StatisticCallViewModel.class);
-        Log.d(this.getClass().getName(),"initiate ViewModel Data");
-        initViewModelData(statisticCallViewModel);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
-        statisticCallRecyclerView =root.findViewById(R.id.statisticCallRecyclerView);
-        //TODO read about Saved Instances (sample app)
-        Log.d(this.getClass().getName(),"initiate RecycleView");
-        layoutManager =new LinearLayoutManager(getActivity());
+
+        Log.d(this.getClass().getName(), "initiate ViewModel Data");
+        initViewModelData(statisticCallViewModel);
+
+        Log.d(this.getClass().getName(), "initiate RecycleView");
+        statisticCallRecyclerView = root.findViewById(R.id.statisticCallRecyclerView);
+        layoutManager = new LinearLayoutManager(getActivity());
         statisticCallRecyclerView.setLayoutManager(layoutManager);
         statisticCallRecyclerView.scrollToPosition(0);
-        statisticCallAdapter =new StatisticCallAdapter(itemID -> {
+        statisticCallAdapter = new StatisticCallAdapter(itemID -> {
             statisticCallViewModel.toggleFavMark(itemID);
             Log.d(this.getClass().getName(), "Item " + itemID + " changed");
         }, new StatisticCallDeleteInterface() {
             @Override
             public void enterDeleteMode(ActionMode.Callback callback) {
-                Log.v(this.getClass().getName(),"entering Delete Mode");
-                deleteMode =requireActivity().startActionMode(callback);
+                Log.v(this.getClass().getName(), "entering Delete Mode");
+                deleteMode = requireActivity().startActionMode(callback);
             }
 
             @Override
-            public void deleteItems(ArrayList<Integer> ItemIds) {
-                Log.v(this.getClass().getName(),"deleting selected favourite Items");
+            public void deleteItems(Set<Integer> ItemIds) {
+                Log.v(this.getClass().getName(), "deleting selected favourite Items");
                 statisticCallViewModel.deleteItems(ItemIds);
             }
         });
-        statisticCallViewModel.mStatisticCallsAndMark.observe(getViewLifecycleOwner(), pairs -> {
+        statisticCallViewModel.getMutableData().observe(getViewLifecycleOwner(), pairs -> {
             statisticCallAdapter.submitList(pairs);
             statisticCallAdapter.notifyDataSetChanged();
-            Log.v(this.getClass().getName(),"updated List");
+            Log.v(this.getClass().getName(), "updated List");
         });
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
-        Log.d(this.getClass().getName(),"finished RecycleView");
-        Log.d(this.getClass().getName(),"start Custom OnCreateView Function");
+        Log.d(this.getClass().getName(), "finished RecycleView");
+
+        Log.d(this.getClass().getName(), "start Custom OnCreateView Function");
         setupOnCreateViewAfterInitOfRecyclerView();
         return root;
     }
@@ -68,10 +73,10 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(this.getClass().getName(),"Pausing Fragment");
-        if(deleteMode !=null){
+        Log.d(this.getClass().getName(), "Pausing Fragment");
+        if (deleteMode != null) {
             deleteMode.finish();
-            deleteMode =null;
+            deleteMode = null;
         }
     }
 

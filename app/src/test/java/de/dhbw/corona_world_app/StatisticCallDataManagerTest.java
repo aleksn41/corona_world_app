@@ -83,7 +83,7 @@ public class StatisticCallDataManagerTest {
     }
 
     @Test
-    public void addData_isCorrect() {
+    public void addData_isCorrect() throws ExecutionException, InterruptedException {
         //listen to liveData, and look if the change is what it should do
         //need first time variable as Observer is triggered when its added
         final boolean[] firstTime = {true};
@@ -101,13 +101,7 @@ public class StatisticCallDataManagerTest {
         test.statisticCallData.observeForever(temp);
 
         //adding new Data
-        Future<Boolean> success = test.addData(testItems);
-        try {
-            if (!success.get()) fail("IO Exception");
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            fail();
-        }
+        test.addData(testItems).get();
         //checking if new Data is also written to File
         if (f.length() == (test.MAX_SIZE_ITEM + 1) * RANDOM_ITEMS_GENERATED) {
             fail("Either writing or padding of items has failed");
@@ -138,13 +132,7 @@ public class StatisticCallDataManagerTest {
         test.statisticCallData.observeForever(temp);
 
 
-        Future<Boolean> success = test.requestMoreData();
-        try {
-            if (!success.get()) fail("Data is corrupt");
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            fail();
-        }
+        test.requestMoreData().get();
         //check if decoded Data is equal to lines in Files
         assertEquals(testItems.size(), f.length()/(test.MAX_SIZE_ITEM+System.lineSeparator().length()));
         test.statisticCallData.removeObserver(temp);
@@ -190,13 +178,7 @@ public class StatisticCallDataManagerTest {
         }
 
         //delete Data
-        Future<Boolean> success = test.deleteData(indicesDeleted);
-        try {
-            if (!success.get()) fail("Problem reading or Writing to File");
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            fail();
-        }
+        test.deleteData(indicesDeleted).get();
         test.statisticCallData.removeObserver(temp);
 
         //creating new DataManager in order to clear LiveData
