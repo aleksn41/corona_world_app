@@ -96,8 +96,9 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
     @Override
     public void onBindViewHolder(@NonNull StatisticCallViewHolder holder, int position) {
         //give the itemOnActionCallback Interface to the Item, such that it can implement its own logic
-        holder.setItem(getItem(holder.getAdapterPosition()),itemOnActionCallback);
-
+        holder.setItem(getItem(holder.getAdapterPosition()));
+        //setActionCallback if available
+        if(itemOnActionCallback!=null)holder.getImageView().setOnClickListener(v -> itemOnActionCallback.callback(holder.getAdapterPosition()));
         //tell Fragment and ViewModel that an Item should be marked for deletion and Deletion Mode should be activated if not already on
         holder.itemView.setOnLongClickListener(v -> {
             if(!multiSelectForDeleteActivated){
@@ -134,9 +135,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
     }
 
     private void deleteSelectedItems(){
-        ArrayList<Integer> sortedResult=new ArrayList<>(selectedItemsToDelete);
-        Collections.sort(sortedResult);
-        deleteInterface.deleteItems(sortedResult);
+        deleteInterface.deleteItems(selectedItemsToDelete);
     }
 
     private void setMarkedItem(StatisticCallViewHolder holder,boolean mark){
