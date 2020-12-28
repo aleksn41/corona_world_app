@@ -14,19 +14,6 @@ import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class StringToCountryParser {
 
-    public static Country parseFromHeroOneCountry(String toParse, Country country){
-        String[] splitArray = toParse.split(",");
-        for (String string : splitArray) {
-            String[] tuple = string.split(":");
-            switch (tuple[0]) {
-                case"\"deaths\"":country.setDeaths(Integer.parseInt(tuple[1]));break;
-                case"\"cases\"":country.setInfected(Integer.parseInt(tuple[1]));break;
-                case"\"recovered\"":country.setRecovered(Integer.parseInt(tuple[1]));break;
-            }
-        }
-        return country;
-    }
-
     public static Country parseFromHeroOneCountry(String toParse){
         Country country = new Country();
         String[] splitArray = toParse.split(",");
@@ -91,21 +78,6 @@ public class StringToCountryParser {
             }
         }
         return returnMap;
-    }
-
-    /*
-    Data can be false, then nothing will be set.
-     */
-    public static long parsePopCountNumber(String toParse){
-        String[] splitArray = toParse.split(",");
-        long returnNumber = 0;
-        for (String string : splitArray) {
-            String[] tuple = string.split(":");
-            if(tuple[0].equals("\"population\"")){
-                returnNumber = Long.parseLong(collectNullToZero(tuple[1]));
-            }
-        }
-        return returnNumber;
     }
 
     private static String collectNullToZero(String in){
