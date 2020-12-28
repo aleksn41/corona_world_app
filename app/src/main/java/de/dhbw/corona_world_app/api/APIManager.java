@@ -36,7 +36,7 @@ public class APIManager {
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
         this.cacheEnabled = cacheEnabled;
         this.longTermStorageEnabled = longTermStorageEnabled;
-        service = ThreadPoolHandler.getsInstance();
+        service = ThreadPoolHandler.getInstance();
     }
 
     public List<Country> getDataWorld(API api) throws Throwable {
