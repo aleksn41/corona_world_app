@@ -41,7 +41,6 @@ public class APIManager {
         service = ThreadPoolHandler.getInstance();
     }
 
-    //todo make getting of the data async
     //gets the data of the whole world through the specified api -> throws the cause of the ExecutionException
     public List<Country> getDataWorld(API api) throws Throwable {
         Logger.logV(TAG,"Getting Data for every Country from api "+api.getName());
