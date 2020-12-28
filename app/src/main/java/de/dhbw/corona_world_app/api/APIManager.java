@@ -31,6 +31,8 @@ public class APIManager {
 
     public static final int MAX_COUNTRY_LIST_SIZE = 10;
 
+    private static final String TAG = APIManager.class.getName();
+
     private final ExecutorService service;
 
     public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
@@ -39,53 +41,55 @@ public class APIManager {
         service = ThreadPoolHandler.getInstance();
     }
 
+    //todo make getting of the data async
+    //gets the data of the whole world through the specified api -> throws the cause of the ExecutionException
     public List<Country> getDataWorld(API api) throws Throwable {
-        Logger.logD("APIManager.getDataWorld","Getting Data for every Country from api "+api.getName());
+        Logger.logV(TAG,"Getting Data for every Country from api "+api.getName());
 
         List<Country> returnList;
         Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
         int cnt = 0;
-
         try {
+            Future<Map<ISOCountry, Long>> futurePop = service.submit(new Callable<Map<ISOCountry, Long>>() {
+                @Override
+                public Map<ISOCountry, Long> call() throws Exception {
+                    return getAllCountriesPopData();
+                }
+            });
             String apiReturn = future.get();
             returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
-
-            Map<ISOCountry, Long> popMap = getAllCountriesPopData();
-
+            Map<ISOCountry, Long> popMap = futurePop.get();
             for (Country country:returnList) {
                 if(!Mapper.isInBlacklist(country.getName())) {
                     if (popMap.containsKey(ISOCountry.valueOf(country.getName()))) {
                         country.setPopulation(popMap.get(ISOCountry.valueOf(country.getName())));
                     } else {
                         cnt += 1;
-                        Logger.logD("APIManager.getDataWorld", "country \"" + country.getName() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                        Logger.logD(TAG, "country \"" + country.getName() + "\" has no popCount!");
                     }
                 }
             }
         } catch (ExecutionException e) {
-            Logger.logE("APIManager.getDataWorld", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
+            Logger.logE(TAG, "Error executing async call\n", e);
             throw Objects.requireNonNull(e.getCause());
         } catch (InterruptedException e) {
-            Logger.logE("APIManager.getDataWorld", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
+            Logger.logE(TAG, "Interruption error\n", e);
             throw e;
         }
 
-        Logger.logD("APIManager.getDataWorld","count of countries with no popCount: "+cnt);
+        Logger.logD(TAG,"Count of countries with no popCount: "+cnt);
         return returnList;
     }
 
-    public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame) throws Throwable {
-        Logger.logD("APIManager.getData", "Getting data according to following parameters: " + countryList + " ; " + criteriaList + " ; " + Arrays.toString(timeFrame));
-
+    //this method creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of country-objects
+    public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame) throws IllegalArgumentException, ExecutionException, InterruptedException {
+        Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList + " ; " + Arrays.toString(timeFrame));
         List<Country> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
         if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
             for (ISOCountry isoCountry : countryList) {
-                //make api-call
-                //System.out.println("Call for " + isoCountry.name() + " starting now " + LocalDateTime.now());
-
                 Future<String> future = service.submit(() -> {
                             String url = API.HEROKU.getUrl();
                             url += API.HEROKU.getOneCountry();
@@ -113,39 +117,33 @@ public class APIManager {
                 }
                 //System.out.println("Call for " + isoCountry.name() + " ending now " + LocalDateTime.now());
             }
+            Logger.logV(TAG,"All requests have been sent...");
             for (int i = 0; i < futureCoronaData.size(); i++){
                 String currentString = futureCoronaData.get(i).get();
                 Country country = StringToCountryParser.parseFromHeroOneCountry(currentString);
                 country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
+            Logger.logV(TAG,"Country-List finished constructing...");
         } else {
+            Logger.logE(TAG,"Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
             throw new IllegalArgumentException("Input country list is too big, max allowed=" + MAX_COUNTRY_LIST_SIZE);
         }
         return returnList;
     }
 
     //Gets a map with ISOCountries mapped to a {@code long} population count gotten by the restcountries api.
-    public Map<ISOCountry,Long> getAllCountriesPopData() throws Throwable {
-        Logger.logD("APIManager.getAllCountriesPopData", "Getting population data...");
+    public Map<ISOCountry,Long> getAllCountriesPopData() throws ExecutionException, InterruptedException, JSONException {
+        Logger.logV(TAG, "Getting population data...");
         Future<String> future = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getAllCountries()));
         Map<ISOCountry, Long> returnMap = new HashMap<>();
-        try {
-            returnMap = StringToCountryParser.parseMultiPopCount(future.get());
-        } catch (ExecutionException e) {
-            Logger.logE("APIManager.getAllCountriesPopData", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
-            throw Objects.requireNonNull(e.getCause());
-        } catch (InterruptedException e) {
-            Logger.logE("APIManager.getAllCountriesPopData", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
-            throw e;
-        } catch (JSONException e) {
-            Logger.logE("APIManager.getAllCountriesPopData", "Error parsing JSON\n" + Arrays.toString(e.getStackTrace()));
-        }
+        returnMap = StringToCountryParser.parseMultiPopCount(future.get());
         return returnMap;
     }
 
     //creates a GET-Call to an url and returns the {@code String} body
     public String createAPICall(String url) throws IOException {
+        Logger.logV(TAG,"Making api call to "+url+" ...");
         OkHttpClient client = new OkHttpClient();
         final Request request = new Request.Builder()
                 .url(url)
