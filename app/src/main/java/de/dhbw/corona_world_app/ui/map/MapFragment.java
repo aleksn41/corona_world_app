@@ -31,16 +31,19 @@ public class MapFragment extends Fragment {
     //todo map ISOCodes to screen names for better understanding
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
-    //todo @Aleks -> insert loading screen to overshadow short white screen
+    //loading screen will be implemented by ui-team
     @SuppressLint("SetJavaScriptEnabled")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.v(TAG,"");
+        Log.v(TAG,"Starting loading screen");
+        loadingScreen.startLoadingScreen();
         Log.v(TAG,"Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
+        loadingScreen.setProgressBar(10,"Starting container...");
         WebView myWebView = root.findViewById(R.id.map_web_view);
         myWebView.getSettings().setJavaScriptEnabled(true);
         ExecutorService service = ThreadPoolHandler.getsInstance();
+        loadingScreen.setProgressBar(20,"Requesting data...");
         service.execute(new Runnable() {
             @Override
             public void run() {
@@ -51,10 +54,14 @@ public class MapFragment extends Fragment {
                 }
             }
         });
+        loadingScreen.setProgressBar(30,"Request sent...");
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
+            loadingScreen.setProgressBar(40,"Answer arrived...");
             Log.v(TAG,"Requested countries have arrived");
+            loadingScreen.setProgressBar(70,"Decrypting data...");
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
             Log.v(TAG,"Loading WebView with "+ webViewString.getValue());
+            loadingScreen.setProgressBar(100,"Visualizing data...");
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
         });
         return root;

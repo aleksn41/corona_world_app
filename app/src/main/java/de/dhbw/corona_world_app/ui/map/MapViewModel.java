@@ -23,23 +23,11 @@ public class MapViewModel extends ViewModel {
 
     private MapData services = new MapData();
 
-    //private MutableLiveData<String> mText;
-
     public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
-
-    public void init(){
-        if(services!=null){
-            services = new MapData();
-        }
-    }
 
     public void initCountryList() throws Throwable {
         manager = new APIManager(false,false);
-        //mText = new MutableLiveData<>();
-        //mText.postValue("World Map");
         mCountryList.postValue(manager.getDataWorld(API.HEROKU));
-        //Map<String, Double> countryMap = new HashMap<>();
-        //return services.putEntries(countryMap);
     }
 
     public String getWebViewStringCustom(List<Country> countryList){
@@ -55,9 +43,5 @@ public class MapViewModel extends ViewModel {
         Log.v(TAG,"Finished constructing map of size "+cnt+"!\nExecuting service to build WebViewString...");
         return services.putEntries(countryMap);
     }
-
-   // public LiveData<String> getText() {
-   //     return mText;
-   // }
 
 }
