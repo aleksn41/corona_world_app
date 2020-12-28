@@ -13,7 +13,7 @@ import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class StringToCountryParser {
-
+    //todo use JSONObject and JSONArray
     public static Country parseFromHeroOneCountry(String toParse){
         Country country = new Country();
         String[] splitArray = toParse.split(",");
@@ -48,9 +48,7 @@ public class StringToCountryParser {
         return countryList;
     }
 
-    /*
-    Data can be false, then nothing will be set.
-     */
+    //todo use JSONObject
     public static Country parsePopCount(String toParse, String name){
         Country country = new Country(name);
         String[] splitArray = toParse.split(",");
