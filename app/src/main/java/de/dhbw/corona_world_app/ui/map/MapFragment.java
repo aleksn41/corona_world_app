@@ -64,11 +64,11 @@ public class MapFragment extends Fragment {
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
+
+        //webSettings.setDisplayZoomControls(false);
         webSettings.setSupportZoom(true);
         ExecutorService service = ThreadPoolHandler.getsInstance();
         loadingScreen.setProgressBar(20,"Requesting data...");
