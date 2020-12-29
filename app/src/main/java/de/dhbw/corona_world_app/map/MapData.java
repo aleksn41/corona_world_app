@@ -34,6 +34,8 @@ public class MapData {
             "\t\t\t    backgroundColor: '#81d4fa',\n" +
             "\t\t\t    datalessRegionColor: '#f8bbd0',\n" +
             "\t\t\t    defaultColor: '#f5f5f5',\n" +
+                      "trigger: 'selection',\n" +
+                      "resolution: 'countries'" +
             "\t\t\t  };\n" +
             "\t\t\t\n" +
             "\t\t\t  var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));\n" +
@@ -41,9 +43,9 @@ public class MapData {
             "\t\t\t};\n" +
             "\t\t</script>\n" +
             "\t</head>\n" +
-            "\t<body>\n" +
+            "\t<body style='margin:0;padding:0;'>\n" +
                     //"\t<h1>World Map</h1>" +
-            "\t\t<div id=\"geochart-colors\" style=\"width: 900px; height: 500px;\"></div>\n" +
+            "\t\t<div id=\"geochart-colors\" style=\"width: 100%; height: 100%;\"></div>\n" +
             "\t</body>\n" +
             "</html>";
 
