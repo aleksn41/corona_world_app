@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
@@ -27,7 +28,27 @@ public class MapFragment extends Fragment {
 
     MutableLiveData<String> webViewString = new MutableLiveData<>();
 
-    LoadingScreenInterface loadingScreen;
+    LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
+        @Override
+        public void startLoadingScreen() {
+
+        }
+
+        @Override
+        public void endLoadingScreen() {
+
+        }
+
+        @Override
+        public void setProgressBar(int progress, @NonNull String message) {
+
+        }
+
+        @Override
+        public int getProgress() {
+            return 0;
+        }
+    };
     //todo map ISOCodes to screen names for better understanding
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
@@ -41,7 +62,14 @@ public class MapFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         loadingScreen.setProgressBar(10,"Starting container...");
         WebView myWebView = root.findViewById(R.id.map_web_view);
-        myWebView.getSettings().setJavaScriptEnabled(true);
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
+        webSettings.setSupportZoom(true);
         ExecutorService service = ThreadPoolHandler.getsInstance();
         loadingScreen.setProgressBar(20,"Requesting data...");
         service.execute(new Runnable() {
