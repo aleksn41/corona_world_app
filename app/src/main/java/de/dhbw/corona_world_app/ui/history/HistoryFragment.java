@@ -16,7 +16,7 @@ import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 public class HistoryFragment extends StatisticCallRecyclerViewFragment {
 
 
-    private static final String HISTORY_FILE_NAME = "history.txt";
+    public static final String HISTORY_FILE_NAME = "history.txt";
     private static final boolean IS_FAVOURITE = false;
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
@@ -50,7 +50,7 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
             }
         }catch (InterruptedException e){
             Log.e(TAG,"Thread has been interrupted",e);
-            future.cancel(false);
+            future.cancel(true);
         }
     }
 }

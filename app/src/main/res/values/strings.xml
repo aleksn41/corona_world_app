@@ -10,4 +10,5 @@
     <string name="description_Star">Favourite-star</string>
     <string name="menu_item_delete">Delete</string>
     <string name="statistic_call_info">Country: %1$s\nCriteria: %2$s\nChart: %3$s</string>
+    <string name="type_to_search">something</string>
 </resources>

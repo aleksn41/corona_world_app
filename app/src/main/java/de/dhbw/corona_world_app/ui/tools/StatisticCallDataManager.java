@@ -245,7 +245,7 @@ public class StatisticCallDataManager {
     private int getMaxSizeForItem() {
         return (isoCountryEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * APIManager.MAX_COUNTRY_LIST_SIZE + chartTypeEnum64BitEncoder.getMaxPossibleEncodedStringSize() + (criteriaEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * Criteria.values().length;
     }
-
+    //TODO used in multiple classes maybe make static?
     private String listOfStringToString(List<String> list) {
         StringBuilder stringbuilder = new StringBuilder(list.size() * 4);
         for (int i = 0; i < list.size(); i++) {

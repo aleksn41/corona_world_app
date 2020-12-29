@@ -14,7 +14,7 @@ import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
-    private static final String FAV_FILE_NAME = "fav.txt";
+    public static final String FAV_FILE_NAME = "fav.txt";
     private static final boolean IS_FAVOURITE = true;
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
@@ -48,7 +48,7 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
             }
         }catch (InterruptedException e){
             Log.e(TAG,"Thread has been interrupted",e);
-            future.cancel(false);
+            future.cancel(true);
         }
     }
 }
