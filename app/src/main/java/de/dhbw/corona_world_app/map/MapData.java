@@ -21,12 +21,14 @@ public class MapData {
 
             String WebViewEnd = "  ]);" +
             "  var options = {" +
-            "   colorAxis: {colors: ['#00853f', '#e31b23']}," +
-            "    backgroundColor: '#81d4fa'," +
-            "    datalessRegionColor: '#f8bbd0'," +
+            "   colorAxis: {colors: ['#ffffff', '#e31b23']}," +
+            "    backgroundColor: '#22748f'," +
+            "    datalessRegionColor: '#ffffff'," +
             "    defaultColor: '#f5f5f5'," +
             "    trigger: 'selection'," +
-            "    resolution: 'countries'};" +
+            "    resolution: 'countries',"+
+            "    legend: 'none'" +
+                    "};" +
             "  var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));" +
             "  chart.draw(data, options);};</script></head>" +
             "<body style='margin:0;padding:0;'><div id=\"geochart-colors\" style=\"width: 100%; height: 100%;\"></div></body></html>";
