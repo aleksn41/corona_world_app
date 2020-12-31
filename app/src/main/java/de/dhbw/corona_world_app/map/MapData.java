@@ -43,7 +43,7 @@ public class MapData {
             "\t</head>\n" +
             "\t<body>\n" +
                     //"\t<h1>World Map</h1>" +
-            "\t\t<div id=\"geochart-colors\" style=\"width: 900px; height: 500px;\"></div>\n" +
+            "\t\t<div id=\"geochart-colors\" style=\"width: 100%; height: 100%;\"></div>\n" +
             "\t</body>\n" +
             "</html>";
 

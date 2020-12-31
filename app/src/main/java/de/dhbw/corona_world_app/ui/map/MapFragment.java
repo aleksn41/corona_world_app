@@ -40,6 +40,7 @@ public class MapFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         myWebView.getSettings().setJavaScriptEnabled(true);
+        myWebView.getSettings().setDisplayZoomControls(true);
         ExecutorService service = ThreadPoolHandler.getsInstance();
         service.execute(new Runnable() {
             @Override
