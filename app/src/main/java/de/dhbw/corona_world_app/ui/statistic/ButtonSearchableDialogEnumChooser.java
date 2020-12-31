@@ -26,7 +26,7 @@ public class ButtonSearchableDialogEnumChooser<T extends Enum<T>> extends androi
     private AlertDialog chooser;
 
     private String dialogTitle = "";
-    private String clearText = "Clear Selection and Close";
+    private String clearText = "Clear & Close";
 
     private FilterableAdapter<T> adapter;
     private static final char ITEM_SEPARATOR = ',';
