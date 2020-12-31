@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.statistic.StatisticFragment">
-    <de.dhbw.corona_world_app.ui.statistic.EnumSpinnerAdapter
+    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
         android:id="@+id/isoCountrySpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <de.dhbw.corona_world_app.ui.statistic.EnumSpinnerAdapter
+    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
         android:id="@+id/criteriaSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/isoCountrySpinner" />
 
-    <de.dhbw.corona_world_app.ui.statistic.EnumSpinnerAdapter
+    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
         android:id="@+id/chartTypeSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

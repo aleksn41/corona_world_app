@@ -1,5 +1,7 @@
 package de.dhbw.corona_world_app.datastructure;
 
+import androidx.annotation.NonNull;
+
 public enum ISOCountry {
     Afghanistan("AF"),
     Aland_Islands("AX"),
@@ -259,5 +261,12 @@ public enum ISOCountry {
 
     public String getISOCode() {
         return this.ISOCode;
+    }
+
+
+    @NonNull
+    @Override
+    public String toString() {
+        return super.toString().replace("_"," ");
     }
 }
