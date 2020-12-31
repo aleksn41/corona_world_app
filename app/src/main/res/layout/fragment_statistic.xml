@@ -6,37 +6,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.statistic.StatisticFragment">
-    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
-        android:id="@+id/isoCountrySpinner"
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/IsoCountryChooserTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="?attr/actionBarSize"
+        android:text="@string/iso_country_chooser_title"
         android:textAlignment="center"
-        app:hintText="xd"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+        app:layout_constraintTop_toTopOf="parent"
+        />
     <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
-        android:id="@+id/criteriaSpinner"
+        android:id="@+id/isoCountryChooser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_big"
         android:textAlignment="center"
-        app:hintText="rofl"
+        android:text="@string/iso_country_chooser_display"
+        app:hintText="@string/iso_country_chooser_display"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/isoCountrySpinner" />
+        app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/criteriaChooserTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        android:text="@string/criteria_chooser_title"
+        android:textAlignment="center"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/isoCountryChooser"
+        />
 
     <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
-        android:id="@+id/chartTypeSpinner"
+        android:id="@+id/criteriaChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_big"
+        android:textAlignment="center"
+        android:text="@string/criteria_chooser_display"
+        app:hintText="@string/criteria_chooser_display"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/chartTypeChooserTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        android:text="@string/chart_type_chooser_title"
+        android:textAlignment="center"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/criteriaChooser"
+        />
+
+    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
+        android:id="@+id/chartTypeChooser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_big"
         android:layout_marginBottom="?attr/actionBarSize"
         android:textAlignment="center"
-        app:hintText="lmao"
-        app:layout_constraintTop_toBottomOf="@id/criteriaSpinner"
+        android:text="@string/chart_type_chooser_display"
+        app:hintText="@string/chart_type_chooser_display"
+        app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

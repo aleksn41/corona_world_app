@@ -1,6 +1,5 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +45,7 @@ public class FilterableAdapter<T> extends RecyclerView.Adapter<ViewHolder> imple
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.multispinner_recyclerview_item, parent, false);
+                .inflate(R.layout.enum_dialog_recyclerview_item, parent, false);
         return new ViewHolder(view);
     }
 

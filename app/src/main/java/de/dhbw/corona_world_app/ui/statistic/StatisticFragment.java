@@ -27,27 +27,17 @@ public class StatisticFragment extends Fragment {
         statisticViewModel =
                 new ViewModelProvider(this).get(StatisticViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
-        ButtonSearchableDialogEnumChooser<ISOCountry> isoCountryMultiSpinner= root.findViewById(R.id.isoCountrySpinner);
-        ButtonSearchableDialogEnumChooser<Criteria> criteriaMultiSpinner= root.findViewById(R.id.criteriaSpinner);
-        ButtonSearchableDialogEnumChooser<ChartType> chartTypeMultiSpinner= root.findViewById(R.id.chartTypeSpinner);
-        // Pass true If you want searchView above the list. Otherwise false. default = true.
 
-        // A text that will display in search hint.
-        isoCountryMultiSpinner.setSearchHint("Select your mood");
+        ButtonSearchableDialogEnumChooser<ISOCountry> isoCountryButtonSearchableDialogEnumChooser= root.findViewById(R.id.isoCountryChooser);
+        isoCountryButtonSearchableDialogEnumChooser.setItems(Arrays.asList(ISOCountry.values()));
+        isoCountryButtonSearchableDialogEnumChooser.setLimit(5, limit -> Toast.makeText(getContext(),"Limit of "+limit+" Countries reached",Toast.LENGTH_SHORT).show());
 
-        // Set text that will display when search result not found...
-        isoCountryMultiSpinner.setHintText("xd");
+        ButtonSearchableDialogEnumChooser<Criteria> criteriaButtonSearchableDialogEnumChooser= root.findViewById(R.id.criteriaChooser);
+        criteriaButtonSearchableDialogEnumChooser.setItems(Arrays.asList(Criteria.values()));
 
-
-        //A text that will display in clear text button
-        isoCountryMultiSpinner.setClearText("Close & Clear");
-
-        // Removed second parameter, position. Its not required now..
-        // If you want to pass preselected items, you can do it while making listArray,
-        // pass true in setSelected of any item that you want to preselect
-        isoCountryMultiSpinner.setItems(Arrays.asList(ISOCountry.values()));
-
-        isoCountryMultiSpinner.setLimit(5, limit -> Toast.makeText(getContext(),"Limit of "+limit+" Countries reached",Toast.LENGTH_SHORT).show());
+        ButtonSearchableDialogEnumChooser<ChartType> chartTypeButtonSearchableDialogEnumChooser= root.findViewById(R.id.chartTypeChooser);
+        chartTypeButtonSearchableDialogEnumChooser.setItems(Arrays.asList(ChartType.values()));
+        chartTypeButtonSearchableDialogEnumChooser.setLimit(1, limit -> Toast.makeText(getContext(),"Limit of "+limit+" Chart-Type reached",Toast.LENGTH_SHORT).show());
         return root;
     }
 }
