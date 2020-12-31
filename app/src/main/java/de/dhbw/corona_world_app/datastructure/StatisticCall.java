@@ -2,10 +2,12 @@ package de.dhbw.corona_world_app.datastructure;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class StatisticCall {
+//TODO if statistic call is to slow implement Parcelable
+public class StatisticCall implements Serializable {
     private List<ISOCountry> countryList;
 
     private ChartType charttype;
@@ -55,5 +57,14 @@ public class StatisticCall {
     @Override
     public int hashCode() {
         return Objects.hash(getCountryList(), getCharttype(), getCriteriaList());
+    }
+
+    @Override
+    public String toString() {
+        return "StatisticCall{" +
+                "countryList=" + countryList +
+                ", charttype=" + charttype +
+                ", criteriaList=" + criteriaList +
+                '}';
     }
 }

@@ -14,6 +14,7 @@ import android.widget.EditText;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -72,8 +73,12 @@ public class ButtonSearchableDialogEnumChooser<T extends Enum<T>> extends androi
     }
 
 
-    public Set<T> getSelectedItems() {
-        return adapter.getSelectedItems();
+    public List<T> getSelectedItems() {
+        return new ArrayList<>(adapter.getSelectedItems());
+    }
+
+    public boolean anyItemSelected(){
+        return adapter.anySelected();
     }
 
     private void initDialog() {
@@ -120,7 +125,7 @@ public class ButtonSearchableDialogEnumChooser<T extends Enum<T>> extends androi
             adapter.unSelectAllItems();
             dialog.cancel();
         });
-        builder.setOnCancelListener(dialog -> setText(!adapter.anySelected() ? dialogTitle : listOfStringToString(getSelectedItems().parallelStream().map(Enum::toString).collect(Collectors.toList()))));
+        builder.setOnCancelListener(dialog -> setText(!adapter.anySelected() ? dialogTitle : listOfStringToString(adapter.getSelectedItems().parallelStream().map(Enum::toString).collect(Collectors.toList()))));
         chooser = builder.create();
     }
 

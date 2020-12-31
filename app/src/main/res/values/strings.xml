@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">corona_world_app</string>
     <string name="title_world">World Map</string>
+    <string name="title_statistic_request">Statistic Chooser</string>
     <string name="title_statistic">Statistic</string>
     <string name="title_history">History</string>
     <string name="title_favourites">Favourites</string>
@@ -17,4 +18,5 @@
     <string name="criteria_chooser_display">Criteria</string>
     <string name="chart_type_chooser_display">Chart-Type</string>
     <string name="auto_fill_hint">Type to search</string>
+    <string name="request_not_found">Could not find Request</string>
 </resources>
