@@ -17,7 +17,7 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
 
 
     public static final String HISTORY_FILE_NAME = "history.txt";
-    private static final boolean IS_FAVOURITE = false;
+    public static final boolean IS_FAVOURITE = false;
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
 

@@ -15,7 +15,7 @@ import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
     public static final String FAV_FILE_NAME = "fav.txt";
-    private static final boolean IS_FAVOURITE = true;
+    public static final boolean IS_FAVOURITE = true;
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
 

@@ -41,14 +41,11 @@ public class StatisticRequestFragment extends Fragment {
         chartTypeButtonSearchableDialogEnumChooser.setItems(Arrays.asList(ChartType.values()));
         chartTypeButtonSearchableDialogEnumChooser.setLimit(1, limit -> Toast.makeText(getContext(),"Limit of "+limit+" Chart-Type reached",Toast.LENGTH_SHORT).show());
 
-       root.findViewById(R.id.imageButton).setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               if(isoCountryButtonSearchableDialogEnumChooser.anyItemSelected()&&criteriaButtonSearchableDialogEnumChooser.anyItemSelected()&&chartTypeButtonSearchableDialogEnumChooser.anyItemSelected()){
-                    requestStatistic(new StatisticCall(isoCountryButtonSearchableDialogEnumChooser.getSelectedItems(),chartTypeButtonSearchableDialogEnumChooser.getSelectedItems().get(0),criteriaButtonSearchableDialogEnumChooser.getSelectedItems()));
-               }else{
-                   Toast.makeText(getContext(),"Please select everything before proceeding",Toast.LENGTH_SHORT).show();
-               }
+       root.findViewById(R.id.imageButton).setOnClickListener(v -> {
+           if(isoCountryButtonSearchableDialogEnumChooser.anyItemSelected()&&criteriaButtonSearchableDialogEnumChooser.anyItemSelected()&&chartTypeButtonSearchableDialogEnumChooser.anyItemSelected()){
+                requestStatistic(new StatisticCall(isoCountryButtonSearchableDialogEnumChooser.getSelectedItems(),chartTypeButtonSearchableDialogEnumChooser.getSelectedItems().get(0),criteriaButtonSearchableDialogEnumChooser.getSelectedItems()));
+           }else{
+               Toast.makeText(getContext(),"Please select everything before proceeding",Toast.LENGTH_SHORT).show();
            }
        });
         return root;

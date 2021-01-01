@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,21 @@ import androidx.fragment.app.Fragment;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.history.HistoryFragment;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
+
+import static de.dhbw.corona_world_app.ui.history.HistoryFragment.HISTORY_FILE_NAME;
 
 public class StatisticFragment extends Fragment {
+
+    private static final String TAG = StatisticFragment.class.getSimpleName();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -29,6 +41,17 @@ public class StatisticFragment extends Fragment {
             TextView testDisplay=view.findViewById(R.id.statisticCallItemTextView);
             StatisticCall request=StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
             testDisplay.setText(request.toString());
+            addToHistory(request);
+        }
+    }
+
+    private void addToHistory(StatisticCall request){
+        try {
+            StatisticCallDataManager manager= new StatisticCallDataManager(ThreadPoolHandler.getInstance(), new File(requireActivity().getFilesDir(), HISTORY_FILE_NAME),HistoryFragment.IS_FAVOURITE);
+            manager.addData(Collections.singletonList(request));
+        } catch (IOException e) {
+            Log.e(TAG,"could not load history File",e);
+            e.printStackTrace();
         }
     }
 }
