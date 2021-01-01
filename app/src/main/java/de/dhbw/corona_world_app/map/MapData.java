@@ -17,13 +17,13 @@ public class MapData {
     Map<String, String> ISOCodeToDisplayName;
 
     String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script><script type=\"text/javascript\">" +
-            "google.charts.load('visualization', {" +
+            "google.charts.load('current', {" +
             "  'packages':['geochart']," +
             "  'mapsApiKey': '" + MapsKey.apiKey + "'});" +
             "google.charts.setOnLoadCallback(drawRegionsMap);" +
             "function drawRegionsMap() {" +
             "  var data = google.visualization.arrayToDataTable([" +
-            "  ['Country','Infected/Healthy-Ratio']";
+            "  ['Country','Percentage of infected population']";
 
     String WebViewEnd = "  ]);" +
             "  var options = {" +
@@ -46,10 +46,14 @@ public class MapData {
         Logger.logV(TAG,"Putting entries into StringBuilder...");
         for (Map.Entry<String, Double> entry : entryList) {
             //System.out.println(entry.getKey()+" "+ISOCodeToDisplayName.get(entry.getKey()));
-            builder.append(",['").append(ISOCodeToDisplayName.get(entry.getKey())).append("',").append(entry.getValue()).append("]");
+            builder.append(",['").append(ISOCodeToDisplayName.get(entry.getKey())).append("',").append(getPercentValueOfDouble(entry.getValue())).append("]");
         }
         Logger.logV(TAG,"Encoding and returning finished WebString...");
         return Base64.encodeToString((WebViewStart + builder.toString() + WebViewEnd).getBytes(), Base64.NO_PADDING);
+    }
+
+    public double getPercentValueOfDouble(double number){
+        return 100 * number;
     }
 
     //todo -> some entries with data are missing in the map

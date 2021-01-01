@@ -88,7 +88,7 @@ public class MapFragment extends Fragment {
             Log.v(TAG,"Requested countries have arrived");
             loadingScreen.setProgressBar(70,"Decrypting data...");
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
-            Log.v(TAG,"Loading WebView with "+ webViewString.getValue());
+            Log.v(TAG,"Loading WebView with WebString...");
             loadingScreen.setProgressBar(100,"Visualizing data...");
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
         });
