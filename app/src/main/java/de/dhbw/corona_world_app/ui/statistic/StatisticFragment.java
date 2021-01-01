@@ -23,8 +23,6 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.history.HistoryFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 
-import static de.dhbw.corona_world_app.ui.history.HistoryFragment.HISTORY_FILE_NAME;
-
 public class StatisticFragment extends Fragment {
 
     private static final String TAG = StatisticFragment.class.getSimpleName();
@@ -47,7 +45,7 @@ public class StatisticFragment extends Fragment {
 
     private void addToHistory(StatisticCall request){
         try {
-            StatisticCallDataManager manager= new StatisticCallDataManager(ThreadPoolHandler.getInstance(), new File(requireActivity().getFilesDir(), HISTORY_FILE_NAME),HistoryFragment.IS_FAVOURITE);
+            StatisticCallDataManager manager= new StatisticCallDataManager(ThreadPoolHandler.getInstance(), requireActivity().getFilesDir());
             manager.addData(Collections.singletonList(request));
         } catch (IOException e) {
             Log.e(TAG,"could not load history File",e);

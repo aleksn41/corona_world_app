@@ -6,6 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -41,10 +42,10 @@ public class StatisticCallDataManagerTest {
     static ExecutorService executorService;
     static List<StatisticCall> testItems;
     File f;
+    File actualFile;
 
     //Constants needed to test Class (test.MAX_SIZE_ITEM must be the same as in the original class, cannot be accessed as it is private)
     private static final int RANDOM_ITEMS_GENERATED = 10;
-    private static final boolean FAVOURITE = false;
 
     @Rule
     public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
@@ -69,17 +70,9 @@ public class StatisticCallDataManagerTest {
     //create new DataManager and new File each Test
     @Before
     public void setupBeforeTest() throws IOException {
-        //create new Temp File
-        f = new File(System.getProperty("java.io.tmpdir") + "test");
-        try {
-            if (!f.createNewFile()) {
-                if (!f.delete()) fail("cannot create or delete Temp-File");
-                if (!f.createNewFile()) fail("this should not be possible");
-            }
-        } catch (IOException e) {
-            fail("Cannot create File in Temp directory");
-        }
-        test=new StatisticCallDataManager(executorService, f, FAVOURITE);
+        f = new File(System.getProperty("java.io.tmpdir"));
+        test=new StatisticCallDataManager(executorService, f);
+        actualFile=new File(System.getProperty("java.io.tmpdir"),StatisticCallDataManager.NAME_OF_FILE);
     }
 
     @Test
@@ -103,7 +96,7 @@ public class StatisticCallDataManagerTest {
         //adding new Data
         test.addData(testItems).get();
         //checking if new Data is also written to File
-        if (f.length() == (test.MAX_SIZE_ITEM + 1) * RANDOM_ITEMS_GENERATED) {
+        if (actualFile.length() == (test.MAX_SIZE_ITEM + 1) * RANDOM_ITEMS_GENERATED) {
             fail("Either writing or padding of items has failed");
         }
         test.statisticCallData.removeObserver(temp);
@@ -134,7 +127,7 @@ public class StatisticCallDataManagerTest {
 
         test.requestMoreData().get();
         //check if decoded Data is equal to lines in Files
-        assertEquals(testItems.size(), f.length()/(test.MAX_SIZE_ITEM+System.lineSeparator().length()));
+        assertEquals(testItems.size(), actualFile.length()/(test.MAX_SIZE_ITEM+System.lineSeparator().length()));
         test.statisticCallData.removeObserver(temp);
     }
 
@@ -182,7 +175,7 @@ public class StatisticCallDataManagerTest {
         test.statisticCallData.removeObserver(temp);
 
         //creating new DataManager in order to clear LiveData
-        test=new StatisticCallDataManager(executorService,f,FAVOURITE);
+        test=new StatisticCallDataManager(executorService,f);
         //read Data and see if indices have successfully been deleted
         firstTime[0]=true;
         test.statisticCallData.observeForever(temp);
@@ -207,14 +200,18 @@ public class StatisticCallDataManagerTest {
         test.statisticCallData.observeForever(temp);
 
         test.deleteAllData().get();
-        //check if file exists and has length 0
-        assertTrue(f.isFile());
-        assertEquals(0,f.length());
+        //check if there is no more data and no data can be get
+        assertEquals(0,test.statisticCallData.getValue().size());
+        assertTrue(test.readAllAvailableData);
+        test.requestMoreData().get();
+        assertEquals(0,test.statisticCallData.getValue().size());
+        assertTrue(test.readAllAvailableData);
+        assertEquals(0,actualFile.length());
     }
 
     @After
-    public void deleteFile() {
-        if (!f.delete()) fail("could not delete File");
+    public void deleteFile(){
+        if(!actualFile.delete())fail("could not delete temp file");
     }
 
 }

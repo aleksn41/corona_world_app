@@ -35,15 +35,17 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
         Log.d(this.getClass().getName(), "initiate ViewModel Data");
         initViewModelData(statisticCallViewModel);
-
         Log.d(this.getClass().getName(), "initiate RecycleView");
         statisticCallRecyclerView = root.findViewById(R.id.statisticCallRecyclerView);
         layoutManager = new LinearLayoutManager(getActivity());
         statisticCallRecyclerView.setLayoutManager(layoutManager);
         statisticCallRecyclerView.scrollToPosition(0);
-        statisticCallAdapter = new StatisticCallAdapter(itemID -> {
-            statisticCallViewModel.toggleFavMark(itemID);
-            Log.d(this.getClass().getName(), "Item " + itemID + " changed");
+        statisticCallAdapter = new StatisticCallAdapter(new StatisticCallAdapterItemOnActionCallback() {
+            @Override
+            public void callback(int itemID) {
+                statisticCallViewModel.toggleFavMark(itemID);
+                Log.d(this.getClass().getName(),"toggled Item number "+itemID);
+            }
         }, new StatisticCallDeleteInterface() {
             @Override
             public void enterDeleteMode(ActionMode.Callback callback) {
@@ -78,6 +80,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             deleteMode.finish();
             deleteMode = null;
         }
+        statisticCallViewModel.updateFavouriteMarks();
     }
 
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();

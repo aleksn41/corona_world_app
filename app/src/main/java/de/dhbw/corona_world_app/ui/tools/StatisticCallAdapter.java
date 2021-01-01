@@ -20,6 +20,7 @@ import java.util.HashSet;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
+//TODO instead of Pairs use an extra Hashset for the selected Items
 public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean>, StatisticCallViewHolder> {
     private boolean multiSelectForDeleteActivated=false;
 

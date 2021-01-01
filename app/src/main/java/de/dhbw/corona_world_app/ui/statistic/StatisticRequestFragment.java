@@ -15,6 +15,7 @@ import androidx.navigation.Navigation;
 import java.util.Arrays;
 
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
@@ -32,7 +33,7 @@ public class StatisticRequestFragment extends Fragment {
 
         ButtonSearchableDialogEnumChooser<ISOCountry> isoCountryButtonSearchableDialogEnumChooser= root.findViewById(R.id.isoCountryChooser);
         isoCountryButtonSearchableDialogEnumChooser.setItems(Arrays.asList(ISOCountry.values()));
-        isoCountryButtonSearchableDialogEnumChooser.setLimit(5, limit -> Toast.makeText(getContext(),"Limit of "+limit+" Countries reached",Toast.LENGTH_SHORT).show());
+        isoCountryButtonSearchableDialogEnumChooser.setLimit(APIManager.MAX_COUNTRY_LIST_SIZE, limit -> Toast.makeText(getContext(),"Limit of "+limit+" Countries reached",Toast.LENGTH_SHORT).show());
 
         ButtonSearchableDialogEnumChooser<Criteria> criteriaButtonSearchableDialogEnumChooser= root.findViewById(R.id.criteriaChooser);
         criteriaButtonSearchableDialogEnumChooser.setItems(Arrays.asList(Criteria.values()));

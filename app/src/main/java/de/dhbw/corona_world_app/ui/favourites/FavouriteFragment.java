@@ -9,13 +9,11 @@ import java.util.concurrent.Future;
 
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.DataException;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapterItemOnActionCallback;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
-
-    public static final String FAV_FILE_NAME = "fav.txt";
-    public static final boolean IS_FAVOURITE = true;
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
 
@@ -28,10 +26,11 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
     }
 
+
     @Override
     public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
         try {
-            statisticCallViewModel.init(new File(requireActivity().getFilesDir(),FAV_FILE_NAME), ThreadPoolHandler.getInstance(),IS_FAVOURITE);
+            statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
         } catch (IOException e) {
             Log.e(TAG,"could not load or create File",e);
             //TODO inform user
