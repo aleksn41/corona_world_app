@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import de.dhbw.corona_world_app.Logger;
+
 public class MapData {
+
+    private static final String TAG = MapData.class.getName();
 
     Map<String, String> ISOCodeToDisplayName;
 
@@ -35,25 +39,23 @@ public class MapData {
             "  chart.draw(data, options);};</script></head>" +
             "<body style='margin:0;padding:0;'><div id=\"geochart-colors\" style=\"width: 100%; height: 100%;\"></div></body></html>";
 
-    public String putEntry(String countryName, double infected_healthy_ratio) {
-        initISOToDisplayMap();
-        return WebViewStart + ",[" + countryName + "," + infected_healthy_ratio + "]" + WebViewEnd;
-    }
-
     public String putEntries(Map<String, Double> entryMap) {
         initISOToDisplayMap();
         StringBuilder builder = new StringBuilder();
         List<Map.Entry<String, Double>> entryList = new ArrayList<>(entryMap.entrySet());
+        Logger.logV(TAG,"Putting entries into StringBuilder...");
         for (Map.Entry<String, Double> entry : entryList) {
-            System.out.println(entry.getKey()+" "+ISOCodeToDisplayName.get(entry.getKey()));
+            //System.out.println(entry.getKey()+" "+ISOCodeToDisplayName.get(entry.getKey()));
             builder.append(",['").append(ISOCodeToDisplayName.get(entry.getKey())).append("',").append(entry.getValue()).append("]");
         }
-
+        Logger.logV(TAG,"Encoding and returning finished WebString...");
         return Base64.encodeToString((WebViewStart + builder.toString() + WebViewEnd).getBytes(), Base64.NO_PADDING);
     }
 
+    //todo -> some entries with data are missing in the map
     private void initISOToDisplayMap(){
         if(ISOCodeToDisplayName==null) {
+            Logger.logV(TAG, "Initiating ISOCodeToDisplay map...");
             ISOCodeToDisplayName = new HashMap<>();
             ISOCodeToDisplayName.put("AF","Afghanistan");
             ISOCodeToDisplayName.put("AX","Åland Islands");
