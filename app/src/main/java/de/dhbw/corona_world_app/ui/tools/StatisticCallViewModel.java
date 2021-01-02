@@ -2,6 +2,7 @@ package de.dhbw.corona_world_app.ui.tools;
 
 import android.util.ArraySet;
 
+import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
 import androidx.lifecycle.MutableLiveData;
@@ -19,15 +20,20 @@ import java.util.concurrent.Future;
 
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
+//TODO share this viemodel between history and favourite
 public class StatisticCallViewModel extends ViewModel {
     private File dataFile;
     private StatisticCallDataManager dataManager;
     //TODO what about deletions?
     private final Set<Integer> indicesOfFavouriteChanged = new HashSet<>();
 
-    public void init(File dataFile, ExecutorService threadHandler) throws IOException {
+    public void init(@NonNull File dataFile,@NonNull ExecutorService threadHandler) throws IOException {
         this.dataFile = dataFile;
         dataManager = new StatisticCallDataManager(threadHandler, dataFile);
+    }
+
+    public boolean isInit(){
+        return dataManager!=null;
     }
 
     public Future<Void> getMoreData() {

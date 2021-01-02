@@ -30,11 +30,13 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         statisticCallViewModel =
-                new ViewModelProvider(this).get(StatisticCallViewModel.class);
+                new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
 
-        Log.d(this.getClass().getName(), "initiate ViewModel Data");
-        initViewModelData(statisticCallViewModel);
+        if(!statisticCallViewModel.isInit()){
+            Log.d(this.getClass().getName(),"init ViewModel");
+            initViewModelData(statisticCallViewModel);
+        }
         Log.d(this.getClass().getName(), "initiate RecycleView");
         statisticCallRecyclerView = root.findViewById(R.id.statisticCallRecyclerView);
         layoutManager = new LinearLayoutManager(getActivity());
