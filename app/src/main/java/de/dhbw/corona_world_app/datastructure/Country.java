@@ -17,6 +17,10 @@ public class Country {
     public Country(){
     }
 
+    public long getHealthy(){
+        return this.population-this.infected;
+    }
+
     public double getPop_inf_ratio() {
         return pop_inf_ratio;
     }

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
+import de.dhbw.corona_world_app.datastructure.Country;
 
 public class MapData {
 
@@ -20,10 +21,13 @@ public class MapData {
             "google.charts.load('current', {" +
             "  'packages':['geochart']," +
             "  'mapsApiKey': '" + MapsKey.apiKey + "'});" +
-            "google.charts.setOnLoadCallback(drawRegionsMap);" +
-            "function drawRegionsMap() {" +
-            "  var data = google.visualization.arrayToDataTable([" +
-            "  ['Country','Percentage of infected population']";
+            "google.charts.setOnLoadCallback(drawWorldMap);" +
+            "function drawWorldMap() {" +
+            "  var dataTable = new google.visualization.DataTable();" +
+            "  dataTable.addColumn('string', 'Country');" +
+            "  dataTable.addColumn('number', 'Percentage of infected population');" +
+            "  dataTable.addColumn({'type': 'string', 'role': 'tooltip', 'p': {'html': true}});\n" +
+            "  dataTable.addRows([";
 
     String WebViewEnd = "  ]);" +
             "  var options = {" +
@@ -33,20 +37,37 @@ public class MapData {
             "    defaultColor: '#f5f5f5'," +
             "    trigger: 'selection'," +
             "    resolution: 'countries'," +
-            "    legend: 'none'" +
+            "    legend: 'none'," +
+            "    tooltip: {isHtml: true}" +
             "};" +
+            "  function createCustomHTMLContent(ratio, totalHealthy, totalInfected, totalDeaths) {\n" +
+            "  return '<div style=\"padding:5px 5px 5px 5px;\">' +\n" +
+            "      '<table class=\"countryData_layout\">' + '<tr>' +\n" +
+            "      '<td>Percentage of infected population: </td>' +\n" +
+            "      '<td><b>' + Math.round((ratio + Number.EPSILON) * 1000) / 1000 + '%</b></td>' + '</tr>' + '<tr>' +\n" +
+            "      '<td>Total Healthy: </td>' +\n" +
+            "      '<td><b>' + totalHealthy + '</b></td>' + '</tr>' + '<tr>' +\n" +
+            "      '<td>Total Infected: </td>' +\n" +
+            "      '<td><b>' + totalInfected + '</b></td>' + '</tr>' + '<tr>' +\n" +
+            "      '<td>Total Deaths: </td>' +\n" +
+            "      '<td><b>' + totalDeaths + '</b></td>' + '</tr>' + '</table>' + '</div>';\n" +
+            "}" +
             "  var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));" +
-            "  chart.draw(data, options);};</script></head>" +
+            "  chart.draw(dataTable, options);};</script></head>" +
             "<body style='margin:0;padding:0;'><div id=\"geochart-colors\" style=\"width: 100%; height: 100%;\"></div></body></html>";
 
-    public String putEntries(Map<String, Double> entryMap) {
+    public String putEntries(List<Country> entryList) {
         initISOToDisplayMap();
         StringBuilder builder = new StringBuilder();
-        List<Map.Entry<String, Double>> entryList = new ArrayList<>(entryMap.entrySet());
         Logger.logV(TAG,"Putting entries into StringBuilder...");
-        for (Map.Entry<String, Double> entry : entryList) {
+        Country country = entryList.get(0);
+        builder.append("['"+ISOCodeToDisplayName.get(country.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country.getPop_inf_ratio()) +", createCustomHTMLContent("+getPercentValueOfDouble(country.getPop_inf_ratio())+","+country.getHealthy()+", "+country.getInfected()+", "+country.getDeaths()+")]");
+        for (int i = 1; i < entryList.size(); i++) {
+            Country country1 = entryList.get(i);
+            builder.append(",['"+ISOCodeToDisplayName.get(country1.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country1.getPop_inf_ratio()) +", createCustomHTMLContent("+getPercentValueOfDouble(country1.getPop_inf_ratio())+","+country1.getHealthy()+", "+country1.getInfected()+", "+country1.getDeaths()+")]");
             //System.out.println(entry.getKey()+" "+ISOCodeToDisplayName.get(entry.getKey()));
-            builder.append(",['").append(ISOCodeToDisplayName.get(entry.getKey())).append("',").append(getPercentValueOfDouble(entry.getValue())).append("]");
+            //builder.append("['USA', createCustomHTMLContent(46, 29, 29), 46, 29, 29]");
+            //builder.append(",['").append(ISOCodeToDisplayName.get(country.getKey())).append("',").append(getPercentValueOfDouble(entry.getValue())).append("]");
         }
         Logger.logV(TAG,"Encoding and returning finished WebString...");
         return Base64.encodeToString((WebViewStart + builder.toString() + WebViewEnd).getBytes(), Base64.NO_PADDING);

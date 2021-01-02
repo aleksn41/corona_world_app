@@ -41,6 +41,6 @@ public class MapViewModel extends ViewModel {
             }
         }
         Log.v(TAG,"Finished constructing map of size "+cnt+"!\nExecuting service to build WebViewString...");
-        return services.putEntries(countryMap);
+        return services.putEntries(countryList);
     }
 }

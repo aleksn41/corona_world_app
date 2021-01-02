@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
@@ -70,7 +71,7 @@ public class APIManager {
             Logger.logE("APIManager.getDataWorld", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
             throw e;
         }
-
+        returnList = returnList.stream().filter(c -> c.getISOCountry()!=null).collect(Collectors.toList());
         Logger.logD("APIManager.getDataWorld","count of countries with no popCount: "+cnt);
         return returnList;
     }
