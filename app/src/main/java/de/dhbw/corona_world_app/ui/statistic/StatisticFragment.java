@@ -43,6 +43,7 @@ public class StatisticFragment extends Fragment {
         }
     }
 
+    //TODO change when only one Instance of manager exists
     private void addToHistory(StatisticCall request){
         try {
             StatisticCallDataManager manager= new StatisticCallDataManager(ThreadPoolHandler.getInstance(), requireActivity().getFilesDir());

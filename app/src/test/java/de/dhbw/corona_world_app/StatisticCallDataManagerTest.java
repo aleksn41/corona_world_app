@@ -6,7 +6,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -23,7 +22,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
@@ -72,7 +70,7 @@ public class StatisticCallDataManagerTest {
     public void setupBeforeTest() throws IOException {
         f = new File(System.getProperty("java.io.tmpdir"));
         test=new StatisticCallDataManager(executorService, f);
-        actualFile=new File(System.getProperty("java.io.tmpdir"),StatisticCallDataManager.NAME_OF_FILE);
+        actualFile=new File(System.getProperty("java.io.tmpdir"),StatisticCallDataManager.NAME_OF_HISTORY_FILE);
     }
 
     @Test
@@ -125,7 +123,7 @@ public class StatisticCallDataManagerTest {
         test.statisticCallData.observeForever(temp);
 
 
-        test.requestMoreData().get();
+        test.requestMoreHistoryData().get();
         //check if decoded Data is equal to lines in Files
         assertEquals(testItems.size(), actualFile.length()/(test.MAX_SIZE_ITEM+System.lineSeparator().length()));
         test.statisticCallData.removeObserver(temp);
@@ -134,7 +132,7 @@ public class StatisticCallDataManagerTest {
     @Test
     public void deleteData_isCorrect() throws ExecutionException, InterruptedException, IOException {
         //getData into DataManager
-        test.requestMoreData().get();
+        test.requestMoreHistoryData().get();
         //if there is no Data, add testItems
         if(test.statisticCallData.getValue().size()==0){
             test.addData(testItems).get();
@@ -179,13 +177,13 @@ public class StatisticCallDataManagerTest {
         //read Data and see if indices have successfully been deleted
         firstTime[0]=true;
         test.statisticCallData.observeForever(temp);
-        test.requestMoreData().get();
+        test.requestMoreHistoryData().get();
     }
 
     @Test
     public void deleteAllData_isCorrect() throws ExecutionException, InterruptedException {
         //getData
-        test.requestMoreData().get();
+        test.requestMoreHistoryData().get();
         //if there is no Data, add testItems
         if(test.statisticCallData.getValue().size()==0){
             test.addData(testItems).get();
@@ -203,7 +201,7 @@ public class StatisticCallDataManagerTest {
         //check if there is no more data and no data can be get
         assertEquals(0,test.statisticCallData.getValue().size());
         assertTrue(test.readAllAvailableData);
-        test.requestMoreData().get();
+        test.requestMoreHistoryData().get();
         assertEquals(0,test.statisticCallData.getValue().size());
         assertTrue(test.readAllAvailableData);
         assertEquals(0,actualFile.length());

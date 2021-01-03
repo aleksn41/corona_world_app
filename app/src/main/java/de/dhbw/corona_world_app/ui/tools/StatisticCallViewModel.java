@@ -1,7 +1,5 @@
 package de.dhbw.corona_world_app.ui.tools;
 
-import android.util.ArraySet;
-
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
@@ -20,12 +18,9 @@ import java.util.concurrent.Future;
 
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
-//TODO share this viemodel between history and favourite
 public class StatisticCallViewModel extends ViewModel {
     private File dataFile;
     private StatisticCallDataManager dataManager;
-    //TODO what about deletions?
-    private final Set<Integer> indicesOfFavouriteChanged = new HashSet<>();
 
     public void init(@NonNull File dataFile,@NonNull ExecutorService threadHandler) throws IOException {
         this.dataFile = dataFile;
@@ -37,7 +32,7 @@ public class StatisticCallViewModel extends ViewModel {
     }
 
     public Future<Void> getMoreData() {
-        return dataManager.requestMoreData();
+        return dataManager.requestMoreHistoryData();
     }
 
     public boolean isMoreDataAvailable() {
@@ -58,18 +53,12 @@ public class StatisticCallViewModel extends ViewModel {
     }
 
     public void toggleFavMark(int position) {
-        Pair<StatisticCall, Boolean> currentItem = Objects.requireNonNull(getMutableData().getValue()).get(position);
-        Objects.requireNonNull(currentItem.second);
-        if (indicesOfFavouriteChanged.contains(position))
-            indicesOfFavouriteChanged.remove(position);
-        else indicesOfFavouriteChanged.add(position);
-        getMutableData().getValue().set(position, Pair.create(currentItem.first, !currentItem.second));
-        getMutableData().postValue(getMutableData().getValue());
+        dataManager.toggleFav(position);
     }
 
     public void updateFavouriteMarks(){
         try {
-            dataManager.updateFavouriteMark(indicesOfFavouriteChanged).get();
+            dataManager.updateFavouriteMark().get();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
