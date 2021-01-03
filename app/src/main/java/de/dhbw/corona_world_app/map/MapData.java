@@ -261,7 +261,7 @@ public class MapData {
             ISOCodeToDisplayName.put("PT","Portugal");
             ISOCodeToDisplayName.put("PR","Puerto Rico");
             ISOCodeToDisplayName.put("QA","Qatar");
-            ISOCodeToDisplayName.put("RE","Réunion");
+            ISOCodeToDisplayName.put("RE","Reunion");
             ISOCodeToDisplayName.put("RO","Romania");
             ISOCodeToDisplayName.put("RU","Russia");
             ISOCodeToDisplayName.put("RW","Rwanda");
