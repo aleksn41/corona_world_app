@@ -18,20 +18,21 @@ public class MapData {
     Map<String, String> ISOCodeToDisplayName;
 
     String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script><script type=\"text/javascript\">" +
-            "google.charts.load('current', {" +
+            "  window.goToStats = (country) => {console.log(country);};" +
+            "  google.charts.load('current', {" +
             "  'packages':['geochart']," +
             "  'mapsApiKey': '" + MapsKey.apiKey + "'});" +
-            "google.charts.setOnLoadCallback(drawWorldMap);" +
-            "function drawWorldMap() {" +
+            "  google.charts.setOnLoadCallback(drawWorldMap);" +
+            "  function drawWorldMap() {" +
             "  var dataTable = new google.visualization.DataTable();" +
             "  dataTable.addColumn('string', 'Country');" +
-            "  dataTable.addColumn('number', 'Percentage of infected population');" +
+            "  dataTable.addColumn('number', 'Infected Population');" +
             "  dataTable.addColumn({'type': 'string', 'role': 'tooltip', 'p': {'html': true}});\n" +
             "  dataTable.addRows([";
 
     String WebViewEnd = "  ]);" +
             "  var options = {" +
-            "   colorAxis: {colors: ['#3bff35', '#e31b23']}," +
+            "    colorAxis: {colors: ['#3bff35', '#e31b23']}," +
             "    backgroundColor: '#22748f'," +
             "    datalessRegionColor: '#ffffff'," +
             "    defaultColor: '#f5f5f5'," +
@@ -39,35 +40,33 @@ public class MapData {
             "    resolution: 'countries'," +
             "    legend: 'none'," +
             "    tooltip: {isHtml: true}" +
-            "};" +
-            "  function createCustomHTMLContent(ratio, totalHealthy, totalInfected, totalDeaths) {\n" +
+            "  };" +
+            "  function createCustomHTMLContent(ISOCountryName, ratio, totalHealthy, totalInfected, totalDeaths) {\n" +
             "  return '<div style=\"padding:5px 5px 5px 5px;\">' +\n" +
             "      '<table class=\"countryData_layout\">' + '<tr>' +\n" +
-            "      '<td>Percentage of infected population: </td>' +\n" +
+            "      '<td>Infected Population: </td>' +\n" +
             "      '<td><b>' + Math.round((ratio + Number.EPSILON) * 1000) / 1000 + '%</b></td>' + '</tr>' + '<tr>' +\n" +
             "      '<td>Total Healthy: </td>' +\n" +
             "      '<td><b>' + totalHealthy + '</b></td>' + '</tr>' + '<tr>' +\n" +
             "      '<td>Total Infected: </td>' +\n" +
             "      '<td><b>' + totalInfected + '</b></td>' + '</tr>' + '<tr>' +\n" +
             "      '<td>Total Deaths: </td>' +\n" +
-            "      '<td><b>' + totalDeaths + '</b></td>' + '</tr>' + '</table>' + '</div>';\n" +
-            "}" +
+            "      '<td><b>' + totalDeaths + '</b></td>' + '</tr>' + '</table>' + '</div>' + " +
+            "      '<center><button type=\"button\" id=\"goTo\" onClick=\"window.goToStats(\\''+ISOCountryName+'\\')\">Go to statistics page</button></center>'" +
+            "  }" +
             "  var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));" +
             "  chart.draw(dataTable, options);};</script></head>" +
             "<body style='margin:0;padding:0;'><div id=\"geochart-colors\" style=\"width: 100%; height: 100%;\"></div></body></html>";
 
     public String putEntries(List<Country> entryList) {
         initISOToDisplayMap();
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(entryList.size() * 100);
         Logger.logV(TAG,"Putting entries into StringBuilder...");
         Country country = entryList.get(0);
-        builder.append("['"+ISOCodeToDisplayName.get(country.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country.getPop_inf_ratio()) +", createCustomHTMLContent("+getPercentValueOfDouble(country.getPop_inf_ratio())+","+country.getHealthy()+", "+country.getInfected()+", "+country.getDeaths()+")]");
+        builder.append("['"+ISOCodeToDisplayName.get(country.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country.getPop_inf_ratio()) +", createCustomHTMLContent('"+country.getISOCountry().name()+"',"+getPercentValueOfDouble(country.getPop_inf_ratio())+","+country.getHealthy()+", "+country.getInfected()+", "+country.getDeaths()+")]");
         for (int i = 1; i < entryList.size(); i++) {
             Country country1 = entryList.get(i);
-            builder.append(",['"+ISOCodeToDisplayName.get(country1.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country1.getPop_inf_ratio()) +", createCustomHTMLContent("+getPercentValueOfDouble(country1.getPop_inf_ratio())+","+country1.getHealthy()+", "+country1.getInfected()+", "+country1.getDeaths()+")]");
-            //System.out.println(entry.getKey()+" "+ISOCodeToDisplayName.get(entry.getKey()));
-            //builder.append("['USA', createCustomHTMLContent(46, 29, 29), 46, 29, 29]");
-            //builder.append(",['").append(ISOCodeToDisplayName.get(country.getKey())).append("',").append(getPercentValueOfDouble(entry.getValue())).append("]");
+            builder.append(",['"+ISOCodeToDisplayName.get(country1.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country1.getPop_inf_ratio()) +", createCustomHTMLContent('"+country1.getISOCountry().name()+"',"+getPercentValueOfDouble(country1.getPop_inf_ratio())+","+country1.getHealthy()+", "+country1.getInfected()+", "+country1.getDeaths()+")]");
         }
         Logger.logV(TAG,"Encoding and returning finished WebString...");
         return Base64.encodeToString((WebViewStart + builder.toString() + WebViewEnd).getBytes(), Base64.NO_PADDING);
@@ -108,7 +107,7 @@ public class MapData {
             ISOCodeToDisplayName.put("BJ","Benin");
             ISOCodeToDisplayName.put("BM","Bermuda");
             ISOCodeToDisplayName.put("BT","Bhutan");
-            ISOCodeToDisplayName.put("BO","Bolivia (Plurinational State of)");
+            ISOCodeToDisplayName.put("BO","Bolivia");
             ISOCodeToDisplayName.put("BQ","Bonaire, Sint Eustatius and Saba");
             ISOCodeToDisplayName.put("BA","Bosnia and Herzegovina");
             ISOCodeToDisplayName.put("BW","Botswana");
@@ -132,11 +131,11 @@ public class MapData {
             ISOCodeToDisplayName.put("CC","Cocos (Keeling) Islands");
             ISOCodeToDisplayName.put("CO","Colombia");
             ISOCodeToDisplayName.put("KM","Comoros");
-            ISOCodeToDisplayName.put("CG","Congo");
-            ISOCodeToDisplayName.put("CD","Congo (Democratic Republic of the)");
+            ISOCodeToDisplayName.put("CG","CG");
+            ISOCodeToDisplayName.put("CD","CD");
             ISOCodeToDisplayName.put("CK","Cook Islands");
             ISOCodeToDisplayName.put("CR","Costa Rica");
-            ISOCodeToDisplayName.put("CI","Côte d\\'Ivoire");
+            ISOCodeToDisplayName.put("CI","Ivory Coast");
             ISOCodeToDisplayName.put("HR","Croatia");
             ISOCodeToDisplayName.put("CU","Cuba");
             ISOCodeToDisplayName.put("CW","Curaçao");
@@ -153,7 +152,7 @@ public class MapData {
             ISOCodeToDisplayName.put("ER","Eritrea");
             ISOCodeToDisplayName.put("EE","Estonia");
             ISOCodeToDisplayName.put("ET","Ethiopia");
-            ISOCodeToDisplayName.put("FK","Falkland Islands (Malvinas)");
+            ISOCodeToDisplayName.put("FK","Falkland Islands");
             ISOCodeToDisplayName.put("FO","Faroe Islands");
             ISOCodeToDisplayName.put("FJ","Fiji");
             ISOCodeToDisplayName.put("FI","Finland");
@@ -186,7 +185,7 @@ public class MapData {
             ISOCodeToDisplayName.put("IS","Iceland");
             ISOCodeToDisplayName.put("IN","India");
             ISOCodeToDisplayName.put("ID","Indonesia");
-            ISOCodeToDisplayName.put("IR","Iran (Islamic Republic of)");
+            ISOCodeToDisplayName.put("IR","Iran");
             ISOCodeToDisplayName.put("IQ","Iraq");
             ISOCodeToDisplayName.put("IE","Ireland");
             ISOCodeToDisplayName.put("IM","Isle of Man");
@@ -203,7 +202,7 @@ public class MapData {
             ISOCodeToDisplayName.put("KR","South Korea");
             ISOCodeToDisplayName.put("KW","Kuwait");
             ISOCodeToDisplayName.put("KG","Kyrgyzstan");
-            ISOCodeToDisplayName.put("LA","Lao People\\'s Democratic Republic");
+            ISOCodeToDisplayName.put("LA","Laos");
             ISOCodeToDisplayName.put("LV","Latvia");
             ISOCodeToDisplayName.put("LB","Lebanon");
             ISOCodeToDisplayName.put("LS","Lesotho");
@@ -213,7 +212,7 @@ public class MapData {
             ISOCodeToDisplayName.put("LT","Lithuania");
             ISOCodeToDisplayName.put("LU","Luxembourg");
             ISOCodeToDisplayName.put("MO","Macao");
-            ISOCodeToDisplayName.put("MK","Macedonia (the Former Yugoslav Republic of)");
+            ISOCodeToDisplayName.put("MK","Macedonia");
             ISOCodeToDisplayName.put("MG","Madagascar");
             ISOCodeToDisplayName.put("MW","Malawi");
             ISOCodeToDisplayName.put("MY","Malaysia");
@@ -227,7 +226,7 @@ public class MapData {
             ISOCodeToDisplayName.put("YT","Mayotte");
             ISOCodeToDisplayName.put("MX","Mexico");
             ISOCodeToDisplayName.put("FM","Micronesia (Federated States of)");
-            ISOCodeToDisplayName.put("MD","Moldova (Republic of)");
+            ISOCodeToDisplayName.put("MD","Moldova");
             ISOCodeToDisplayName.put("MC","Monaco");
             ISOCodeToDisplayName.put("MN","Mongolia");
             ISOCodeToDisplayName.put("ME","Montenegro");
@@ -289,21 +288,21 @@ public class MapData {
             ISOCodeToDisplayName.put("SO","Somalia");
             ISOCodeToDisplayName.put("ZA","South Africa");
             ISOCodeToDisplayName.put("GS","South Georgia and the South Sandwich Islands");
-            ISOCodeToDisplayName.put("SS","South Sudan");
+            ISOCodeToDisplayName.put("SS","SS");
             ISOCodeToDisplayName.put("ES","Spain");
             ISOCodeToDisplayName.put("LK","Sri Lanka");
             ISOCodeToDisplayName.put("SD","Sudan");
             ISOCodeToDisplayName.put("SR","Suriname");
-            ISOCodeToDisplayName.put("SJ","Svalbard and Jan Mayen");
+            ISOCodeToDisplayName.put("SJ","Svalbard");
             ISOCodeToDisplayName.put("SZ","Swaziland");
             ISOCodeToDisplayName.put("SE","Sweden");
             ISOCodeToDisplayName.put("CH","Switzerland");
-            ISOCodeToDisplayName.put("SY","Syrian Arab Republic");
-            ISOCodeToDisplayName.put("TW","Taiwan, Province of China");
+            ISOCodeToDisplayName.put("SY","Syria");
+            ISOCodeToDisplayName.put("TW","Taiwan");
             ISOCodeToDisplayName.put("TJ","Tajikistan");
-            ISOCodeToDisplayName.put("TZ","Tanzania, United Republic of");
+            ISOCodeToDisplayName.put("TZ","Tanzania");
             ISOCodeToDisplayName.put("TH","Thailand");
-            ISOCodeToDisplayName.put("TL","Timor-Leste");
+            ISOCodeToDisplayName.put("TL","TL");
             ISOCodeToDisplayName.put("TG","Togo");
             ISOCodeToDisplayName.put("TK","Tokelau");
             ISOCodeToDisplayName.put("TO","Tonga");
@@ -322,8 +321,8 @@ public class MapData {
             ISOCodeToDisplayName.put("UY","Uruguay");
             ISOCodeToDisplayName.put("UZ","Uzbekistan");
             ISOCodeToDisplayName.put("VU","Vanuatu");
-            ISOCodeToDisplayName.put("VE","Venezuela (Bolivarian Republic of)");
-            ISOCodeToDisplayName.put("VN","Viet Nam");
+            ISOCodeToDisplayName.put("VE","Venezuela");
+            ISOCodeToDisplayName.put("VN","Vietnam");
             ISOCodeToDisplayName.put("VG","Virgin Islands (British)");
             ISOCodeToDisplayName.put("VI","Virgin Islands (U.S.)");
             ISOCodeToDisplayName.put("WF","Wallis and Futuna");
@@ -331,6 +330,7 @@ public class MapData {
             ISOCodeToDisplayName.put("YE","Yemen");
             ISOCodeToDisplayName.put("ZM","Zambia");
             ISOCodeToDisplayName.put("ZW","Zimbabwe");
+            ISOCodeToDisplayName.put("XK","Kosovo");
         }
     }
 }

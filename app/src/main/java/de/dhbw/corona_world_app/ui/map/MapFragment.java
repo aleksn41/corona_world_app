@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -49,6 +51,7 @@ public class MapFragment extends Fragment {
             return 0;
         }
     };
+
     //todo map ISOCodes to screen names for better understanding
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
@@ -60,15 +63,14 @@ public class MapFragment extends Fragment {
         Log.v(TAG,"Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
-        loadingScreen.setProgressBar(10,"Starting container...");
+        loadingScreen.setProgressBar(10,"Starting...");
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setBuiltInZoomControls(true);
-
-        //webSettings.setDisplayZoomControls(false);
+        webSettings.setDisplayZoomControls(false);
         webSettings.setSupportZoom(true);
         ExecutorService service = ThreadPoolHandler.getsInstance();
         loadingScreen.setProgressBar(20,"Requesting data...");
