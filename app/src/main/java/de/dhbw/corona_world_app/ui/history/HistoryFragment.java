@@ -1,50 +1,56 @@
 package de.dhbw.corona_world_app.ui.history;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-import de.dhbw.corona_world_app.R;
-import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapter;
+import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.datastructure.DataException;
+import de.dhbw.corona_world_app.ui.favourites.FavouriteFragment;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends StatisticCallRecyclerViewFragment {
 
-    private HistoryViewModel historyViewModel;
-    protected RecyclerView mHistoryRecyclerView;
-    protected StatisticCallAdapter mStatisticCallAdapter;
-    protected RecyclerView.LayoutManager mHistoryLayoutManager;
+
+    private static final String HISTORY_FILE_NAME = "history.txt";
+    private static final boolean IS_FAVOURITE = false;
+
+    private static final String TAG = FavouriteFragment.class.getSimpleName();
+
+    public HistoryFragment() {
+        super();
+    }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //TODO: get Data from local File Storage
+    public void setupOnCreateViewAfterInitOfRecyclerView() {
+
     }
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        historyViewModel =
-                new ViewModelProvider(this).get(HistoryViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_history, container, false);
-        mHistoryRecyclerView =root.findViewById(R.id.historyRecyclerView);
-        mHistoryLayoutManager =new LinearLayoutManager(getActivity());
-        //TODO read about Saved Instances (sample app)
-        //setup Favourite List
-        
-        mHistoryRecyclerView.setLayoutManager(mHistoryLayoutManager);
-        mHistoryRecyclerView.scrollToPosition(0);
-        mStatisticCallAdapter =new StatisticCallAdapter();
-        historyViewModel.mHistory.observe(getViewLifecycleOwner(), strings -> mStatisticCallAdapter.submitList(strings));
-        mHistoryRecyclerView.setAdapter(mStatisticCallAdapter);
-
-        return root;
+    @Override
+    public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
+        try {
+            statisticCallViewModel.init(new File(requireActivity().getFilesDir(), HISTORY_FILE_NAME), ThreadPoolHandler.getInstance(),IS_FAVOURITE);
+        } catch (IOException e) {
+            Log.e(TAG,"could not load or create File",e);
+            //TODO inform user
+        }
+        Future<Void> future=statisticCallViewModel.getMoreData();
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            Throwable error=e.getCause();
+            if(error instanceof IOException){
+                //check if error is undoable
+            }else if(error instanceof DataException){
+                //inform User that data is corrupt and must be remade
+            }
+        }catch (InterruptedException e){
+            Log.e(TAG,"Thread has been interrupted",e);
+            future.cancel(false);
+        }
     }
-
 }
