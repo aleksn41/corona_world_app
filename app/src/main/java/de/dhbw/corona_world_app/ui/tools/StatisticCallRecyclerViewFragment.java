@@ -8,23 +8,27 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
-    protected StatisticCallDataManager statisticCallDataManager;
     protected RecyclerView statisticCallRecyclerView;
     protected StatisticCallAdapter statisticCallAdapter;
     protected RecyclerView.LayoutManager layoutManager;
-    private StatisticCallViewModel statisticCallViewModel;
+    protected StatisticCallViewModel statisticCallViewModel;
     private ActionMode deleteMode;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -32,7 +36,6 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
-
         if(!statisticCallViewModel.isInit()){
             Log.d(this.getClass().getName(),"init ViewModel");
             initViewModelData(statisticCallViewModel);
@@ -45,7 +48,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallAdapter = new StatisticCallAdapter(new StatisticCallAdapterItemOnActionCallback() {
             @Override
             public void callback(int itemID) {
-                statisticCallViewModel.toggleFavMark(itemID);
+                statisticCallViewModel.toggleFav(itemID,getDataType());
                 Log.d(this.getClass().getName(),"toggled Item number "+itemID);
             }
         }, new StatisticCallDeleteInterface() {
@@ -58,14 +61,22 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             @Override
             public void deleteItems(Set<Integer> ItemIds) {
                 Log.v(this.getClass().getName(), "deleting selected favourite Items");
-                statisticCallViewModel.deleteItems(ItemIds);
+                try {
+                    statisticCallViewModel.deleteItems(ItemIds,getDataType()).get();
+                } catch (ExecutionException | InterruptedException e) {
+                    Log.e(this.getClass().getName(),"items could not be deleted",e);
+                    //TODO handle
+                }
             }
         });
-        statisticCallViewModel.getMutableData().observe(getViewLifecycleOwner(), pairs -> {
-            statisticCallAdapter.submitList(pairs);
-            statisticCallAdapter.notifyDataSetChanged();
-            Log.v(this.getClass().getName(), "updated List");
-        });
+        statisticCallViewModel.observeData(getViewLifecycleOwner(), new Observer<List<Pair<StatisticCall, Boolean>>>() {
+            @Override
+            public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
+                statisticCallAdapter.submitList(pairs);
+                statisticCallAdapter.notifyDataSetChanged();
+                Log.v(this.getClass().getName(), "updated List");
+            }
+        },getDataType());
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
         Log.d(this.getClass().getName(), "finished RecycleView");
 
@@ -82,10 +93,21 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             deleteMode.finish();
             deleteMode = null;
         }
-        statisticCallViewModel.updateFavouriteMarks();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        try {
+            statisticCallViewModel.saveAllData();
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e("error","error",e);
+        }
     }
 
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();
+
+    public abstract StatisticCallDataManager.DataType getDataType();
 
     public abstract void initViewModelData(StatisticCallViewModel statisticCallViewModel);
 }

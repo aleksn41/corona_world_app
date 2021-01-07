@@ -2,15 +2,21 @@ package de.dhbw.corona_world_app.ui.history;
 
 import android.util.Log;
 
+import androidx.core.util.Pair;
+import androidx.lifecycle.Observer;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.DataException;
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.favourites.FavouriteFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapterItemOnActionCallback;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
@@ -27,7 +33,12 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
 
     }
 
+    @Override
+    public StatisticCallDataManager.DataType getDataType() {
+        return StatisticCallDataManager.DataType.ALL_DATA;
+    }
 
+    //TODO change this
     @Override
     public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
         try {
@@ -36,15 +47,22 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
             Log.e(TAG,"could not load or create File",e);
             //TODO inform user
         }
-        Future<Void> future=statisticCallViewModel.getMoreData();
+        Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
+        Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
         try {
             future.get();
+            future1.get();
         } catch (ExecutionException e) {
             Throwable error=e.getCause();
             if(error instanceof IOException){
+                Log.e("error","error",error);
                 //check if error is undoable
             }else if(error instanceof DataException){
                 //inform User that data is corrupt and must be remade
+                Log.e("error","error",error);
+            }
+            else{
+                Log.e("error","error",e);
             }
         }catch (InterruptedException e){
             Log.e(TAG,"Thread has been interrupted",e);

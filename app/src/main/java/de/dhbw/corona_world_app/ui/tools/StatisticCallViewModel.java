@@ -3,14 +3,13 @@ package de.dhbw.corona_world_app.ui.tools;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -22,26 +21,21 @@ public class StatisticCallViewModel extends ViewModel {
     private File dataFile;
     private StatisticCallDataManager dataManager;
 
-    public void init(@NonNull File dataFile,@NonNull ExecutorService threadHandler) throws IOException {
+    public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException {
         this.dataFile = dataFile;
         dataManager = new StatisticCallDataManager(threadHandler, dataFile);
     }
 
-    public boolean isInit(){
-        return dataManager!=null;
+    public boolean isInit() {
+        return dataManager != null;
     }
 
-    public Future<Void> getMoreData() {
-        return dataManager.requestMoreHistoryData();
+    public Future<Void> getMoreData(StatisticCallDataManager.DataType dataType) {
+        return dataManager.requestMoreData(dataType);
     }
 
-    public boolean isMoreDataAvailable() {
-        return !dataManager.readAllAvailableData;
-    }
-
-
-    public Future<Void> deleteItems(Set<Integer> indices) {
-        return dataManager.deleteData(indices);
+    public Future<Void> deleteItems(Set<Integer> indices, StatisticCallDataManager.DataType dataType) {
+        return dataManager.deleteData(indices,dataType);
     }
 
     public Future<Void> deleteAllItems() {
@@ -52,22 +46,24 @@ public class StatisticCallViewModel extends ViewModel {
         return dataManager.addData(statisticCalls);
     }
 
-    public void toggleFavMark(int position) {
-        dataManager.toggleFav(position);
+
+    public void toggleFav(int position, StatisticCallDataManager.DataType dataType) {
+        dataManager.toggleFav(position,dataType);
     }
 
-    public void updateFavouriteMarks(){
-        try {
-            dataManager.updateFavouriteMark().get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public void saveAllData() throws ExecutionException, InterruptedException {
+        dataManager.saveAllData();
+    }
+
+    public void observeData(LifecycleOwner owner, Observer<List<Pair<StatisticCall, Boolean>>> observer, StatisticCallDataManager.DataType dataType) {
+        switch (dataType){
+            case ALL_DATA:
+                dataManager.statisticCallData.observe(owner,observer);
+                break;
+            case FAVOURITE_DATA:
+                dataManager.statisticCallFavouriteData.observe(owner, observer);
+                break;
         }
-    }
-
-    public MutableLiveData<List<Pair<StatisticCall, Boolean>>> getMutableData() {
-        return dataManager.statisticCallData;
     }
 
 }
