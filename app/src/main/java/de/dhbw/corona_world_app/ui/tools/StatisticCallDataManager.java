@@ -205,7 +205,7 @@ public class StatisticCallDataManager {
         indicesOfFavouriteEntries = getIndicesFromFavFile();
         currentPositionOnFile = readAllAvailableData ? 0 : fileWhereAllDataIsToBeSaved.length() / (MAX_SIZE_ITEM + System.lineSeparator().length()) - 1;
         currentPositionOnFavIndices = 0;
-        linesInCurrentFile = (int) fileWhereAllDataIsToBeSaved.length() / (MAX_SIZE_ITEM + System.lineSeparator().length());
+        linesInCurrentFile = getLinesInFile();
     }
 
     //TODO if user corrupts Data may cause an array out of bounds exception
@@ -316,7 +316,14 @@ public class StatisticCallDataManager {
                     //delete fav entries
                     statisticCallFavouriteData.postValue(IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !favouriteIndicesToDelete.contains(i)).map(i -> statisticCallFavouriteData.getValue().get(i)).collect(Collectors.toList()));
                     //update fav indices
-                    indicesOfFavouriteEntries = IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !favouriteIndicesToDelete.contains(i)).map(i -> indicesOfFavouriteEntries.get(i)).collect(Collectors.toList());
+                    int deleted=favouriteIndicesToDelete.size();
+                    ArrayList<Integer> newList=new ArrayList<>(indicesOfFavouriteEntries.size());
+                    for (int i = 0; i < indicesOfFavouriteEntries.size(); i++) {
+                        if(favouriteIndicesToDelete.contains(i)){
+                            deleted-=1;
+                        }else newList.add(indicesOfFavouriteEntries.get(i)-deleted);
+                    }
+                    indicesOfFavouriteEntries=newList;
                     //remember items that are supposed to be deleted from storage to delete them later in saveData()
                     indicesToDeleteOfEntriesNotCreatedInThisSession.addAll(indices.parallelStream().filter(i -> i >= amountOfNewItemsAddedInSession).collect(Collectors.toList()));
                     break;
@@ -327,7 +334,14 @@ public class StatisticCallDataManager {
                     //delete fav entries
                     statisticCallFavouriteData.postValue(IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !indices.contains(i)).map(i -> statisticCallFavouriteData.getValue().get(i)).collect(Collectors.toList()));
                     //update fav indices
-                    indicesOfFavouriteEntries = IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !indices.contains(i)).map(i -> indicesOfFavouriteEntries.get(i)).collect(Collectors.toList());
+                    deleted=indices.size();
+                    newList=new ArrayList<>(indicesOfFavouriteEntries.size());
+                    for (int i = 0; i < indicesOfFavouriteEntries.size(); i++) {
+                        if(indices.contains(i)){
+                            deleted-=1;
+                        }else newList.add(indicesOfFavouriteEntries.get(i)-deleted);
+                    }
+                    indicesOfFavouriteEntries=newList;
                     //remember items that are supposed to be deleted from storage to delete them later in saveData()
                     indicesToDeleteOfEntriesNotCreatedInThisSession.addAll(indicesOfAllDataToRemove.parallelStream().filter(i -> i >= amountOfNewItemsAddedInSession).collect(Collectors.toList()));
                     break;
@@ -352,8 +366,12 @@ public class StatisticCallDataManager {
             }
             //delete Live Data
             statisticCallData.postValue(new ArrayList<>());
+            statisticCallFavouriteData.postValue(new ArrayList<>());
             indicesOfFavouriteEntries.clear();
-            resetSession();
+            readAllAvailableData = true;
+            readAllAvailableFavData = true;
+            currentPositionOnFile = 0;
+            currentPositionOnFavIndices = 0;
             return null;
         });
     }
@@ -573,15 +591,15 @@ public class StatisticCallDataManager {
         //file is at most (MAX_SIZE_ENTRIES+1)*(new String(MAX_SIZE_ENTRIES).length()) big (currently 4004 bytes)
         byte[] file = Files.readAllBytes(fileWhereFavIndicesAreToBeSaved.toPath());
         List<Integer> result = new ArrayList<>(file.length / 2);
-        int indexOfLastNum = 0;
+        int indexOfLastSeparator = file.length;
         for (int i = file.length-1; i >=0; i--) {
             if (file[i] == ITEM_SEPARATOR) {
-                result.add(parseByteArrayToInt(file, indexOfLastNum, i - indexOfLastNum));
-                indexOfLastNum = i + 1;
+                result.add(parseByteArrayToInt(file, i+1, indexOfLastSeparator-(i+1)));
+                indexOfLastSeparator = i;
             }
         }
         if (file.length != 0)
-            result.add(parseByteArrayToInt(file, indexOfLastNum, file.length - indexOfLastNum));
+            result.add(parseByteArrayToInt(file,0,  indexOfLastSeparator));
         return result;
     }
 
