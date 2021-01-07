@@ -79,8 +79,8 @@ public class StatisticCallDataManager {
     int linesInCurrentFile;
     //technically a constant but dependent on another constant which could change, which is why its dynamically generated
     public int MAX_SIZE_ITEM;
-    //used to check if old save request has ended before executing new one
-    private Future<Void> fileSaving;
+    //used in order to check if old AsyncTask has been finished before starting a new one
+    private Future<Void> lastAsyncTask;
 
     //indicates from what context the function is called
     public enum DataType {
@@ -219,9 +219,10 @@ public class StatisticCallDataManager {
      * @param dataType describes the data that is supposed to be loaded
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> requestMoreData(DataType dataType) {
+    public Future<Void> requestMoreData(DataType dataType) throws ExecutionException, InterruptedException {
         Log.i(this.getClass().getName()+"|"+dataType, "loading more Data of " + dataType);
-        return executorService.submit(new Callable<Void>() {
+        checkLastAsyncTask();
+        lastAsyncTask=executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
                 readDataInterface request;
@@ -263,6 +264,7 @@ public class StatisticCallDataManager {
                 return null;
             }
         });
+        return lastAsyncTask;
     }
 
     //TODO if an error occurs, undo everything
@@ -275,8 +277,9 @@ public class StatisticCallDataManager {
      * @param calls the list of {@link StatisticCall} that should be added. The Order should be from oldest item (first item in list) to newest item (last item in list).
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> addData(List<StatisticCall> calls) {
-        return executorService.submit(() -> {
+    public Future<Void> addData(List<StatisticCall> calls) throws ExecutionException, InterruptedException {
+        checkLastAsyncTask();
+        lastAsyncTask= executorService.submit(() -> {
             //mapping items and reversing List
             Objects.requireNonNull(statisticCallData.getValue()).addAll(0, calls.parallelStream().map(x -> new Pair<>(x, false)).collect(Collector.of(
                     ArrayDeque::new,
@@ -289,6 +292,7 @@ public class StatisticCallDataManager {
             amountOfNewItemsAddedInSession += calls.size();
             return null;
         });
+        return lastAsyncTask;
     }
 
     //TODO recover data, if process was killed while Data has been changed (unlikely, only implemented if time is left)
@@ -306,8 +310,9 @@ public class StatisticCallDataManager {
      * @param dataType describes if the indices come from ALL_DATA or FAVOURITE_DATA
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> deleteData(Set<Integer> indices, DataType dataType) {
-        return executorService.submit(() -> {
+    public Future<Void> deleteData(Set<Integer> indices, DataType dataType) throws ExecutionException, InterruptedException {
+        checkLastAsyncTask();
+        lastAsyncTask= executorService.submit(() -> {
             switch (dataType) {
                 case ALL_DATA:
                     //delete data from All Data
@@ -348,14 +353,16 @@ public class StatisticCallDataManager {
             }
             return null;
         });
+        return lastAsyncTask;
     }
 
     /**
      *  deletes all Data locally and in the File (saving is not needed)
      *  @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> deleteAllData() {
-        return executorService.submit(() -> {
+    public Future<Void> deleteAllData() throws ExecutionException, InterruptedException {
+        checkLastAsyncTask();
+        lastAsyncTask= executorService.submit(() -> {
             //delete history data
             try (FileChannel channel = new FileOutputStream(fileWhereAllDataIsToBeSaved, true).getChannel()) {
                 channel.truncate(0);
@@ -374,6 +381,7 @@ public class StatisticCallDataManager {
             currentPositionOnFavIndices = 0;
             return null;
         });
+        return lastAsyncTask;
     }
 
 
@@ -455,17 +463,15 @@ public class StatisticCallDataManager {
      */
     public Future<Void> saveAllData() throws ExecutionException, InterruptedException {
         //check if old request is finished
-        if(fileSaving!=null&&!fileSaving.isDone()){
-            fileSaving.get();
-        }
-        fileSaving=executorService.submit(() -> {
+        checkLastAsyncTask();
+        lastAsyncTask=executorService.submit(() -> {
             deleteMarkedIndicesNotCreatedInSession();
             saveNewSessionData();
             updateFavIndicesFile();
             resetSession();
             return null;
         });
-        return fileSaving;
+        return lastAsyncTask;
     }
 
     private void deleteMarkedIndicesNotCreatedInSession() throws ExecutionException, InterruptedException, IOException {
@@ -601,6 +607,12 @@ public class StatisticCallDataManager {
         if (file.length != 0)
             result.add(parseByteArrayToInt(file,0,  indexOfLastSeparator));
         return result;
+    }
+
+    private void checkLastAsyncTask() throws ExecutionException, InterruptedException {
+        if(lastAsyncTask!=null&&!lastAsyncTask.isDone()){
+            lastAsyncTask.get();
+        }
     }
 
     private int getLinesInFile() {
