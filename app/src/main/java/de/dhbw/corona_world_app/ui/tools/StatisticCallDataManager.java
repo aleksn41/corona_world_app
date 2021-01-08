@@ -57,21 +57,25 @@ public class StatisticCallDataManager {
     public static final String NAME_OF_FAV_INDICES_FILE = "fav_indices.txt";
     private static final String NAME_OF_TEMP_FILE = "_temp";
     private static final int MAX_SIZE_ENTRIES = 1000;
+    private static final int SIZE_ITEM_SEPARATOR = 1;
+    private static final int SIZE_CATEGORY_SEPARATOR = 1;
+    private static final int SIZE_FAVOURITE_BIT = 1;
+    private static final int MAX_SIZE_DATE_STRING = 2+ SIZE_ITEM_SEPARATOR +2+ SIZE_ITEM_SEPARATOR + 4;
 
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallData;
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallFavouriteData;
 
     //saving Session Data in order to Save in File Later
-    private List<Integer> indicesToDeleteOfEntriesNotCreatedInThisSession = new ArrayList<>();
-    private HashSet<Integer> indicesOfFavouriteChangedThisSession = new HashSet<>();
+    private final List<Integer> indicesToDeleteOfEntriesNotCreatedInThisSession = new ArrayList<>();
+    private final HashSet<Integer> indicesOfFavouriteChangedThisSession = new HashSet<>();
     private int amountOfNewItemsAddedInSession = 0;
 
     private List<Integer> indicesOfFavouriteEntries;
     private Enum64BitEncoder<ISOCountry> isoCountryEnum64BitEncoder;
     private Enum64BitEncoder<Criteria> criteriaEnum64BitEncoder;
     private Enum64BitEncoder<ChartType> chartTypeEnum64BitEncoder;
-    private File fileWhereAllDataIsToBeSaved;
-    private File fileWhereFavIndicesAreToBeSaved;
+    private final File fileWhereAllDataIsToBeSaved;
+    private final File fileWhereFavIndicesAreToBeSaved;
     private final ExecutorService executorService;
     private long currentPositionOnFile;
     private int currentPositionOnFavIndices;
@@ -572,8 +576,13 @@ public class StatisticCallDataManager {
                 stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(statisticCallData.getValue().get(i).first.getChartType())).get(0));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                //new Data cannot be favourite (0=false)
                 stringToWrite.append(statisticCallData.getValue().get(i).second ? '1' : '0');
+                stringToWrite.append(CATEGORY_SEPARATOR);
+
+                stringToWrite.append(statisticCallData.getValue().get(i).first.getStartDate().format(StatisticCall.DATE_FORMAT).replace('-',ITEM_SEPARATOR));
+                stringToWrite.append(CATEGORY_SEPARATOR);
+
+                stringToWrite.append(statisticCallData.getValue().get(i).first.getEndDate()==null? new String(new char[]{ITEM_SEPARATOR, ITEM_SEPARATOR, ITEM_SEPARATOR}) :statisticCallData.getValue().get(i).first.getEndDate().format(StatisticCall.DATE_FORMAT).replace('-',ITEM_SEPARATOR));
 
                 stringToWrite.append(createPaddingString(MAX_SIZE_ITEM - stringToWrite.length()));
                 stringToWrite.append(System.lineSeparator());
@@ -643,7 +652,7 @@ public class StatisticCallDataManager {
 
     //returns the maximum size a String representing an Item can have (excludes lineSeparator)
     private int getMaxSizeForItem() {
-        return (isoCountryEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * APIManager.MAX_COUNTRY_LIST_SIZE + chartTypeEnum64BitEncoder.getMaxPossibleEncodedStringSize() + (criteriaEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * Criteria.values().length + 1 + 1;
+        return (isoCountryEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * APIManager.MAX_COUNTRY_LIST_SIZE + chartTypeEnum64BitEncoder.getMaxPossibleEncodedStringSize() + (criteriaEnum64BitEncoder.getMaxPossibleEncodedStringSize() + 1) * Criteria.values().length + SIZE_CATEGORY_SEPARATOR + SIZE_FAVOURITE_BIT + SIZE_CATEGORY_SEPARATOR+ MAX_SIZE_DATE_STRING+SIZE_CATEGORY_SEPARATOR+MAX_SIZE_DATE_STRING;
     }
 
     //TODO used in multiple classes maybe make static?
@@ -679,20 +688,20 @@ public class StatisticCallDataManager {
         int day;
         int month;
         int year;
-        int[] positionsOfItemSeparators = new int[3];
+        int[] positionsOfItemSeparators = new int[2];
         int currentIndexOnPositionsOfItemSeparators=0;
         for (int i = 0; i < length; i++) {
             if(arr[i]==ITEM_SEPARATOR){
-                if(currentIndexOnPositionsOfItemSeparators==3){
+                if(currentIndexOnPositionsOfItemSeparators==2){
                     throw new DataException("could not read LocaleDate");
                 }
                 positionsOfItemSeparators[currentIndexOnPositionsOfItemSeparators++]=i;
             }
         }
-        if(currentIndexOnPositionsOfItemSeparators!=3)throw new DataException("could not read LocaleDate");
+        if(currentIndexOnPositionsOfItemSeparators!=2)throw new DataException("could not read LocaleDate");
         day=parseByteArrayToInt(arr, 0,positionsOfItemSeparators[0]);
         month=parseByteArrayToInt(arr, positionsOfItemSeparators[0]+1,positionsOfItemSeparators[1]-positionsOfItemSeparators[0]-1);
-        year=parseByteArrayToInt(arr, positionsOfItemSeparators[1]+1,positionsOfItemSeparators[2]-positionsOfItemSeparators[1]-1);
+        year=parseByteArrayToInt(arr, positionsOfItemSeparators[1]+1,length-positionsOfItemSeparators[1]-1);
         return LocalDate.of(year,month,day);
     }
 

@@ -54,6 +54,7 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
             future1.get();
         } catch (ExecutionException e) {
             Throwable error=e.getCause();
+            Log.e(TAG,"error getting new Data",e);
             if(error instanceof IOException){
                 //check if error is undoable
             }else if(error instanceof DataException){

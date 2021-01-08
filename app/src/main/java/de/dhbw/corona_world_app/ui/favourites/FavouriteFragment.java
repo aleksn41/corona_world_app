@@ -51,6 +51,7 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
             future.get();
             future1.get();
         } catch (ExecutionException e) {
+            Log.e(TAG,"error getting new Data",e);
             Throwable error=e.getCause();
             if(error instanceof IOException){
                 //check if error is undoable
