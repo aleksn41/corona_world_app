@@ -42,6 +42,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.akexorcist:round-corner-progress-bar:2.1.1'
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.json:json:20180813'
     testImplementation "androidx.arch.core:core-testing:$arch_version"

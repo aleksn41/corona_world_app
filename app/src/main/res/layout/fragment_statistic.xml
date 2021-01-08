@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_centerInParent="true"
+        app:rcBackgroundColor="#0A000000"
+        app:rcBackgroundPadding="2dp"
+        app:rcMax="100"
+        app:rcProgress="0"
+        app:rcProgressColor="#4CAF50"
+        app:rcRadius="80dp"
+        app:rcReverse="false"
+        app:rcSecondaryProgress="100"
+        app:rcSecondaryProgressColor="#40009688"
+        app:rcTextInsideGravity="end"
+        app:rcTextOutsideGravity="end"
+        app:rcTextPositionPriority="inside"
+        app:rcTextProgress="sample Text"
+        app:rcTextProgressColor="#111111"
+        android:visibility="gone"/>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/statisticCallItemTextView"
@@ -14,4 +34,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
