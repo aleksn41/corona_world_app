@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 
+import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -75,14 +76,16 @@ public class StatisticRequestFragment extends Fragment {
 
         //sets the min date to the beginning of Corona
         startDatePicker.getDatePicker().setMinDate(localeDateToMilliSecondsSince1970(StatisticCall.MIN_DATE));
-
+        endDatePicker.getDatePicker().setMinDate(localeDateToMilliSecondsSince1970(StatisticCall.MIN_DATE));
         endDatePicker=new DatePickerDialog(getContext(),R.style.SpinnerDatePickerStyle, (view, year1, month1, dayOfMonth) -> {
             end=LocalDate.of(year1, month1+1,dayOfMonth);
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
             startDatePicker.getDatePicker().setMaxDate(localeDateToMilliSecondsSince1970(end));
         },year,month,day);
-        //sets the min date to the beginning of Corona
-        endDatePicker.getDatePicker().setMinDate(localeDateToMilliSecondsSince1970(StatisticCall.MIN_DATE));
+
+        //sets the max date to today
+        startDatePicker.getDatePicker().setMaxDate(localeDateToMilliSecondsSince1970(LocalDate.now()));
+        endDatePicker.getDatePicker().setMaxDate(localeDateToMilliSecondsSince1970(LocalDate.now()));
 
         startDateChooser.setOnClickListener(v->startDatePicker.show());
         endDateChooser.setOnClickListener(v->endDatePicker.show());
