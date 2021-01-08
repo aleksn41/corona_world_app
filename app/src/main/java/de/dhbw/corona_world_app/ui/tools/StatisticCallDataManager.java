@@ -16,6 +16,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -568,7 +569,7 @@ public class StatisticCallDataManager {
                 stringToWrite.append(listOfStringToString(temp));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(statisticCallData.getValue().get(i).first.getCharttype())).get(0));
+                stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(statisticCallData.getValue().get(i).first.getChartType())).get(0));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
                 //new Data cannot be favourite (0=false)
@@ -585,13 +586,16 @@ public class StatisticCallDataManager {
 
     private Pair<StatisticCall, Boolean> parseData(String s) throws DataException {
         String[] categories = s.split(Pattern.quote(String.valueOf(CATEGORY_SEPARATOR)));
-        if (categories.length != 4) throw new DataException("Data is corrupt");
+        if (categories.length != 6) throw new DataException("Data is corrupt");
         List<ISOCountry> decodedISOCountries = isoCountryEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[0].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         List<Criteria> decodedCriteria = criteriaEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[1].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         List<ChartType> decodedChartType = chartTypeEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[2].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         if (!categories[3].equals("0") && !categories[3].equals("1"))
             throw new DataException("Data is corrupt");
-        return Pair.create(new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria), categories[3].equals("1"));
+        LocalDate startDay=parseByteArrayToLocaleDate(categories[4].getBytes(), categories[4].length());
+        if(startDay==null)throw new DataException("start Date cannot be null");
+        LocalDate endDay=parseByteArrayToLocaleDate(categories[5].getBytes(), categories[5].length());
+        return Pair.create(new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria,startDay,endDay), categories[3].equals("1"));
     }
 
     //TODO check for corruption
@@ -666,6 +670,30 @@ public class StatisticCallDataManager {
             if (buffer[i] != PADDING_CHAR) return i + 1;
         }
         return begin;
+    }
+
+    private LocalDate parseByteArrayToLocaleDate(byte[] arr, int length){
+        if(length==3&&arr[0]==ITEM_SEPARATOR&&arr[1]==ITEM_SEPARATOR&&arr[2]==ITEM_SEPARATOR){
+            return null;
+        }
+        int day;
+        int month;
+        int year;
+        int[] positionsOfItemSeparators = new int[3];
+        int currentIndexOnPositionsOfItemSeparators=0;
+        for (int i = 0; i < length; i++) {
+            if(arr[i]==ITEM_SEPARATOR){
+                if(currentIndexOnPositionsOfItemSeparators==3){
+                    throw new DataException("could not read LocaleDate");
+                }
+                positionsOfItemSeparators[currentIndexOnPositionsOfItemSeparators++]=i;
+            }
+        }
+        if(currentIndexOnPositionsOfItemSeparators!=3)throw new DataException("could not read LocaleDate");
+        day=parseByteArrayToInt(arr, 0,positionsOfItemSeparators[0]);
+        month=parseByteArrayToInt(arr, positionsOfItemSeparators[0]+1,positionsOfItemSeparators[1]-positionsOfItemSeparators[0]-1);
+        year=parseByteArrayToInt(arr, positionsOfItemSeparators[1]+1,positionsOfItemSeparators[2]-positionsOfItemSeparators[1]-1);
+        return LocalDate.of(year,month,day);
     }
 
     //expects an byte array of chars '0'-'9'

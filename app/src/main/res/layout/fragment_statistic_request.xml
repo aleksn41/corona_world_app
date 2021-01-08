@@ -82,14 +82,49 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/timePickerTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        android:text="@string/time_picker_title"
+        android:textAlignment="center"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chartTypeChooser"
+        />
+
+    <Button
+        android:id="@+id/startDateChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        app:layout_constraintEnd_toStartOf="@id/endDateChooser"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timePickerTitle"
+        android:text="@string/pick_start_time" />
+
+    <Button
+        android:id="@+id/endDateChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/startDateChooser"
+        app:layout_constraintTop_toBottomOf="@id/timePickerTitle"
+        android:text="@string/pick_end_time" />
+
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_huge"
+        android:layout_marginStart="@dimen/margin_medium"
         android:src="@android:drawable/ic_menu_send"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chartTypeChooser"
+        app:layout_constraintTop_toBottomOf="@id/startDateChooser"
         android:contentDescription="Create new Statistic" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

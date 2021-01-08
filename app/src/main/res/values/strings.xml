@@ -10,7 +10,7 @@
     <string name="allHistory">History</string>
     <string name="description_Star">Favourite-star</string>
     <string name="menu_item_delete">Delete</string>
-    <string name="statistic_call_info">Country: %1$s\nCriteria: %2$s\nChart: %3$s</string>
+    <string name="statistic_call_info">Country: %1$s\nCriteria: %2$s\nChart: %3$s\nTime: %4$s-%5$s</string>
     <string name="iso_country_chooser_title">Choose Countries of which you would like to have a statistic</string>
     <string name="criteria_chooser_title">Choose Criteria after which the statistic is to be made</string>
     <string name="chart_type_chooser_title">Choose the Chart-type the Statistic is supposed to have</string>
@@ -19,4 +19,7 @@
     <string name="chart_type_chooser_display">Chart-Type</string>
     <string name="auto_fill_hint">Type to search</string>
     <string name="request_not_found">Could not find Request</string>
+    <string name="time_picker_title">Choose the time range of the Statistic</string>
+    <string name="pick_start_time">Start Time</string>
+    <string name="pick_end_time">End Time</string>
 </resources>
