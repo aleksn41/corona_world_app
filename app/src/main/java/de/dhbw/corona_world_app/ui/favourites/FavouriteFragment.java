@@ -1,20 +1,27 @@
 package de.dhbw.corona_world_app.ui.favourites;
 
-import androidx.core.util.Pair;
+import android.util.Log;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-import de.dhbw.corona_world_app.datastructure.ChartType;
-import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
-import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
+    private static final String FAV_FILE_NAME = "fav.txt";
+    private static final boolean IS_FAVOURITE = true;
+
+    private static final String TAG = FavouriteFragment.class.getSimpleName();
+
+    public FavouriteFragment() {
+        super();
+    }
 
     @Override
     public void setupOnCreateViewAfterInitOfRecyclerView() {
@@ -23,13 +30,25 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
     @Override
     public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
-        List<Pair<StatisticCall, Boolean>> testData = new LinkedList<>();
-        ISOCountry[] allCountries=ISOCountry.values();
-        ChartType[] allChartTypes=ChartType.values();
-        Criteria[] allCriteria=Criteria.values();
-        for (int i = 0; i < 50; ++i) {
-            testData.add(Pair.create(new StatisticCall(Collections.singletonList(allCountries[i%allCountries.length]),allChartTypes[i%allChartTypes.length],Collections.singletonList(allCriteria[i%allCriteria.length])), true));
+        try {
+            statisticCallViewModel.init(new File(requireActivity().getFilesDir(),FAV_FILE_NAME), ThreadPoolHandler.getInstance(),IS_FAVOURITE);
+        } catch (IOException e) {
+            Log.e(TAG,"could not load or create File",e);
+            //TODO inform user
         }
-        statisticCallViewModel.mStatisticCallsAndMark.setValue(testData);
+        Future<Void> future=statisticCallViewModel.getMoreData();
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            Throwable error=e.getCause();
+            if(error instanceof IOException){
+                //check if error is undoable
+            }else if(error instanceof DataException){
+                //inform User that data is corrupt and must be remade
+            }
+        }catch (InterruptedException e){
+            Log.e(TAG,"Thread has been interrupted",e);
+            future.cancel(false);
+        }
     }
 }

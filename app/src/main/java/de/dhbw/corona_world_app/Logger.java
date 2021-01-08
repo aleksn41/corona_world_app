@@ -30,6 +30,12 @@ public class Logger {
         }
     }
 
+    public static void logV(String tag, String msg){
+        if(logOn==true){
+            Log.v(tag, msg);
+        }
+    }
+
     public static void disableLogging(){
         logOn = false;
     }

@@ -67,9 +67,7 @@ public class StringToCountryParser {
         return countryList;
     }
 
-    /*
-    Data can be false, then nothing will be set.
-     */
+    //todo use JSONObject
     public static Country parsePopCount(String toParse, String name){
         Country country = new Country(ISOCountry.valueOf(name));
         String[] splitArray = toParse.split(",");
@@ -99,21 +97,6 @@ public class StringToCountryParser {
         }
         Log.v(TAG,"Finished parsing the population count from String!");
         return returnMap;
-    }
-
-    /*
-    Data can be false, then nothing will be set.
-     */
-    public static long parsePopCountNumber(String toParse){
-        String[] splitArray = toParse.split(",");
-        long returnNumber = 0;
-        for (String string : splitArray) {
-            String[] tuple = string.split(":");
-            if(tuple[0].equals("\"population\"")){
-                returnNumber = Long.parseLong(collectNullToZero(tuple[1]));
-            }
-        }
-        return returnNumber;
     }
 
     private static String collectNullToZero(String in){

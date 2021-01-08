@@ -46,7 +46,7 @@ public class Enum64BitEncoderTest {
             assertEquals(testData.size(), result.size());
             //the length of the encoded String should at most have Math.ceil(Log64(Enum.values().length)) characters
             for (String s : result) {
-                assertTrue(s.length()<=Math.ceil(Math.log(ISOCountry.values().length)/Math.log(64)));
+                assertTrue(s.length()<=test.getMaxPossibleEncodedStringSize());
             }
             //list order should stay the same
             //decoding the encoded should give the original Dataset
@@ -64,7 +64,7 @@ public class Enum64BitEncoderTest {
         //create a List of Strings with invalid ISOCodes
         List<String> invalidTestData = new LinkedList<>();
         String invalidString;
-        int maxNumberOfPossibleEncodedStrings = (int) Math.pow(64, Math.ceil(Math.log(validTestData.size()) / Math.log(64)));
+        int maxNumberOfPossibleEncodedStrings = (int) Math.pow(64, test.getMaxPossibleEncodedStringSize());
         for (int i = 0; i < maxNumberOfPossibleEncodedStrings; ++i) {
             invalidString = encodeIntegerToString(i);
             if (!validTestDataSet.contains(invalidString)) {
