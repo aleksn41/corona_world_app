@@ -118,6 +118,7 @@ public enum ISOCountry {
     Kazakhstan("KZ"),
     Kenya("KE"),
     Kiribati("KI"),
+    Republic_of_Kosovo("XK"),
     North_Korea("KP"),
     South_Korea("KR"),
     Kuwait("KW"),

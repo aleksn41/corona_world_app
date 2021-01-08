@@ -32,7 +32,7 @@ public class Mapper {
             apisToMap.put(API.HEROKU, herokuToStandardMap);
             apisToMap.put(API.RESTCOUNTRIES, restcountriesToStandardMap);
             reverseMapAPI = null;
-            blackList.add("Republic of Kosovo");
+            //blackList.add("Republic of Kosovo");
             blackList.add("Channel_Islands");
             blackList.add("World");
             blackList.add("Diamond_Princess");

@@ -2,7 +2,7 @@ package de.dhbw.corona_world_app.datastructure;
 
 public class Country {
 
-    private String name;
+    private ISOCountry country;
 
     private int deaths;
 
@@ -17,6 +17,10 @@ public class Country {
     public Country(){
     }
 
+    public long getHealthy(){
+        return this.population-this.infected;
+    }
+
     public double getPop_inf_ratio() {
         return pop_inf_ratio;
     }
@@ -25,8 +29,8 @@ public class Country {
         this.pop_inf_ratio = pop_inf_ratio;
     }
 
-    public Country(String name) {
-        this.name = name;
+    public Country(ISOCountry country) {
+        this.country = country;
     }
 
     public int getDeaths() {
@@ -62,18 +66,18 @@ public class Country {
         this.pop_inf_ratio = (double) infected / population;
     }
 
-    public String getName() {
-        return name;
+    public ISOCountry getISOCountry() {
+        return country;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setISOCountry(ISOCountry country) {
+        this.country = country;
     }
 
     @Override
     public String toString() {
         return "Country{" +
-                "name='" + name + '\'' +
+                "name='" + country + '\'' +
                 ", deaths=" + deaths +
                 ", infected=" + infected +
                 ", recovered=" + recovered +

@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
@@ -47,27 +48,22 @@ public class APIManager {
 
         List<Country> returnList = new ArrayList<>();
         Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
-        //use Duration.between(startLocalDateTime, endLocalDateTime).toMillis();
-        if(!LocalDateTime.now().equals(Cache.getLastTimeAccessedLifeDataWorld())) {
-            int cnt = 0;
-            try {
-                Future<Map<ISOCountry, Long>> futurePop = service.submit(new Callable<Map<ISOCountry, Long>>() {
-                    @Override
-                    public Map<ISOCountry, Long> call() throws Exception {
-                        return getAllCountriesPopData();
-                    }
-                });
-                String apiReturn = future.get();
-                returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
-                Map<ISOCountry, Long> popMap = futurePop.get();
-                for (Country country : returnList) {
-                    if (!Mapper.isInBlacklist(country.getName())) {
-                        if (popMap.containsKey(ISOCountry.valueOf(country.getName()))) {
-                            country.setPopulation(popMap.get(ISOCountry.valueOf(country.getName())));
-                        } else {
-                            cnt += 1;
-                            Logger.logD(TAG, "country \"" + country.getName() + "\" has no popCount!");
-                        }
+
+        int cnt = 0;
+
+        try {
+            String apiReturn = future.get();
+            returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
+
+            Map<ISOCountry, Long> popMap = getAllCountriesPopData();
+
+            for (Country country:returnList) {
+                if(country.getISOCountry()!=null && !Mapper.isInBlacklist(country.getISOCountry().name())) {
+                    if (popMap.containsKey(country.getISOCountry())) {
+                        country.setPopulation(popMap.get(country.getISOCountry()));
+                    } else {
+                        cnt += 1;
+                        Logger.logD("APIManager.getDataWorld", "country \"" + country.getISOCountry().name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
                     }
                 }
             } catch (ExecutionException e) {
@@ -77,9 +73,19 @@ public class APIManager {
                 Logger.logE(TAG, "Interruption error\n", e);
                 throw e;
             }
+        } catch (ExecutionException e) {
+            Logger.logE("APIManager.getDataWorld", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
+            throw Objects.requireNonNull(e.getCause());
+        } catch (InterruptedException e) {
+            Logger.logE("APIManager.getDataWorld", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
+            throw e;
+        }
+        returnList = returnList.stream().filter(c -> c.getISOCountry()!=null).collect(Collectors.toList());
+        Logger.logD("APIManager.getDataWorld","count of countries with no popCount: "+cnt);
 
             Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
         }
+
         return returnList;
     }
 
