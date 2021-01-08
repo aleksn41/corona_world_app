@@ -63,6 +63,12 @@ public class StatisticFragment extends Fragment {
 
     //TODO fix: if user never enters history/fav this entry will not be saved permanently
     private void addToHistory(StatisticCall request){
-        statisticCallViewModel.addData(Collections.singletonList(request));
+        try {
+            statisticCallViewModel.addData(Collections.singletonList(request));
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

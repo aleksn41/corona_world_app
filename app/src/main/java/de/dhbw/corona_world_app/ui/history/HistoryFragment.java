@@ -47,26 +47,21 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
             Log.e(TAG,"could not load or create File",e);
             //TODO inform user
         }
-        Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
-        Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
         try {
+            Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
+            Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
             future.get();
             future1.get();
         } catch (ExecutionException e) {
             Throwable error=e.getCause();
             if(error instanceof IOException){
-                Log.e("error","error",error);
                 //check if error is undoable
             }else if(error instanceof DataException){
                 //inform User that data is corrupt and must be remade
-                Log.e("error","error",error);
-            }
-            else{
-                Log.e("error","error",e);
             }
         }catch (InterruptedException e){
             Log.e(TAG,"Thread has been interrupted",e);
-            future.cancel(true);
+            //future.cancel(true);
         }
     }
 }

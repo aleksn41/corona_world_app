@@ -48,8 +48,8 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallAdapter = new StatisticCallAdapter(new StatisticCallAdapterItemOnActionCallback() {
             @Override
             public void callback(int itemID) {
-                statisticCallViewModel.toggleFav(itemID,getDataType());
-                Log.d(this.getClass().getName(),"toggled Item number "+itemID);
+                statisticCallViewModel.toggleFav(itemID, getDataType());
+                Log.d(this.getClass().getName(), "toggled Item number " + itemID);
             }
         }, new StatisticCallDeleteInterface() {
             @Override
@@ -62,10 +62,23 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             public void deleteItems(Set<Integer> ItemIds) {
                 Log.v(this.getClass().getName(), "deleting selected favourite Items");
                 try {
-                    statisticCallViewModel.deleteItems(ItemIds,getDataType()).get();
+                    statisticCallViewModel.deleteItems(ItemIds, getDataType()).get();
                 } catch (ExecutionException | InterruptedException e) {
-                    Log.e(this.getClass().getName(),"items could not be deleted",e);
+                    Log.e(this.getClass().getName(), "items could not be deleted", e);
                     //TODO handle
+                }
+            }
+        }, new StatisticCallAdapterOnLastItemLoaded() {
+            @Override
+            public void onLastItemLoaded() {
+                if(statisticCallViewModel.hasMoreData(getDataType())) {
+                    try {
+                        Log.d(this.getClass().getName(), "last item reached, loading more Data of " + getDataType());
+                        statisticCallViewModel.getMoreData(getDataType());
+                    }catch (InterruptedException | ExecutionException e) {
+                        Log.e(this.getClass().getName(),"error reading more Data",e);
+                        //TODO handle
+                    }
                 }
             }
         });

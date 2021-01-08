@@ -45,9 +45,9 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
             Log.e(TAG,"could not load or create File",e);
             //TODO inform user
         }
-        Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
-        Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
         try {
+            Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
+            Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
             future.get();
             future1.get();
         } catch (ExecutionException e) {
@@ -59,7 +59,7 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
             }
         }catch (InterruptedException e){
             Log.e(TAG,"Thread has been interrupted",e);
-            future.cancel(true);
+            //future.cancel(true);
         }
     }
 }

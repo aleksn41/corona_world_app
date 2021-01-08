@@ -89,7 +89,6 @@ public class StatisticCallDataManager {
     }
     //used to differentiate between contexts when reading files
     interface readDataInterface {
-        boolean existsDataToRead();
 
         File getFileToReadFrom();
 
@@ -105,10 +104,6 @@ public class StatisticCallDataManager {
     }
 
     readDataInterface allData = new readDataInterface() {
-        @Override
-        public boolean existsDataToRead() {
-            return !readAllAvailableData;
-        }
 
         @Override
         public File getFileToReadFrom() {
@@ -142,10 +137,6 @@ public class StatisticCallDataManager {
     };
 
     readDataInterface favData = new readDataInterface() {
-        @Override
-        public boolean existsDataToRead() {
-            return !readAllAvailableFavData;
-        }
 
         @Override
         public File getFileToReadFrom() {
@@ -208,6 +199,17 @@ public class StatisticCallDataManager {
         linesInCurrentFile = getLinesInFile();
     }
 
+    public boolean hasMoreData(DataType dataType){
+        switch (dataType){
+            case ALL_DATA:
+                return !readAllAvailableData;
+            case FAVOURITE_DATA:
+                return !readAllAvailableFavData;
+            default:
+                throw new IllegalStateException("Unexpected value: " + dataType);
+        }
+    }
+
     //TODO if user corrupts Data may cause an array out of bounds exception
     //TODO if this method reads a fav entry remember it and read less if fav is requested
     //TODO adjust position when deleted
@@ -236,7 +238,7 @@ public class StatisticCallDataManager {
                     default:
                         throw new IllegalStateException("Unexpected value: " + dataType);
                 }
-                if (!request.existsDataToRead()){
+                if (!hasMoreData(dataType)){
                     Log.v(this.getClass().getName()+"|"+dataType, dataType + " Data has been successfully loaded");
                     return null;
                 }

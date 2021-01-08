@@ -69,7 +69,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
     //used to Inform the List-Owner if an Item is supposed to be deleted
     private final StatisticCallDeleteInterface deleteInterface;
 
-    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface) {
+    //used to add an Callback when the last item is loaded
+    private final StatisticCallAdapterOnLastItemLoaded onLastItemLoaded;
+
+    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface,StatisticCallAdapterOnLastItemLoaded onLastItemLoaded) {
         super(new DiffUtil.ItemCallback<Pair<StatisticCall,Boolean>>() {
 
             @Override
@@ -84,6 +87,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         });
         this.itemOnActionCallback=itemOnActionCallback;
         this.deleteInterface = deleteInterface;
+        this.onLastItemLoaded=onLastItemLoaded;
     }
 
     @NotNull
@@ -100,6 +104,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         holder.setItem(getItem(holder.getAdapterPosition()));
         //setActionCallback if available
         if(itemOnActionCallback!=null)holder.getImageView().setOnClickListener(v -> itemOnActionCallback.callback(holder.getAdapterPosition()));
+        //check if its the last item
+        if(holder.getAdapterPosition()==getItemCount()-1){
+            onLastItemLoaded.onLastItemLoaded();
+        }
         //tell Fragment and ViewModel that an Item should be marked for deletion and Deletion Mode should be activated if not already on
         holder.itemView.setOnLongClickListener(v -> {
             if(!multiSelectForDeleteActivated){

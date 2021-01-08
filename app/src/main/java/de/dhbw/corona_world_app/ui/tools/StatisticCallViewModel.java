@@ -30,20 +30,24 @@ public class StatisticCallViewModel extends ViewModel {
         return dataManager != null;
     }
 
-    public Future<Void> getMoreData(StatisticCallDataManager.DataType dataType) {
+    public Future<Void> getMoreData(StatisticCallDataManager.DataType dataType) throws ExecutionException, InterruptedException {
         return dataManager.requestMoreData(dataType);
     }
 
-    public Future<Void> deleteItems(Set<Integer> indices, StatisticCallDataManager.DataType dataType) {
+    public Future<Void> deleteItems(Set<Integer> indices, StatisticCallDataManager.DataType dataType) throws ExecutionException, InterruptedException {
         return dataManager.deleteData(indices,dataType);
     }
 
-    public Future<Void> deleteAllItems() {
+    public Future<Void> deleteAllItems() throws ExecutionException, InterruptedException {
         return dataManager.deleteAllData();
     }
 
-    public Future<Void> addData(List<StatisticCall> statisticCalls) {
+    public Future<Void> addData(List<StatisticCall> statisticCalls) throws ExecutionException, InterruptedException {
         return dataManager.addData(statisticCalls);
+    }
+
+    public boolean hasMoreData(StatisticCallDataManager.DataType dataType){
+        return dataManager.hasMoreData(dataType);
     }
 
 
