@@ -2,20 +2,24 @@ package de.dhbw.corona_world_app.ui.favourites;
 
 import android.util.Log;
 
+import androidx.core.util.Pair;
+import androidx.lifecycle.Observer;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.DataException;
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapterItemOnActionCallback;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
-
-    private static final String FAV_FILE_NAME = "fav.txt";
-    private static final boolean IS_FAVOURITE = true;
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
 
@@ -29,16 +33,23 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
     }
 
     @Override
+    public StatisticCallDataManager.DataType getDataType() {
+        return StatisticCallDataManager.DataType.FAVOURITE_DATA;
+    }
+    //TODO change this
+    @Override
     public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
         try {
-            statisticCallViewModel.init(new File(requireActivity().getFilesDir(),FAV_FILE_NAME), ThreadPoolHandler.getInstance(),IS_FAVOURITE);
+            statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
         } catch (IOException e) {
             Log.e(TAG,"could not load or create File",e);
             //TODO inform user
         }
-        Future<Void> future=statisticCallViewModel.getMoreData();
         try {
+            Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
+            Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
             future.get();
+            future1.get();
         } catch (ExecutionException e) {
             Throwable error=e.getCause();
             if(error instanceof IOException){
@@ -48,7 +59,7 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
             }
         }catch (InterruptedException e){
             Log.e(TAG,"Thread has been interrupted",e);
-            future.cancel(false);
+            //future.cancel(true);
         }
     }
 }

@@ -10,6 +10,13 @@ import java.util.Objects;
 public class StatisticCall {
     public static final LocalDate MIN_DATE = LocalDate.of(2020,1,22);
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+
+//TODO if statistic call is to slow implement Parcelable
+public class StatisticCall implements Serializable {
+
     private List<ISOCountry> countryList;
 
     private ChartType charttype;
@@ -72,5 +79,14 @@ public class StatisticCall {
         if(endDate.isBefore(startDate)) throw new IllegalArgumentException("Parameter \"endDate\"=" + endDate.toString() + " is before parameter \"startDate\"!");
         this.endDate = endDate;
 
+    }
+
+    @Override
+    public String toString() {
+        return "StatisticCall{" +
+                "countryList=" + countryList +
+                ", charttype=" + charttype +
+                ", criteriaList=" + criteriaList +
+                '}';
     }
 }

@@ -6,4 +6,7 @@
     <dimen name="statistic_call_list_item_margin_image">20dp</dimen>
     <dimen name="margin_medium">8dp</dimen>
     <dimen name="margin_big">16dp</dimen>
+    <dimen name="margin_basic_25">0.25dp</dimen>
+    <dimen name="margin_huge">32dp</dimen>
+    <dimen name="font_size">15sp</dimen>
 </resources>
