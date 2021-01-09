@@ -66,12 +66,6 @@ public class APIManager {
                         Logger.logD("APIManager.getDataWorld", "country \"" + country.getISOCountry().name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
                     }
                 }
-            } catch (ExecutionException e) {
-                Logger.logE(TAG, "Error executing async call\n", e);
-                throw Objects.requireNonNull(e.getCause());
-            } catch (InterruptedException e) {
-                Logger.logE(TAG, "Interruption error\n", e);
-                throw e;
             }
         } catch (ExecutionException e) {
             Logger.logE("APIManager.getDataWorld", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
@@ -83,8 +77,7 @@ public class APIManager {
         returnList = returnList.stream().filter(c -> c.getISOCountry()!=null).collect(Collectors.toList());
         Logger.logD("APIManager.getDataWorld","count of countries with no popCount: "+cnt);
 
-            Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
-        }
+        Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
 
         return returnList;
     }
