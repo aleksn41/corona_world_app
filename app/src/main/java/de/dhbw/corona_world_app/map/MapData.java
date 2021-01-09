@@ -65,10 +65,10 @@ public class MapData {
         Logger.logV(TAG,"Putting entries into StringBuilder...");
         if(entryList.size() > 0) {
             Country country = entryList.get(0);
-            builder.append("['" + ISOCodeToDisplayName.get(country.getISOCountry().getISOCode()) + "'," + getPercentValueOfDouble(country.getPop_inf_ratio()) + ", createCustomHTMLContent('" + country.getISOCountry().name() + "'," + getPercentValueOfDouble(country.getPop_inf_ratio()) + "," + country.getHealthy() + ", " + country.getInfected() + ", " + country.getDeaths() + ")]");
+            builder.append("['").append(ISOCodeToDisplayName.get(country.getISOCountry().getISOCode())).append("',").append(getPercentValueOfDouble(country.getPop_inf_ratio())).append(", createCustomHTMLContent('").append(country.getISOCountry().name()).append("',").append(getPercentValueOfDouble(country.getPop_inf_ratio())).append(",").append(country.getHealthy()).append(", ").append(country.getInfected()).append(", ").append(country.getDeaths()).append(")]");
             for (int i = 1; i < entryList.size(); i++) {
                 Country country1 = entryList.get(i);
-                builder.append(",['" + ISOCodeToDisplayName.get(country1.getISOCountry().getISOCode()) + "'," + getPercentValueOfDouble(country1.getPop_inf_ratio()) + ", createCustomHTMLContent('" + country1.getISOCountry().name() + "'," + getPercentValueOfDouble(country1.getPop_inf_ratio()) + "," + country1.getHealthy() + ", " + country1.getInfected() + ", " + country1.getDeaths() + ")]");
+                builder.append(",['").append(ISOCodeToDisplayName.get(country1.getISOCountry().getISOCode())).append("',").append(getPercentValueOfDouble(country1.getPop_inf_ratio())).append(", createCustomHTMLContent('").append(country1.getISOCountry().name()).append("',").append(getPercentValueOfDouble(country1.getPop_inf_ratio())).append(",").append(country1.getHealthy()).append(", ").append(country1.getInfected()).append(", ").append(country1.getDeaths()).append(")]");
             }
             Logger.logV(TAG, "Encoding and returning finished WebString...");
         } else {
