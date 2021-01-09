@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/statisticCallRequest"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.statistic.StatisticRequestFragment">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/IsoCountryChooserTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:text="@string/iso_country_chooser_title"
+        android:textAlignment="center"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
+        android:id="@+id/isoCountryChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_big"
+        android:textAlignment="center"
+        android:text="@string/iso_country_chooser_display"
+        app:hintText="@string/iso_country_chooser_display"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/criteriaChooserTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        android:text="@string/criteria_chooser_title"
+        android:textAlignment="center"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/isoCountryChooser"
+        />
+
+    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
+        android:id="@+id/criteriaChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_big"
+        android:textAlignment="center"
+        android:text="@string/criteria_chooser_display"
+        app:hintText="@string/criteria_chooser_display"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/chartTypeChooserTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        android:text="@string/chart_type_chooser_title"
+        android:textAlignment="center"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/criteriaChooser"
+        />
+
+    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
+        android:id="@+id/chartTypeChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_big"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:textAlignment="center"
+        android:text="@string/chart_type_chooser_display"
+        app:hintText="@string/chart_type_chooser_display"
+        app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/timePickerTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        android:text="@string/time_picker_title"
+        android:textAlignment="center"
+        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chartTypeChooser"
+        />
+
+    <Button
+        android:id="@+id/startDateChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        app:layout_constraintEnd_toStartOf="@id/endDateChooser"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timePickerTitle"
+        android:text="@string/pick_start_date" />
+
+    <Button
+        android:id="@+id/endDateChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/startDateChooser"
+        app:layout_constraintTop_toBottomOf="@id/timePickerTitle"
+        android:text="@string/pick_end_date" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_huge"
+        android:layout_marginStart="@dimen/margin_medium"
+        android:src="@android:drawable/ic_menu_send"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/startDateChooser"
+        android:contentDescription="Create new Statistic" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
