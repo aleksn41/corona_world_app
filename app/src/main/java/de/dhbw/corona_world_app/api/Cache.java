@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.api;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,7 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public class Cache {
 
-    private static LocalDateTime lastTimeAccessedLifeDataWorld;
+    private static LocalDateTime lastTimeAccessedLiveDataWorld;
 
     private static List<Country> cachedWorldData;
     //Country is just a placeholder for the return-class of the according statistic-service
@@ -37,11 +36,11 @@ public class Cache {
         setLastTimeAccessedLifeDataWorldToNow();
     }
 
-    public static LocalDateTime getLastTimeAccessedLifeDataWorld() {
-        return lastTimeAccessedLifeDataWorld;
+    public static LocalDateTime getLastTimeAccessedLiveDataWorld() {
+        return lastTimeAccessedLiveDataWorld;
     }
 
     private static void setLastTimeAccessedLifeDataWorldToNow() {
-        Cache.lastTimeAccessedLifeDataWorld = LocalDateTime.now();
+        Cache.lastTimeAccessedLiveDataWorld = LocalDateTime.now();
     }
 }

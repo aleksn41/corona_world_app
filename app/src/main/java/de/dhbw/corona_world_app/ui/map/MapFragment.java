@@ -101,6 +101,7 @@ public class MapFragment extends Fragment {
             Log.v(TAG,"Loading WebView with WebString...");
             loadingScreen.setProgressBar(100,"Visualizing data...");
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
+            loadingScreen.endLoadingScreen();
         });
         return root;
     }

@@ -28,9 +28,9 @@ public class APIManager {
 
     public static final int MAX_COUNTRY_LIST_SIZE = 10;
 
-    public static final int MAX_GET_DATA_WORLD_CACHE_OLDNESS = 15; //time-unit is minutes
+    public static final int MAX_GET_DATA_WORLD_CACHE_AGE = 15; //time-unit is minutes
 
-    public static final int MAX_LIVE_STATISTICS_CACHE_OLDNESS = 15; //time-unit is minutes
+    public static final int MAX_LIVE_STATISTICS_CACHE_AGE = 15; //time-unit is minutes
 
     public static final int MAX_CACHED_STATISTIC_CALLS = 50;
 
@@ -53,7 +53,7 @@ public class APIManager {
 
         List<Country> returnList = null;
 
-        if (!cacheEnabled || Cache.getLastTimeAccessedLifeDataWorld() == null || Cache.getLastTimeAccessedLifeDataWorld().isBefore(LocalDateTime.now().minusMinutes(MAX_GET_DATA_WORLD_CACHE_OLDNESS))) {
+        if (!cacheEnabled || Cache.getLastTimeAccessedLiveDataWorld() == null || Cache.getLastTimeAccessedLiveDataWorld().isBefore(LocalDateTime.now().minusMinutes(MAX_GET_DATA_WORLD_CACHE_AGE))) {
             Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
             int cnt = 0;

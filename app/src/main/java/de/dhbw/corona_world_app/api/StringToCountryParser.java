@@ -21,11 +21,11 @@ public class StringToCountryParser {
     public static Country parseFromHeroOneCountry(String toParse, Country country){
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
-            String[] tuple = string.split(":");
-            switch (tuple[0]) {
-                case"\"deaths\"":country.setDeaths(Integer.parseInt(tuple[1]));break;
-                case"\"cases\"":country.setInfected(Integer.parseInt(tuple[1]));break;
-                case"\"recovered\"":country.setRecovered(Integer.parseInt(tuple[1]));break;
+            String[] jsonPair = string.split(":");
+            switch (jsonPair[0]) {
+                case"\"deaths\"":country.setDeaths(Integer.parseInt(jsonPair[1]));break;
+                case"\"cases\"":country.setInfected(Integer.parseInt(jsonPair[1]));break;
+                case"\"recovered\"":country.setRecovered(Integer.parseInt(jsonPair[1]));break;
             }
         }
         return country;
