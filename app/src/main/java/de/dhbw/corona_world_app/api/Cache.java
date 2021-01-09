@@ -17,20 +17,15 @@ public class Cache {
     //Country is just a placeholder for the return-class of the according statistic-service
     private static Map<StatisticCall, Country> cachedStatisticsData;
 
-    public static void init(){
-        if(cachedWorldData==null || cachedStatisticsData==null) {
-            cachedWorldData = new ArrayList<>();
-            cachedStatisticsData = new HashMap<>();
-        }
-    }
-
     public static Map<StatisticCall, Country> getCachedStatisticsData() {
         return cachedStatisticsData;
     }
 
-    public static void setCachedStatisticsData(Map<StatisticCall, Country> cachedStatisticsData) {
-        init();
-        Cache.cachedStatisticsData = cachedStatisticsData;
+    public static void setCachedStatisticsData(StatisticCall statisticCall, Country country) {
+        if(cachedStatisticsData==null) {
+            cachedStatisticsData = new HashMap<>();
+        }
+        Cache.cachedStatisticsData.put(statisticCall, country);
     }
 
     public static List<Country> getCachedDataList() {
@@ -38,16 +33,15 @@ public class Cache {
     }
 
     public static void setCachedDataList(List<Country> cachedDataList) {
-        init();
         Cache.cachedWorldData = cachedDataList;
+        setLastTimeAccessedLifeDataWorldToNow();
     }
 
     public static LocalDateTime getLastTimeAccessedLifeDataWorld() {
         return lastTimeAccessedLifeDataWorld;
     }
 
-    public static void setLastTimeAccessedLifeDataWorldToNow() {
-        init();
+    private static void setLastTimeAccessedLifeDataWorldToNow() {
         Cache.lastTimeAccessedLifeDataWorld = LocalDateTime.now();
     }
 }
