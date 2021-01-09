@@ -16,8 +16,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import org.json.JSONException;
+
+import java.net.ConnectException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
+import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
@@ -30,7 +35,7 @@ public class MapFragment extends Fragment {
 
     MutableLiveData<String> webViewString = new MutableLiveData<>();
 
-    LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
+    private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
         public void startLoadingScreen() {
 
@@ -52,7 +57,6 @@ public class MapFragment extends Fragment {
         }
     };
 
-    //todo map ISOCodes to screen names for better understanding
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
     //loading screen will be implemented by ui-team
@@ -60,33 +64,37 @@ public class MapFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG,"Starting loading screen");
         loadingScreen.startLoadingScreen();
+
         Log.v(TAG,"Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         loadingScreen.setProgressBar(10,"Starting...");
+
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
-        webSettings.setUseWideViewPort(true);
+        webSettings.setUseWideViewPort(false);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
         webSettings.setSupportZoom(true);
-        ExecutorService service = ThreadPoolHandler.getsInstance();
+
+        ExecutorService service = ThreadPoolHandler.getInstance();
         loadingScreen.setProgressBar(20,"Requesting data...");
+        Log.v(TAG,"Requesting all countries...");
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     mapViewModel.initCountryList();
-                } catch (Throwable throwable) {
-                    Log.e(TAG,"Exception during initiation of country list!", throwable);
+                } catch (ConnectException | InterruptedException | ExecutionException | JSONException e) {
+                    Logger.logE(TAG,"Exception during initiation of country list!", e);
                 }
             }
         });
         loadingScreen.setProgressBar(30,"Request sent...");
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
-            loadingScreen.setProgressBar(40,"Answer arrived...");
+            loadingScreen.setProgressBar(50,"Answer arrived...");
             Log.v(TAG,"Requested countries have arrived");
             loadingScreen.setProgressBar(70,"Decrypting data...");
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));

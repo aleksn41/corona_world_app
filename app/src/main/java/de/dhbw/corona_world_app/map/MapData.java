@@ -2,6 +2,7 @@ package de.dhbw.corona_world_app.map;
 
 import android.util.Base64;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,7 @@ public class MapData {
 
     private static final String TAG = MapData.class.getName();
 
-    Map<String, String> ISOCodeToDisplayName;
+    private static Map<String, String> ISOCodeToDisplayName;
 
     String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script><script type=\"text/javascript\">" +
             "  window.goToStats = (country) => {console.log(country);};" +
@@ -62,13 +63,17 @@ public class MapData {
         initISOToDisplayMap();
         StringBuilder builder = new StringBuilder(entryList.size() * 100);
         Logger.logV(TAG,"Putting entries into StringBuilder...");
-        Country country = entryList.get(0);
-        builder.append("['"+ISOCodeToDisplayName.get(country.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country.getPop_inf_ratio()) +", createCustomHTMLContent('"+country.getISOCountry().name()+"',"+getPercentValueOfDouble(country.getPop_inf_ratio())+","+country.getHealthy()+", "+country.getInfected()+", "+country.getDeaths()+")]");
-        for (int i = 1; i < entryList.size(); i++) {
-            Country country1 = entryList.get(i);
-            builder.append(",['"+ISOCodeToDisplayName.get(country1.getISOCountry().getISOCode())+"',"+ getPercentValueOfDouble(country1.getPop_inf_ratio()) +", createCustomHTMLContent('"+country1.getISOCountry().name()+"',"+getPercentValueOfDouble(country1.getPop_inf_ratio())+","+country1.getHealthy()+", "+country1.getInfected()+", "+country1.getDeaths()+")]");
+        if(entryList.size() > 0) {
+            Country country = entryList.get(0);
+            builder.append("['" + ISOCodeToDisplayName.get(country.getISOCountry().getISOCode()) + "'," + getPercentValueOfDouble(country.getPop_inf_ratio()) + ", createCustomHTMLContent('" + country.getISOCountry().name() + "'," + getPercentValueOfDouble(country.getPop_inf_ratio()) + "," + country.getHealthy() + ", " + country.getInfected() + ", " + country.getDeaths() + ")]");
+            for (int i = 1; i < entryList.size(); i++) {
+                Country country1 = entryList.get(i);
+                builder.append(",['" + ISOCodeToDisplayName.get(country1.getISOCountry().getISOCode()) + "'," + getPercentValueOfDouble(country1.getPop_inf_ratio()) + ", createCustomHTMLContent('" + country1.getISOCountry().name() + "'," + getPercentValueOfDouble(country1.getPop_inf_ratio()) + "," + country1.getHealthy() + ", " + country1.getInfected() + ", " + country1.getDeaths() + ")]");
+            }
+            Logger.logV(TAG, "Encoding and returning finished WebString...");
+        } else {
+            throw new IllegalArgumentException("An empty List was given as input!");
         }
-        Logger.logV(TAG,"Encoding and returning finished WebString...");
         return Base64.encodeToString((WebViewStart + builder.toString() + WebViewEnd).getBytes(), Base64.NO_PADDING);
     }
 
