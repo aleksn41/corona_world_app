@@ -52,7 +52,6 @@ public class MapFragment extends Fragment {
         }
     };
 
-    //todo map ISOCodes to screen names for better understanding
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
     //loading screen will be implemented by ui-team
@@ -68,11 +67,12 @@ public class MapFragment extends Fragment {
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
-        webSettings.setUseWideViewPort(true);
+        webSettings.setUseWideViewPort(false);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
         webSettings.setSupportZoom(true);
-        ExecutorService service = ThreadPoolHandler.getsInstance();
+
+        ExecutorService service = ThreadPoolHandler.getInstance();
         loadingScreen.setProgressBar(20,"Requesting data...");
         service.execute(new Runnable() {
             @Override
@@ -86,7 +86,7 @@ public class MapFragment extends Fragment {
         });
         loadingScreen.setProgressBar(30,"Request sent...");
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
-            loadingScreen.setProgressBar(40,"Answer arrived...");
+            loadingScreen.setProgressBar(50,"Answer arrived...");
             Log.v(TAG,"Requested countries have arrived");
             loadingScreen.setProgressBar(70,"Decrypting data...");
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));

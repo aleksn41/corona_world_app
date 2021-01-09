@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,11 @@ public class MapViewModel extends ViewModel {
 
     public void initCountryList() throws Throwable {
         manager = new APIManager(false,false);
-        mCountryList.postValue(manager.getDataWorld(API.HEROKU));
+        List<Country> apiGottenList = manager.getDataWorld(API.HEROKU);
+        if(apiGottenList==null || !(apiGottenList.size() > 0)){
+            throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
+        }
+        mCountryList.postValue(apiGottenList);
     }
 
     public String getWebViewStringCustom(List<Country> countryList){
