@@ -30,7 +30,7 @@ public class MapFragment extends Fragment {
 
     MutableLiveData<String> webViewString = new MutableLiveData<>();
 
-    LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
+    private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
         public void startLoadingScreen() {
 
@@ -59,10 +59,12 @@ public class MapFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG,"Starting loading screen");
         loadingScreen.startLoadingScreen();
+
         Log.v(TAG,"Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         loadingScreen.setProgressBar(10,"Starting...");
+
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
