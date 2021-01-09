@@ -5,6 +5,6 @@
     </style>
 
     <style name="SpinnerDatePicker" parent="android:Widget.Material.DatePicker">
-        <item name="android:datePickerMode">spinner</item>
+        <item name="android:datePickerMode">calendar</item>
     </style>
 </resources>

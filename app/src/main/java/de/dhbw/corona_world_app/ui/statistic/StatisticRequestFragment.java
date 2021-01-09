@@ -14,11 +14,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 
-import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -71,22 +69,22 @@ public class StatisticRequestFragment extends Fragment {
         startDatePicker =new DatePickerDialog(getContext(),R.style.SpinnerDatePickerStyle, (view, year12, month12, dayOfMonth) -> {
             start =LocalDate.of(year12, month12+1,dayOfMonth);
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-            endDatePicker.getDatePicker().setMinDate(localeDateToMilliSecondsSince1970(start));
+            endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
         },year,month,day);
 
         endDatePicker=new DatePickerDialog(getContext(),R.style.SpinnerDatePickerStyle, (view, year1, month1, dayOfMonth) -> {
             end=LocalDate.of(year1, month1+1,dayOfMonth);
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-            startDatePicker.getDatePicker().setMaxDate(localeDateToMilliSecondsSince1970(end));
+            startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
         },year,month,day);
 
         //sets the min date to the beginning of Corona
-        startDatePicker.getDatePicker().setMinDate(localeDateToMilliSecondsSince1970(StatisticCall.MIN_DATE));
-        endDatePicker.getDatePicker().setMinDate(localeDateToMilliSecondsSince1970(StatisticCall.MIN_DATE));
+        startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
+        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
 
         //sets the max date to today
-        startDatePicker.getDatePicker().setMaxDate(localeDateToMilliSecondsSince1970(LocalDate.now()));
-        endDatePicker.getDatePicker().setMaxDate(localeDateToMilliSecondsSince1970(LocalDate.now()));
+        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
+        endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
 
         startDateChooser.setOnClickListener(v->startDatePicker.show());
         endDateChooser.setOnClickListener(v->endDatePicker.show());
@@ -106,7 +104,7 @@ public class StatisticRequestFragment extends Fragment {
         Navigation.findNavController(getView()).navigate(action);
     }
 
-    private long localeDateToMilliSecondsSince1970(LocalDate date){
+    private long localDateToMilliSeconds(LocalDate date){
         return date.atStartOfDay().toEpochSecond(ZoneId.systemDefault().getRules().getOffset(Instant.now()))*1000;
     }
 }

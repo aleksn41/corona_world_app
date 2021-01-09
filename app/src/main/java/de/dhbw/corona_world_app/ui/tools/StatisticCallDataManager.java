@@ -61,6 +61,7 @@ public class StatisticCallDataManager {
     private static final int SIZE_CATEGORY_SEPARATOR = 1;
     private static final int SIZE_FAVOURITE_BIT = 1;
     private static final int MAX_SIZE_DATE_STRING = 2+ SIZE_ITEM_SEPARATOR +2+ SIZE_ITEM_SEPARATOR + 4;
+    private static final int AMOUNT_OF_CATEGORIES = 6;
 
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallData;
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallFavouriteData;
@@ -595,7 +596,7 @@ public class StatisticCallDataManager {
 
     private Pair<StatisticCall, Boolean> parseData(String s) throws DataException {
         String[] categories = s.split(Pattern.quote(String.valueOf(CATEGORY_SEPARATOR)));
-        if (categories.length != 6) throw new DataException("Data is corrupt");
+        if (categories.length != AMOUNT_OF_CATEGORIES) throw new DataException("Data is corrupt");
         List<ISOCountry> decodedISOCountries = isoCountryEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[0].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         List<Criteria> decodedCriteria = criteriaEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[1].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
         List<ChartType> decodedChartType = chartTypeEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[2].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
@@ -604,7 +605,12 @@ public class StatisticCallDataManager {
         LocalDate startDay=parseByteArrayToLocaleDate(categories[4].getBytes(), categories[4].length());
         if(startDay==null)throw new DataException("start Date cannot be null");
         LocalDate endDay=parseByteArrayToLocaleDate(categories[5].getBytes(), categories[5].length());
-        return Pair.create(new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria,startDay,endDay), categories[3].equals("1"));
+        try {
+            StatisticCall parsedStatisticCall=new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria,startDay,endDay);
+            return Pair.create(parsedStatisticCall, categories[3].equals("1"));
+        }catch (IllegalArgumentException e){
+            throw new DataException("start or endDay are corrupt");
+        }
     }
 
     //TODO check for corruption

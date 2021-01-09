@@ -3,18 +3,17 @@ package de.dhbw.corona_world_app.datastructure;
 import androidx.annotation.NonNull;
 
 public enum Criteria {
-    DEATHS,
-    RECOVERED,
-    INFECTED,
-    HEALTHY,
-    POPULATION,
-    ID_RATION,
-    IH_RATION;
+    DEATHS("Deaths"),
+    RECOVERED("Recovered"),
+    INFECTED("Infected"),
+    HEALTHY("Healthy"),
+    POPULATION("Population"),
+    ID_RATION("Infected Deaths Ratio"),
+    IH_RATION("Infected Health Ratio");
 
+    String displayName;
 
-    @NonNull
-    @Override
-    public String toString() {
-        return super.toString().replace("_"," ");
+    Criteria(String displayName){
+        this.displayName=displayName;
     }
 }

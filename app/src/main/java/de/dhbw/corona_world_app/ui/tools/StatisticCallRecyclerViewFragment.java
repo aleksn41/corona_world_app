@@ -114,7 +114,8 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         try {
             statisticCallViewModel.saveAllData();
         } catch (ExecutionException | InterruptedException e) {
-            Log.e("error","error",e);
+            Log.e(this.getClass().getName(),"could not save Data",e);
+            //TODO handle
         }
     }
 
