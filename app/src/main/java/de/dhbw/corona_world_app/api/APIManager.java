@@ -26,11 +26,17 @@ import okhttp3.Request;
 
 public class APIManager {
 
+    public static final int MAX_COUNTRY_LIST_SIZE = 10;
+
+    public static final int MAX_GET_DATA_WORLD_CACHE_OLDNESS = 15; //time-unit is minutes
+
+    public static final int MAX_LIVE_STATISTICS_CACHE_OLDNESS = 15; //time-unit is minutes
+
+    public static final int MAX_CACHED_STATISTIC_CALLS = 50;
+
     private boolean cacheEnabled;
 
     private boolean longTermStorageEnabled;
-
-    public static final int MAX_COUNTRY_LIST_SIZE = 10;
 
     private static final String TAG = APIManager.class.getName();
 
@@ -48,7 +54,7 @@ public class APIManager {
 
         List<Country> returnList = null;
 
-        if(Cache.getLastTimeAccessedLifeDataWorld()==null || Cache.getLastTimeAccessedLifeDataWorld().isBefore(LocalDateTime.now().minusMinutes(15))) {
+        if(Cache.getLastTimeAccessedLifeDataWorld()==null || Cache.getLastTimeAccessedLifeDataWorld().isBefore(LocalDateTime.now().minusMinutes(MAX_GET_DATA_WORLD_CACHE_OLDNESS))) {
             Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
             int cnt = 0;
