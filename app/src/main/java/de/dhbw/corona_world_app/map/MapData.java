@@ -16,7 +16,7 @@ public class MapData {
 
     private static final String TAG = MapData.class.getName();
 
-    Map<String, String> ISOCodeToDisplayName;
+    private static Map<String, String> ISOCodeToDisplayName;
 
     String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script><script type=\"text/javascript\">" +
             "  window.goToStats = (country) => {console.log(country);};" +

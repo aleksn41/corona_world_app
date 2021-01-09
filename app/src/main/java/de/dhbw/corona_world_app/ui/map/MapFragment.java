@@ -16,8 +16,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import org.json.JSONException;
+
+import java.net.ConnectException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
+import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
@@ -76,13 +81,14 @@ public class MapFragment extends Fragment {
 
         ExecutorService service = ThreadPoolHandler.getInstance();
         loadingScreen.setProgressBar(20,"Requesting data...");
+        Log.v(TAG,"Requesting all countries...");
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     mapViewModel.initCountryList();
-                } catch (Throwable throwable) {
-                    Log.e(TAG,"Exception during initiation of country list!", throwable);
+                } catch (ConnectException | InterruptedException | ExecutionException | JSONException e) {
+                    Logger.logE(TAG,"Exception during initiation of country list!", e);
                 }
             }
         });
