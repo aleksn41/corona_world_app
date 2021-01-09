@@ -156,6 +156,8 @@ public class APIManager {
         return toReturn;
     }
 
+    //public static
+
     public static void enableCache() {
         APIManager.cacheEnabled = true;
     }
