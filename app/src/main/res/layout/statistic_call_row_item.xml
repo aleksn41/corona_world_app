@@ -18,10 +18,10 @@
 
     <ImageView
         android:id="@+id/statisticCallItemImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_centerVertical="true"
         android:layout_alignEnd="@id/StatisticCallItemTextView"
-        android:layout_marginTop="@dimen/statistic_call_list_item_margin_image"
         android:layout_marginEnd="@dimen/margin_big"
         android:src="@drawable/ic_favourites_star24dp"
         android:contentDescription="@string/description_Star"
