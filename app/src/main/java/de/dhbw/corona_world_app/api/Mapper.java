@@ -21,7 +21,7 @@ public class Mapper {
 
     private static List<String> blackList;
 
-    private static boolean isAlreadyInitiated=false;
+    private static boolean isAlreadyInitiated = false;
 
     private static void init(){
         if(!isAlreadyInitiated) {
