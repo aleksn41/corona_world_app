@@ -57,5 +57,14 @@
             app:enterAnim="@anim/fragment_fade_enter" />
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="de.dhbw.corona_world_app.ui.settings.SettingsFragment"
+        android:label="Settings" />
+    <action
+        android:id="@+id/action_global_navigation_settings"
+        app:destination="@id/navigation_settings"
+        app:enterAnim="@anim/fragment_fade_enter" />
+
 
 </navigation>

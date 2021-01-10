@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        app:key="cache_deactivated"
+        app:title="Disable Cache for less RAM usage (increases loading time)"/>
+
+    <SwitchPreferenceCompat
+        app:key="storage_disabled"
+        app:title="Disable Storage of frequently used Statistics"/>
+
+</PreferenceScreen>

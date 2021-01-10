@@ -2,14 +2,20 @@ package de.dhbw.corona_world_app;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import de.dhbw.corona_world_app.ui.settings.SettingsFragment;
+import de.dhbw.corona_world_app.ui.settings.SettingsFragmentDirections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,5 +52,15 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.top_action_bar_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {// User chose the "Settings" item, show the app settings UI...
+            NavDirections action=SettingsFragmentDirections.actionGlobalNavigationSettings();
+            Navigation.findNavController(this, R.id.nav_host_fragment).navigate(action);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
