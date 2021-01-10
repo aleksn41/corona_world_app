@@ -2,7 +2,8 @@ package de.dhbw.corona_world_app.api;
 
 public enum API {
     HEROKU("https://coronavirus-19-api.herokuapp.com", "/countries", "/countries/", false, "Heroku"),
-    RESTCOUNTRIES("https://restcountries.eu/rest/v2", "/all", "/alpha/", true, "RestCountries");
+    RESTCOUNTRIES("https://restcountries.eu/rest/v2", "/all", "/alpha/", true, "RestCountries"),
+    POSTMANAPI("https://api.covid19api.com", "/world/total","/total/country/", true, "api.covid19api.com");
 
     private final String url;
 
@@ -22,23 +23,23 @@ public enum API {
         this.name = name;
     }
 
-    public String getOneCountry() {
-        return getOneCountry;
+    public String getUrl() {
+        return url;
     }
 
-    public boolean acceptsISOCode() {
-        return acceptsISOCode;
+    public String getName() {
+        return name;
     }
 
     public String getAllCountries() {
         return getAllCountries;
     }
 
-    public String getUrl(){
-        return this.url;
+    public String getOneCountry() {
+        return getOneCountry;
     }
 
-    public String getName() {
-        return name;
+    public boolean acceptsISOCode() {
+        return acceptsISOCode;
     }
 }

@@ -10,7 +10,7 @@ public class ThreadPoolHandler {
 
     public static ExecutorService getInstance() {
         if (sInstance == null) {
-            synchronized (ExecutorService.class) {
+            synchronized (ThreadPoolHandler.class) {
                 sInstance = Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE);
             }
         }
