@@ -156,7 +156,13 @@ public class APIManager {
         return toReturn;
     }
 
-    //public static
+    public static boolean isCacheEnabled() {
+        return cacheEnabled;
+    }
+
+    public static boolean isLongTermStorageEnabled() {
+        return longTermStorageEnabled;
+    }
 
     public static void enableCache() {
         APIManager.cacheEnabled = true;
