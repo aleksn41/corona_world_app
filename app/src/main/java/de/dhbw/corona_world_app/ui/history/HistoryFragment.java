@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.core.util.Pair;
 import androidx.lifecycle.Observer;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
@@ -45,7 +47,10 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
     public ShowStatisticInterface getShowStatisticInterface() {
         return request -> {
             HistoryFragmentDirections.ShowStatistic2 action = HistoryFragmentDirections.showStatistic2(request,false);
-            Navigation.findNavController(getView()).navigate(action);
+            NavHostFragment navHostFragment =
+                    (NavHostFragment) requireActivity().getSupportFragmentManager()
+                            .findFragmentById(R.id.nav_host_fragment);
+            navHostFragment.getNavController().navigate(action);
         };
     }
 
