@@ -1,6 +1,8 @@
 package de.dhbw.corona_world_app.datastructure;
 
-public class Country {
+import java.io.Serializable;
+
+public class Country implements Serializable {
 
     private ISOCountry country;
 

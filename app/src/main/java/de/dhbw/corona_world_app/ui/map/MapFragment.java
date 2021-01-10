@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.net.ConnectException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -68,6 +69,7 @@ public class MapFragment extends Fragment {
         Log.v(TAG,"Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
+        mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10,"Starting...");
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
@@ -87,7 +89,7 @@ public class MapFragment extends Fragment {
             public void run() {
                 try {
                     mapViewModel.initCountryList();
-                } catch (ConnectException | InterruptedException | ExecutionException | JSONException e) {
+                } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
                     Logger.logE(TAG,"Exception during initiation of country list!", e);
                 }
             }
@@ -101,6 +103,7 @@ public class MapFragment extends Fragment {
             Log.v(TAG,"Loading WebView with WebString...");
             loadingScreen.setProgressBar(100,"Visualizing data...");
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
+            loadingScreen.endLoadingScreen();
         });
         return root;
     }

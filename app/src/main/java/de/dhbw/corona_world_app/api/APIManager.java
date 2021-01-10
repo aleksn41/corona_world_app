@@ -28,9 +28,9 @@ public class APIManager {
 
     public static final int MAX_COUNTRY_LIST_SIZE = 10;
 
-    public static final int MAX_GET_DATA_WORLD_CACHE_OLDNESS = 15; //time-unit is minutes
+    public static final int MAX_GET_DATA_WORLD_CACHE_AGE = 15; //time-unit is minutes
 
-    public static final int MAX_LIVE_STATISTICS_CACHE_OLDNESS = 15; //time-unit is minutes
+    public static final int MAX_LIVE_STATISTICS_CACHE_AGE = 15; //time-unit is minutes
 
     public static final int MAX_CACHED_STATISTIC_CALLS = 50;
 
@@ -53,7 +53,6 @@ public class APIManager {
 
         List<Country> returnList = null;
 
-        if (!cacheEnabled || Cache.getLastTimeAccessedLifeDataWorld() == null || Cache.getLastTimeAccessedLifeDataWorld().isBefore(LocalDateTime.now().minusMinutes(MAX_GET_DATA_WORLD_CACHE_OLDNESS))) {
             Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
             int cnt = 0;
@@ -78,10 +77,6 @@ public class APIManager {
             returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
 
             Logger.logD(TAG, "Putting live data into Cache...");
-            Cache.setCachedDataList(returnList);
-        } else {
-            returnList = Cache.getCachedDataList();
-        }
         return returnList;
     }
 
@@ -156,7 +151,13 @@ public class APIManager {
         return toReturn;
     }
 
-    //public static
+    public static boolean isCacheEnabled() {
+        return cacheEnabled;
+    }
+
+    public static boolean isLongTermStorageEnabled() {
+        return longTermStorageEnabled;
+    }
 
     public static void enableCache() {
         APIManager.cacheEnabled = true;

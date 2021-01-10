@@ -39,7 +39,7 @@ public enum API {
         return getOneCountry;
     }
 
-    public boolean isAcceptsISOCode() {
+    public boolean acceptsISOCode() {
         return acceptsISOCode;
     }
 }
