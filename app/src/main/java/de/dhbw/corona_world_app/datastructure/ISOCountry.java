@@ -3,6 +3,7 @@ package de.dhbw.corona_world_app.datastructure;
 import androidx.annotation.NonNull;
 
 public enum ISOCountry {
+
     Afghanistan("AF","Afghanistan"),
     Aland_Islands("AX","Åland Islands"),
     Albania("AL","Albania"),
@@ -253,7 +254,6 @@ public enum ISOCountry {
     Yemen("YE","Yemen"),
     Zambia("ZM","Zambia"),
     Zimbabwe("ZW","Zimbabwe");
-
 
     private final String ISOCode;
     private final String displayName;
