@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.core.util.Pair;
 import androidx.lifecycle.Observer;
+import androidx.navigation.Navigation;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,8 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.favourites.FavouriteFragment;
+import de.dhbw.corona_world_app.ui.favourites.FavouriteFragmentDirections;
+import de.dhbw.corona_world_app.ui.tools.ShowStatisticInterface;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallAdapterItemOnActionCallback;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
@@ -36,6 +39,14 @@ public class HistoryFragment extends StatisticCallRecyclerViewFragment {
     @Override
     public StatisticCallDataManager.DataType getDataType() {
         return StatisticCallDataManager.DataType.ALL_DATA;
+    }
+
+    @Override
+    public ShowStatisticInterface getShowStatisticInterface() {
+        return request -> {
+            HistoryFragmentDirections.ShowStatistic2 action = HistoryFragmentDirections.showStatistic2(request,false);
+            Navigation.findNavController(getView()).navigate(action);
+        };
     }
 
     //TODO change this

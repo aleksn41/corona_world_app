@@ -100,7 +100,7 @@ public class StatisticRequestFragment extends Fragment {
     }
 
     public void requestStatistic(StatisticCall request) {
-        StatisticRequestFragmentDirections.CreateStatistic action = StatisticRequestFragmentDirections.createStatistic(request);
+        StatisticRequestFragmentDirections.CreateStatistic action = StatisticRequestFragmentDirections.createStatistic(request,true);
         Navigation.findNavController(getView()).navigate(action);
     }
 

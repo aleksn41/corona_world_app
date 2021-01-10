@@ -56,8 +56,9 @@ public class StatisticFragment extends Fragment {
         if(bundle!=null){
             TextView testDisplay=view.findViewById(R.id.statisticCallItemTextView);
             StatisticCall request=StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
+            boolean isNewRequest=StatisticFragmentArgs.fromBundle(bundle).getIsNewRequest();
             testDisplay.setText(request.toString());
-            addToHistory(request);
+            if(isNewRequest)addToHistory(request);
         }
     }
 

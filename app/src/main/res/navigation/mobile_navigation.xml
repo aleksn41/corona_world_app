@@ -12,37 +12,50 @@
         tools:layout="@layout/fragment_map" />
 
     <fragment
-        android:id="@+id/navigation_statistic"
+        android:id="@+id/navigation_statistic_request"
         android:name="de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragment"
         android:label="@string/title_statistic_request"
         tools:layout="@layout/fragment_statistic_request">
         <action
             android:id="@+id/createStatistic"
-            app:destination="@id/statisticFragment"
+            app:destination="@id/navigation_statistic"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_close_exit" />
     </fragment>
 
     <fragment
-        android:id="@+id/statisticFragment"
+        android:id="@+id/navigation_statistic"
         android:name="de.dhbw.corona_world_app.ui.statistic.StatisticFragment"
         android:label="@string/title_statistic">
         <argument
             android:name="statisticCall"
             app:argType="de.dhbw.corona_world_app.datastructure.StatisticCall" />
+        <argument
+            android:name="isNewRequest"
+            app:argType="boolean" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_favourites"
         android:name="de.dhbw.corona_world_app.ui.favourites.FavouriteFragment"
         android:label="@string/title_favourites"
-        tools:layout="@layout/fragment_statistical_call_list" />
+        tools:layout="@layout/fragment_statistical_call_list" >
+        <action
+            android:id="@+id/showStatistic"
+            app:destination="@id/navigation_statistic"
+            app:enterAnim="@anim/fragment_fade_enter" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_history"
         android:name="de.dhbw.corona_world_app.ui.history.HistoryFragment"
         android:label="@string/title_history"
-        tools:layout="@layout/fragment_statistical_call_list" />
+        tools:layout="@layout/fragment_statistical_call_list" >
+        <action
+            android:id="@+id/showStatistic2"
+            app:destination="@id/navigation_statistic"
+            app:enterAnim="@anim/fragment_fade_enter" />
+    </fragment>
 
 
 </navigation>

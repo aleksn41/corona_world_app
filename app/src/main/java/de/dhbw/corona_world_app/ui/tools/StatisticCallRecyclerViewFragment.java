@@ -12,6 +12,7 @@ import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
@@ -71,17 +73,17 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         }, new StatisticCallAdapterOnLastItemLoaded() {
             @Override
             public void onLastItemLoaded() {
-                if(statisticCallViewModel.hasMoreData(getDataType())) {
+                if (statisticCallViewModel.hasMoreData(getDataType())) {
                     try {
                         Log.d(this.getClass().getName(), "last item reached, loading more Data of " + getDataType());
                         statisticCallViewModel.getMoreData(getDataType());
-                    }catch (InterruptedException | ExecutionException e) {
-                        Log.e(this.getClass().getName(),"error reading more Data",e);
+                    } catch (InterruptedException | ExecutionException e) {
+                        Log.e(this.getClass().getName(), "error reading more Data", e);
                         //TODO handle
                     }
                 }
             }
-        });
+        }, getShowStatisticInterface());
         statisticCallViewModel.observeData(getViewLifecycleOwner(), new Observer<List<Pair<StatisticCall, Boolean>>>() {
             @Override
             public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
@@ -122,6 +124,8 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();
 
     public abstract StatisticCallDataManager.DataType getDataType();
+
+    public abstract ShowStatisticInterface getShowStatisticInterface();
 
     public abstract void initViewModelData(StatisticCallViewModel statisticCallViewModel);
 }
