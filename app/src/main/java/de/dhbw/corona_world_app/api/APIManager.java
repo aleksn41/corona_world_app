@@ -53,7 +53,6 @@ public class APIManager {
 
         List<Country> returnList = null;
 
-        if (!cacheEnabled || Cache.getLastTimeAccessedLiveDataWorld() == null || Cache.getLastTimeAccessedLiveDataWorld().isBefore(LocalDateTime.now().minusMinutes(MAX_GET_DATA_WORLD_CACHE_AGE))) {
             Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
             int cnt = 0;
@@ -78,10 +77,6 @@ public class APIManager {
             returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
 
             Logger.logD(TAG, "Putting live data into Cache...");
-            Cache.setCachedDataList(returnList);
-        } else {
-            returnList = Cache.getCachedDataList();
-        }
         return returnList;
     }
 

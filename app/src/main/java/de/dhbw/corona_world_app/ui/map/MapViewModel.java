@@ -33,7 +33,7 @@ public class MapViewModel extends ViewModel {
 
     private File pathToCacheDir;
 
-    private LocalDateTime worldCacheAge;
+    private static LocalDateTime worldCacheAge;
 
     public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
 
