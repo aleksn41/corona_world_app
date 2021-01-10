@@ -6,10 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar
-        android:id="@+id/textRoundCornerProgressBar"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/statisticCallItemTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/request_not_found"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -29,14 +39,4 @@
         app:rcTextPositionPriority="inside"
         app:rcTextProgress="sample Text"
         app:rcTextProgressColor="#111111" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/statisticCallItemTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/request_not_found"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

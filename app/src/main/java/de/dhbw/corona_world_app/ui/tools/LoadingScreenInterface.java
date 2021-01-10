@@ -10,5 +10,5 @@ public interface LoadingScreenInterface {
 
     public void setProgressBar(int progress, @NonNull String message);
 
-    public int getProgress();
+    public float getProgress();
 }
