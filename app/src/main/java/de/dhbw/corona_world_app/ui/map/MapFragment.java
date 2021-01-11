@@ -96,19 +96,18 @@ public class MapFragment extends Fragment {
         webSettings.setSupportZoom(true);
 
         ExecutorService service = ThreadPoolHandler.getInstance();
-        loadingScreen.setProgressBar(20, "Requesting data...");
         Log.v(TAG, "Requesting all countries...");
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
+                    loadingScreen.setProgressBar(25, "Requesting data...");
                     mapViewModel.initCountryList();
                 } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
                     Logger.logE(TAG, "Exception during initiation of country list!", e);
                 }
             }
         });
-        loadingScreen.setProgressBar(30, "Request sent...");
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
             loadingScreen.setProgressBar(50, "Answer arrived...");
             Log.v(TAG, "Requested countries have arrived");
