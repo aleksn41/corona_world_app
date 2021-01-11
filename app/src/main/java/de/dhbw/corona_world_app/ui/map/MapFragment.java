@@ -10,6 +10,7 @@ import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -82,6 +83,11 @@ public class MapFragment extends Fragment {
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
+        myWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                loadingScreen.endLoadingScreen();
+            }
+        });
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(false);
@@ -111,8 +117,6 @@ public class MapFragment extends Fragment {
             Log.v(TAG, "Loading WebView with WebString...");
             loadingScreen.setProgressBar(100, "Visualizing data...");
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
-            //TODO this is called before it is actually loaded see if it can be fixed
-            loadingScreen.endLoadingScreen();
         });
         return root;
     }
