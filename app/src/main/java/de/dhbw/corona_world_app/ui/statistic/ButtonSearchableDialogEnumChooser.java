@@ -1,6 +1,5 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.text.Editable;
@@ -11,12 +10,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.R;
@@ -26,7 +25,6 @@ public class ButtonSearchableDialogEnumChooser<T extends Enum<T>> extends androi
     private AlertDialog chooser;
 
     private String dialogTitle = "";
-    private String clearText = "Clear & Close";
 
     private FilterableAdapter<T> adapter;
     private static final char ITEM_SEPARATOR = ',';
@@ -40,8 +38,6 @@ public class ButtonSearchableDialogEnumChooser<T extends Enum<T>> extends androi
             if (attr == R.styleable.ButtonSearchableDialogEnumChooser_hintText) {
                 this.setDialogTitle(a.getString(attr));
                 break;
-            } else if (attr == R.styleable.ButtonSearchableDialogEnumChooser_clearText) {
-                this.setClearText(a.getString(attr));
             }
         }
         initDialog();
@@ -55,10 +51,6 @@ public class ButtonSearchableDialogEnumChooser<T extends Enum<T>> extends androi
 
     public void setDialogTitle(String dialogTitle) {
         this.dialogTitle = dialogTitle;
-    }
-
-    public void setClearText(String clearText) {
-        this.clearText = clearText;
     }
 
     public void setLimit(int limit, FilterableAdapter.LimitExceedListener<T> limitExceedListener) {
@@ -121,7 +113,7 @@ public class ButtonSearchableDialogEnumChooser<T extends Enum<T>> extends androi
             dialog.cancel();
         });
 
-        builder.setNegativeButton(clearText, (dialog, which) -> {
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
             adapter.unSelectAllItems();
             dialog.cancel();
         });
