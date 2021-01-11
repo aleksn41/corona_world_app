@@ -24,10 +24,10 @@ public class StatisticCallViewModel extends ViewModel {
     public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException {
         this.dataFile = dataFile;
         dataManager = new StatisticCallDataManager(threadHandler, dataFile);
-    }
 
-    public boolean isInit() {
-        return dataManager != null;
+    }
+    public boolean isNotInit() {
+        return dataManager == null;
     }
 
     public Future<Void> getMoreData(StatisticCallDataManager.DataType dataType) throws ExecutionException, InterruptedException {

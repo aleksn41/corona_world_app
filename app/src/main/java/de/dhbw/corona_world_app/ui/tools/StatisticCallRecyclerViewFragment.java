@@ -12,19 +12,15 @@ import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
@@ -38,7 +34,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
-        if(!statisticCallViewModel.isInit()){
+        if(statisticCallViewModel.isNotInit()){
             Log.d(this.getClass().getName(),"init ViewModel");
             initViewModelData(statisticCallViewModel);
         }

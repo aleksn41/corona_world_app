@@ -387,6 +387,7 @@ public class StatisticCallDataManager {
             readAllAvailableFavData = true;
             currentPositionOnFile = 0;
             currentPositionOnFavIndices = 0;
+            resetSession();
             return null;
         });
         return lastAsyncTask;
@@ -482,7 +483,7 @@ public class StatisticCallDataManager {
         return lastAsyncTask;
     }
 
-    private void deleteMarkedIndicesNotCreatedInSession() throws ExecutionException, InterruptedException, IOException {
+    private void deleteMarkedIndicesNotCreatedInSession() throws IOException {
 
         /*if (indicesToDeleteOfEntriesNotCreatedInThisSession.size() == linesInCurrentFile){
             deleteAllData().get();

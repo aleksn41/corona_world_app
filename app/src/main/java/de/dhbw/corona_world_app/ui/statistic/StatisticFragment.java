@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticFragment extends Fragment {
@@ -41,7 +43,7 @@ public class StatisticFragment extends Fragment {
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
 
         //TODO remove this
-        if (!statisticCallViewModel.isInit()) {
+        if (statisticCallViewModel.isNotInit()) {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
             } catch (IOException e) {
@@ -49,15 +51,10 @@ public class StatisticFragment extends Fragment {
             }
         }
 
-
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
-        try {
-            testProgressBar();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        testProgressBar();
         return root;
     }
 
@@ -74,17 +71,31 @@ public class StatisticFragment extends Fragment {
 
     private void addToHistory(StatisticCall request) {
         try {
-            statisticCallViewModel.addData(Collections.singletonList(request));
+            statisticCallViewModel.addData(Collections.singletonList(request)).get();
             statisticCallViewModel.saveAllData();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(TAG,"could not save Data",e);
+            ErrorDialog.createBasicErrorDialog(getContext(), "Your Data seems to be corrupt", "We were not able to save new Data, we will try to fix this Problem", (dialog, which) -> {
+                //TODO implement check to see if Data can be recovered
+                boolean canBeRecovered=false;
+                if(canBeRecovered){
+                    //recover Data
+                }else{
+                    ErrorDialog.createBasicErrorDialog(getContext(), "We were not able to recover your Data", "Your History and your Favourites must be deleted for this app to function properly, we are so sorry", (dialog1, which1) -> {
+                        try {
+                            statisticCallViewModel.deleteAllItems().get();
+                        } catch (ExecutionException | InterruptedException e1) {
+                            Log.e(TAG,"Not able to delete corrupt Data", e1);
+                            ErrorDialog.createBasicErrorDialog(getContext(),"There has been an error deleting your Data","Something has gone terribly wrong, please reinstall the app and try again",null);
+                        }
+                    },"I understand");
+                }
+            });
         }
     }
 
     //will be removed once Statistic is finished
-    private void testProgressBar() throws ExecutionException, InterruptedException {
+    private void testProgressBar()  {
         int milliSecondsToLoad = 3000;
         ThreadPoolHandler.getInstance().submit(new Callable<Void>() {
             @Override
