@@ -1,36 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <EditText
         android:id="@+id/alertSearchEditText"
-        android:layout_width="fill_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
+        android:autofillHints="@string/auto_fill_hint"
         android:background="@drawable/default_border"
+        android:hint="@string/auto_fill_hint"
         android:inputType="text"
         android:padding="5dp"
-        android:autofillHints="@string/auto_fill_hint"
-        android:hint="@string/auto_fill_hint">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <requestFocus />
+        <requestFocus
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </EditText>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/alertSearchRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:cacheColorHint="@null"
-            android:fadeScrollbars="true"
-            android:fastScrollEnabled="true"
-            android:textFilterEnabled="true" />
-    </RelativeLayout>
-</LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/alertSearchRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:cacheColorHint="@null"
+        android:fadeScrollbars="true"
+        android:fastScrollEnabled="true"
+        android:textFilterEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alertSearchEditText" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

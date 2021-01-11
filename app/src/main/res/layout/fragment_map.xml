@@ -6,10 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".ui.map.MapFragment">
 
+    <WebView
+        android:id="@+id/map_web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar
+        android:id="@+id/progress_bar"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_centerInParent="true"
+        android:visibility="gone"
         app:rcBackgroundColor="#0A000000"
         app:rcBackgroundPadding="2dp"
         app:rcMax="100"
@@ -23,14 +30,5 @@
         app:rcTextOutsideGravity="end"
         app:rcTextPositionPriority="inside"
         app:rcTextProgress="sample Text"
-        app:rcTextProgressColor="#111111"
-        android:visibility="gone"/>
-
-
-    <WebView
-        android:id="@+id/map_web_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="?attr/actionBarSize" />
+        app:rcTextProgressColor="#111111" />
 </RelativeLayout>
