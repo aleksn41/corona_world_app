@@ -11,7 +11,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 
 import java.time.Instant;
@@ -100,8 +102,11 @@ public class StatisticRequestFragment extends Fragment {
     }
 
     public void requestStatistic(StatisticCall request) {
-        StatisticRequestFragmentDirections.CreateStatistic action = StatisticRequestFragmentDirections.createStatistic(request);
-        Navigation.findNavController(getView()).navigate(action);
+        StatisticRequestFragmentDirections.CreateStatistic action = StatisticRequestFragmentDirections.createStatistic(request,true);
+        NavHostFragment navHostFragment =
+                (NavHostFragment) requireActivity().getSupportFragmentManager()
+                        .findFragmentById(R.id.nav_host_fragment);
+        navHostFragment.getNavController().navigate(action);
     }
 
     private long localDateToMilliSeconds(LocalDate date){

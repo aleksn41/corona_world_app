@@ -522,8 +522,14 @@ public class StatisticCallDataManager {
     //TODO only if not deleted
     private void updateFavouriteMarkOfEntriesNotCreatedInThisSession(byte[] newFile) {
         for (Integer integer : indicesOfFavouriteChangedThisSession) {
-            int positionOfCurrentEntry = integer * (MAX_SIZE_ITEM + System.lineSeparator().length());
-            int positionOfFavouriteByte = getStartingPositionOfPadding(newFile, positionOfCurrentEntry, MAX_SIZE_ITEM) - 1;
+            int positionOfFavouriteByte = integer * (MAX_SIZE_ITEM + System.lineSeparator().length());
+            int currentCategory=0;
+            int categoryOfFavByte=3;
+            while((newFile[positionOfFavouriteByte]!='0'&&newFile[positionOfFavouriteByte]!='1')||categoryOfFavByte!=currentCategory){
+                if(newFile[positionOfFavouriteByte]==CATEGORY_SEPARATOR)currentCategory+=1;
+                positionOfFavouriteByte+=1;
+                if(currentCategory>categoryOfFavByte)throw new RuntimeException("Data in new File has become corrupt");
+            }
             //changes byte from '0' to '1' and '1' to '0'
             newFile[positionOfFavouriteByte] ^= 1;
         }
