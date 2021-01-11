@@ -1,4 +1,4 @@
-package de.dhbw.corona_world_app;
+package de.dhbw.corona_world_app.statistic;
 
 import java.util.List;
 
