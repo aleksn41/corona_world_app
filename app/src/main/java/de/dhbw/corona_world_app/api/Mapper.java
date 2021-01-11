@@ -21,7 +21,7 @@ public class Mapper {
 
     private static List<String> blackList;
 
-    private static boolean isAlreadyInitiated=false;
+    private static boolean isAlreadyInitiated = false;
 
     private static void init(){
         if(!isAlreadyInitiated) {
@@ -32,7 +32,6 @@ public class Mapper {
             apisToMap.put(API.HEROKU, herokuToStandardMap);
             apisToMap.put(API.RESTCOUNTRIES, restcountriesToStandardMap);
             reverseMapAPI = null;
-            blackList.add("Republic of Kosovo");
             blackList.add("Channel_Islands");
             blackList.add("World");
             blackList.add("Diamond_Princess");

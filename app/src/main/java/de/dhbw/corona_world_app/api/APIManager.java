@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
@@ -25,67 +26,68 @@ import okhttp3.Request;
 
 public class APIManager {
 
-    private boolean cacheEnabled;
-
-    private boolean longTermStorageEnabled;
-
     public static final int MAX_COUNTRY_LIST_SIZE = 10;
 
-    private final ExecutorService service;
+    public static final int MAX_GET_DATA_WORLD_CACHE_AGE = 15; //time-unit is minutes
 
-    public APIManager(boolean cacheEnabled, boolean longTermStorageEnabled){
-        this.cacheEnabled = cacheEnabled;
-        this.longTermStorageEnabled = longTermStorageEnabled;
-        service = ThreadPoolHandler.getInstance();
+    public static final int MAX_LIVE_STATISTICS_CACHE_AGE = 15; //time-unit is minutes
+
+    public static final int MAX_CACHED_STATISTIC_CALLS = 50;
+
+    private static boolean cacheEnabled;
+
+    private static boolean longTermStorageEnabled;
+
+    private static final String TAG = APIManager.class.getName();
+
+    private static final ExecutorService service = ThreadPoolHandler.getInstance();
+
+    public static void setSettings(boolean cacheEnabled, boolean longTermStorageEnabled) {
+        APIManager.cacheEnabled = cacheEnabled;
+        APIManager.longTermStorageEnabled = longTermStorageEnabled;
     }
 
-    public List<Country> getDataWorld(API api) throws Throwable {
-        Logger.logD("APIManager.getDataWorld","Getting Data for every Country from api "+api.getName());
+    //gets the data of the whole world through the specified api -> throws the cause of the ExecutionException
+    public static List<Country> getDataWorld(API api) throws ExecutionException, JSONException, InterruptedException {
+        Logger.logV(TAG, "Getting Data for every Country from api " + api.getName());
 
-        List<Country> returnList;
-        Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
+        List<Country> returnList = null;
 
-        int cnt = 0;
+            Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
-        try {
+            int cnt = 0;
+
             String apiReturn = future.get();
             returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
 
             Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
-            for (Country country:returnList) {
-                if(!Mapper.isInBlacklist(country.getName())) {
-                    if (popMap.containsKey(ISOCountry.valueOf(country.getName()))) {
-                        country.setPopulation(popMap.get(ISOCountry.valueOf(country.getName())));
+            for (Country country : returnList) {
+                if (country.getISOCountry() != null && !Mapper.isInBlacklist(country.getISOCountry().name())) {
+                    if (popMap.containsKey(country.getISOCountry())) {
+                        country.setPopulation(popMap.get(country.getISOCountry()));
                     } else {
                         cnt += 1;
-                        Logger.logD("APIManager.getDataWorld", "country \"" + country.getName() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                        Logger.logD("APIManager.getDataWorld", "country \"" + country.getISOCountry().name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
                     }
                 }
             }
-        } catch (ExecutionException e) {
-            Logger.logE("APIManager.getDataWorld", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
-            throw Objects.requireNonNull(e.getCause());
-        } catch (InterruptedException e) {
-            Logger.logE("APIManager.getDataWorld", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
-            throw e;
-        }
 
-        Logger.logD("APIManager.getDataWorld","count of countries with no popCount: "+cnt);
+            Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
+            returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
+
+            Logger.logD(TAG, "Putting live data into Cache...");
         return returnList;
     }
 
-    public List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame) throws Throwable {
-        Logger.logD("APIManager.getData", "Getting data according to following parameters: " + countryList + " ; " + criteriaList + " ; " + Arrays.toString(timeFrame));
-
+    //this method creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of country-objects
+    public static List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame) throws IllegalArgumentException, ExecutionException, InterruptedException {
+        Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList + " ; " + Arrays.toString(timeFrame));
         List<Country> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
         if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
             for (ISOCountry isoCountry : countryList) {
-                //make api-call
-                //System.out.println("Call for " + isoCountry.name() + " starting now " + LocalDateTime.now());
-
                 Future<String> future = service.submit(() -> {
                             String url = API.HEROKU.getUrl();
                             url += API.HEROKU.getOneCountry();
@@ -106,46 +108,40 @@ public class APIManager {
                     Future<Country> future1 = service.submit(new Callable<Country>() {
                         @Override
                         public Country call() throws Exception {
-                            return StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()),isoCountry.name());
+                            return StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name());
                         }
                     });
                     futurePopData.add(future1);
                 }
                 //System.out.println("Call for " + isoCountry.name() + " ending now " + LocalDateTime.now());
             }
-            for (int i = 0; i < futureCoronaData.size(); i++){
+            Logger.logV(TAG, "All requests have been sent...");
+            for (int i = 0; i < futureCoronaData.size(); i++) {
                 String currentString = futureCoronaData.get(i).get();
                 Country country = StringToCountryParser.parseFromHeroOneCountry(currentString);
                 country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
+            Logger.logV(TAG, "Country-List finished constructing...");
         } else {
-            throw new IllegalArgumentException("Input country list is too big, max allowed=" + MAX_COUNTRY_LIST_SIZE);
+            Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
+            throw new IllegalArgumentException("Input country list is too big, max allowed=" + MAX_COUNTRY_LIST_SIZE +"!");
         }
         return returnList;
     }
 
     //Gets a map with ISOCountries mapped to a {@code long} population count gotten by the restcountries api.
-    public Map<ISOCountry,Long> getAllCountriesPopData() throws Throwable {
-        Logger.logD("APIManager.getAllCountriesPopData", "Getting population data...");
+    public static Map<ISOCountry, Long> getAllCountriesPopData() throws ExecutionException, InterruptedException, JSONException {
+        Logger.logV(TAG, "Getting population data...");
         Future<String> future = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getAllCountries()));
         Map<ISOCountry, Long> returnMap = new HashMap<>();
-        try {
-            returnMap = StringToCountryParser.parseMultiPopCount(future.get());
-        } catch (ExecutionException e) {
-            Logger.logE("APIManager.getAllCountriesPopData", "Error executing async call\n" + Arrays.toString(e.getStackTrace()));
-            throw Objects.requireNonNull(e.getCause());
-        } catch (InterruptedException e) {
-            Logger.logE("APIManager.getAllCountriesPopData", "Interruption error\n" + Arrays.toString(e.getStackTrace()));
-            throw e;
-        } catch (JSONException e) {
-            Logger.logE("APIManager.getAllCountriesPopData", "Error parsing JSON\n" + Arrays.toString(e.getStackTrace()));
-        }
+        returnMap = StringToCountryParser.parseMultiPopCount(future.get());
         return returnMap;
     }
 
     //creates a GET-Call to an url and returns the {@code String} body
-    public String createAPICall(String url) throws IOException {
+    public static String createAPICall(String url) throws IOException {
+        Logger.logV(TAG, "Making api call to " + url + " ...");
         OkHttpClient client = new OkHttpClient();
         final Request request = new Request.Builder()
                 .url(url)
@@ -155,24 +151,32 @@ public class APIManager {
         return toReturn;
     }
 
-    public void enableCache(){
-        cacheEnabled = true;
+    public static boolean isCacheEnabled() {
+        return cacheEnabled;
     }
 
-    public void disableCache(){
-        cacheEnabled = false;
+    public static boolean isLongTermStorageEnabled() {
+        return longTermStorageEnabled;
     }
 
-    public void enableLongTermStorage(){
-        longTermStorageEnabled = true;
+    public static void enableCache() {
+        APIManager.cacheEnabled = true;
     }
 
-    public void disableLongTermStorage(){
-        longTermStorageEnabled = false;
+    public static void disableCache() {
+        APIManager.cacheEnabled = false;
+    }
+
+    public static void enableLongTermStorage() {
+        APIManager.longTermStorageEnabled = true;
+    }
+
+    public static void disableLongTermStorage() {
+        APIManager.longTermStorageEnabled = false;
     }
 
     //disables logs for testing
-    public void disableLogsForTesting(){
+    public static void disableLogsForTesting() {
         Logger.disableLogging();
     }
 }

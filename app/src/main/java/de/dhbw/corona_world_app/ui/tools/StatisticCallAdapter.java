@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
@@ -19,7 +20,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 
+//TODO instead of Pairs use an extra Hashset for the selected Items
 public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean>, StatisticCallViewHolder> {
     private boolean multiSelectForDeleteActivated=false;
 
@@ -68,7 +71,13 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
     //used to Inform the List-Owner if an Item is supposed to be deleted
     private final StatisticCallDeleteInterface deleteInterface;
 
-    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface) {
+    //used to add an Callback when the last item is loaded
+    private final StatisticCallAdapterOnLastItemLoaded onLastItemLoaded;
+
+    //used to show Statistic when user wants to see a certain Statistic
+    private final ShowStatisticInterface showStatisticInterface;
+
+    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface,StatisticCallAdapterOnLastItemLoaded onLastItemLoaded,ShowStatisticInterface showStatisticInterface) {
         super(new DiffUtil.ItemCallback<Pair<StatisticCall,Boolean>>() {
 
             @Override
@@ -83,6 +92,8 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         });
         this.itemOnActionCallback=itemOnActionCallback;
         this.deleteInterface = deleteInterface;
+        this.onLastItemLoaded=onLastItemLoaded;
+        this.showStatisticInterface=showStatisticInterface;
     }
 
     @NotNull
@@ -99,6 +110,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         holder.setItem(getItem(holder.getAdapterPosition()));
         //setActionCallback if available
         if(itemOnActionCallback!=null)holder.getImageView().setOnClickListener(v -> itemOnActionCallback.callback(holder.getAdapterPosition()));
+        //check if its the last item
+        if(holder.getAdapterPosition()==getItemCount()-1){
+            onLastItemLoaded.onLastItemLoaded();
+        }
         //tell Fragment and ViewModel that an Item should be marked for deletion and Deletion Mode should be activated if not already on
         holder.itemView.setOnLongClickListener(v -> {
             if(!multiSelectForDeleteActivated){
@@ -109,13 +124,13 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
             return true;
         });
 
-        //if the item is clicked, go to Statistic with the call TODO instead show pop up with more info and a confirmation he wants to see the statistic
+        //if the item is clicked, go to Statistic with the call
         holder.itemView.setOnClickListener(v -> {
             if(multiSelectForDeleteActivated){
                 selectItemToDelete(holder.getAdapterPosition(),holder);
             }else{
-                //TODO
-                //goToStatistic(getItem(position))
+                //TODO  show pop up with more info and a confirmation he wants to see the statistic
+                goToStatistic(getItem(holder.getAdapterPosition()).first);
             }
         });
         setMarkedItem(holder,selectedItemsToDelete.contains(holder.getAdapterPosition()));
@@ -140,6 +155,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
     private void setMarkedItem(StatisticCallViewHolder holder,boolean mark){
         holder.itemView.setAlpha(mark?0.3f:1f);
+    }
+
+    private void goToStatistic(StatisticCall request){
+        showStatisticInterface.showStatisticCall(request);
     }
 }
 

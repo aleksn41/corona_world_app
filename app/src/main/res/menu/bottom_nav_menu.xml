@@ -7,7 +7,7 @@
         android:title="@string/title_world" />
 
     <item
-        android:id="@+id/navigation_statistic"
+        android:id="@+id/navigation_statistic_request"
         android:icon="@drawable/ic_bar_chart_24dp"
         android:title="@string/title_statistic" />
 

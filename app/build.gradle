@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id "androidx.navigation.safeargs"
 }
 
 android {
@@ -38,9 +39,11 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.navigation:navigation-fragment:2.3.2'
     implementation 'androidx.navigation:navigation-ui:2.3.2'
+    implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.akexorcist:round-corner-progress-bar:2.1.1'
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.json:json:20180813'
     testImplementation "androidx.arch.core:core-testing:$arch_version"
