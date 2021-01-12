@@ -6,6 +6,7 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
@@ -63,7 +64,8 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                     statisticCallViewModel.deleteItems(ItemIds, getDataType()).get();
                 } catch (ExecutionException | InterruptedException e) {
                     Log.e(this.getClass().getName(), "items could not be deleted", e);
-                    //TODO handle
+                    //this should not happen
+                    ErrorDialog.createBasicErrorDialog(getContext(),"An critical Error has occurred","It seems that something unexpected happened, please restart the App and if that does not help reinstall the App",null);
                 }
             }
         }, new StatisticCallAdapterOnLastItemLoaded() {
@@ -75,7 +77,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                         statisticCallViewModel.getMoreData(getDataType());
                     } catch (InterruptedException | ExecutionException e) {
                         Log.e(this.getClass().getName(), "error reading more Data", e);
-                        //TODO handle
+                        tryRepairingData();
                     }
                 }
             }
@@ -98,23 +100,24 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
     @Override
     public void onPause() {
-        super.onPause();
-        Log.d(this.getClass().getName(), "Pausing Fragment");
+        Log.d(this.getClass().getName()+"|"+getDataType(), "Pausing Fragment");
         if (deleteMode != null) {
             deleteMode.finish();
             deleteMode = null;
         }
+        super.onPause();
     }
 
     @Override
     public void onStop() {
-        super.onStop();
+        Log.d(this.getClass().getName()+"|"+getDataType(),"Stopping Fragment");
         try {
             statisticCallViewModel.saveAllData();
         } catch (ExecutionException | InterruptedException e) {
             Log.e(this.getClass().getName(),"could not save Data",e);
-            //TODO handle
+            Toast.makeText(getContext(), "Could not save Data of this Session, please restart the Application if you want your Session to be saved", Toast.LENGTH_LONG).show();
         }
+        super.onStop();
     }
 
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();
@@ -124,4 +127,23 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public abstract ShowStatisticInterface getShowStatisticInterface();
 
     public abstract void initViewModelData(StatisticCallViewModel statisticCallViewModel);
+
+    protected void tryRepairingData(){
+        ErrorDialog.createBasicErrorDialog(getContext(), "Your Data seems to be corrupt", "We were not able to save new Data, we will try to fix this Problem", (dialog, which) -> {
+            //TODO implement check to see if Data can be recovered
+            boolean canBeRecovered=false;
+            if(canBeRecovered){
+                //recover Data
+            }else{
+                ErrorDialog.createBasicErrorDialog(getContext(), "We were not able to recover your Data", "Your History and your Favourites must be deleted for this app to function properly, we are so sorry", (dialog1, which1) -> {
+                    try {
+                        statisticCallViewModel.deleteAllItems().get();
+                    } catch (ExecutionException | InterruptedException e1) {
+                        Log.e(this.getClass().getName()+"|"+getDataType(),"Not able to delete corrupt Data", e1);
+                        ErrorDialog.createBasicErrorDialog(getContext(),"There has been an error deleting your Data","Something has gone terribly wrong, please reinstall the app and try again",null);
+                    }
+                },"I understand");
+            }
+        });
+    }
 }

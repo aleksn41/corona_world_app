@@ -48,6 +48,7 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
  * For more information on how the data is structure see
  * @author Aleksandr Stankoski
  */
+//TODO if time is left, implement a backup file
 public class StatisticCallDataManager {
     private static final char ITEM_SEPARATOR = ',';
     private static final char CATEGORY_SEPARATOR = '|';
@@ -470,6 +471,7 @@ public class StatisticCallDataManager {
      * Saves all local data in permanent Storage
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
+    //TODO check if new Data has been set before saving
     public Future<Void> saveAllData() throws ExecutionException, InterruptedException {
         //check if old request is finished
         checkLastAsyncTask();

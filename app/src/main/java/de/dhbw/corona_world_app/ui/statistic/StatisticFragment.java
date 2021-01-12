@@ -1,11 +1,13 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,12 +44,11 @@ public class StatisticFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
 
-        //TODO remove this
         if (statisticCallViewModel.isNotInit()) {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
             } catch (IOException e) {
-                e.printStackTrace();
+                ErrorDialog.createBasicErrorDialog(getContext(), "We were not able to create new Files", "Please restart the application or it will not function properly", null);
             }
         }
 
@@ -75,22 +76,7 @@ public class StatisticFragment extends Fragment {
             statisticCallViewModel.saveAllData();
         } catch (ExecutionException | InterruptedException e) {
             Log.e(TAG,"could not save Data",e);
-            ErrorDialog.createBasicErrorDialog(getContext(), "Your Data seems to be corrupt", "We were not able to save new Data, we will try to fix this Problem", (dialog, which) -> {
-                //TODO implement check to see if Data can be recovered
-                boolean canBeRecovered=false;
-                if(canBeRecovered){
-                    //recover Data
-                }else{
-                    ErrorDialog.createBasicErrorDialog(getContext(), "We were not able to recover your Data", "Your History and your Favourites must be deleted for this app to function properly, we are so sorry", (dialog1, which1) -> {
-                        try {
-                            statisticCallViewModel.deleteAllItems().get();
-                        } catch (ExecutionException | InterruptedException e1) {
-                            Log.e(TAG,"Not able to delete corrupt Data", e1);
-                            ErrorDialog.createBasicErrorDialog(getContext(),"There has been an error deleting your Data","Something has gone terribly wrong, please reinstall the app and try again",null);
-                        }
-                    },"I understand");
-                }
-            });
+            Toast.makeText(getContext(), "Could not save Data of this Session, please restart the Application if you want your Session to be saved", Toast.LENGTH_LONG).show();
         }
     }
 
