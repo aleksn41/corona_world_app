@@ -22,9 +22,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -67,9 +70,9 @@ public class StatisticCallDataManager {
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallData;
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallFavouriteData;
 
-    //saving Session Data in order to Save in File Later
+    //saving Session Data in order to save in File Later
     private final List<Integer> indicesToDeleteOfEntriesNotCreatedInThisSession = new ArrayList<>();
-    private final HashSet<Integer> indicesOfFavouriteChangedThisSession = new HashSet<>();
+    private List<Integer> indicesOfFavouriteChangedNotCreatedThisSession = new ArrayList<>();
     private int amountOfNewItemsAddedInSession = 0;
 
     private List<Integer> indicesOfFavouriteEntries;
@@ -84,7 +87,7 @@ public class StatisticCallDataManager {
     public boolean readAllAvailableData = false;
     public boolean readAllAvailableFavData = false;
     int linesInCurrentFile;
-    //technically a constant but dependent on another constant which could change, which is why its dynamically generated
+    //technically a constant but dependent on enum size, which could change, which is why its dynamically generated
     public int MAX_SIZE_ITEM;
     //used in order to check if old AsyncTask has been finished before starting a new one
     private Future<Void> lastAsyncTask;
@@ -99,7 +102,7 @@ public class StatisticCallDataManager {
 
         File getFileToReadFrom();
 
-        int getPosition();
+        int getFilePosition();
 
         boolean atTheEndOfFile();
 
@@ -118,7 +121,7 @@ public class StatisticCallDataManager {
         }
 
         @Override
-        public int getPosition() {
+        public int getFilePosition() {
             return (int) (currentPositionOnFile * (MAX_SIZE_ITEM + System.lineSeparator().length()));
         }
 
@@ -151,7 +154,7 @@ public class StatisticCallDataManager {
         }
 
         @Override
-        public int getPosition() {
+        public int getFilePosition() {
             return indicesOfFavouriteEntries.get(currentPositionOnFavIndices)*(MAX_SIZE_ITEM + System.lineSeparator().length());
         }
 
@@ -206,7 +209,7 @@ public class StatisticCallDataManager {
         linesInCurrentFile = getLinesInFile();
     }
 
-    public boolean hasMoreData(DataType dataType){
+    public boolean hasMoreData(@NonNull DataType dataType){
         switch (dataType){
             case ALL_DATA:
                 return !readAllAvailableData;
@@ -218,17 +221,13 @@ public class StatisticCallDataManager {
     }
 
     //TODO if user corrupts Data may cause an array out of bounds exception
-    //TODO if this method reads a fav entry remember it and read less if fav is requested
-    //TODO adjust position when deleted
-    //reading file in reverse
-
     /**
      * Reads more data, if there exists more, into the corresponding MutableLiveData.
      * Only {@link StatisticCallDataManager#LINES_READ_PER_REQUEST} lines are read at most
      * @param dataType describes the data that is supposed to be loaded
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> requestMoreData(DataType dataType) throws ExecutionException, InterruptedException {
+    public Future<Void> requestMoreData(@NonNull DataType dataType) throws ExecutionException, InterruptedException {
         Log.i(this.getClass().getName()+"|"+dataType, "loading more Data of " + dataType);
         checkLastAsyncTask();
         lastAsyncTask=executorService.submit(new Callable<Void>() {
@@ -257,7 +256,7 @@ public class StatisticCallDataManager {
                             request.setAllDataIsRead();
                             break;
                         }
-                        r.seek(request.getPosition());
+                        r.seek(request.getFilePosition());
                         int success = r.read(buffer);
                         Log.d(this.getClass().getName()+"|"+dataType, "amount of bytes read: " + success);
                         int positionOfStringWithoutPadding = getStartingPositionOfPadding(buffer, 0, MAX_SIZE_ITEM);
@@ -278,8 +277,7 @@ public class StatisticCallDataManager {
 
     //TODO if an error occurs, undo everything
     //TODO check if space is available before and request if necessary
-    //TODO if memory usage is too high remove padding (costs more time if no padding exists)
-    //TODO only a maximum Number of MAX_SIZE entries
+    //TODO only a maximum Number of MAX_SIZE entries (optional)
     /**
      * add new StatisticCalls to All Data.
      * To save the Data permanently use {@link StatisticCallDataManager#saveAllData()}
@@ -304,14 +302,6 @@ public class StatisticCallDataManager {
         return lastAsyncTask;
     }
 
-    //TODO recover data, if process was killed while Data has been changed (unlikely, only implemented if time is left)
-    //TODO if slow maybe load lines that are already in ram instead of in file
-    //TODO load in chunks if all Data cannot be loaded at once
-    //TODO check if input is correct (if necessary)
-    //TODO adjust current position after deleting
-    //TODO are indices updated if addData is called?
-    //TODO clean up
-
     /**
      * deletes the entries of the given indices depended on the context of the given indices
      * To save the Data permanently use {@link StatisticCallDataManager#saveAllData()}
@@ -322,44 +312,46 @@ public class StatisticCallDataManager {
     public Future<Void> deleteData(Set<Integer> indices, DataType dataType) throws ExecutionException, InterruptedException {
         checkLastAsyncTask();
         lastAsyncTask= executorService.submit(() -> {
+            Set<Integer> favouriteIndicesToDelete;
+            Set<Integer> indicesOfAllDataToRemove;
             switch (dataType) {
                 case ALL_DATA:
-                    //delete data from All Data
-                    statisticCallData.postValue(IntStream.range(0, Objects.requireNonNull(statisticCallData.getValue()).size()).parallel().boxed().filter(i -> !indices.contains(i)).map(i -> statisticCallData.getValue().get(i)).collect(Collectors.toList()));
-                    Set<Integer> favouriteIndicesToDelete = indices.parallelStream().map(this::historyIndexToFavIndex).filter(i -> i >= 0).collect(Collectors.toSet());
-                    //delete fav entries
-                    statisticCallFavouriteData.postValue(IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !favouriteIndicesToDelete.contains(i)).map(i -> statisticCallFavouriteData.getValue().get(i)).collect(Collectors.toList()));
-                    //update fav indices
-                    int deleted=favouriteIndicesToDelete.size();
-                    ArrayList<Integer> newList=new ArrayList<>(indicesOfFavouriteEntries.size());
-                    for (int i = 0; i < indicesOfFavouriteEntries.size(); i++) {
-                        if(favouriteIndicesToDelete.contains(i)){
-                            deleted-=1;
-                        }else newList.add(indicesOfFavouriteEntries.get(i)-deleted);
-                    }
-                    indicesOfFavouriteEntries=newList;
-                    //remember items that are supposed to be deleted from storage to delete them later in saveData()
-                    indicesToDeleteOfEntriesNotCreatedInThisSession.addAll(indices.parallelStream().filter(i -> i >= amountOfNewItemsAddedInSession).collect(Collectors.toList()));
+                    favouriteIndicesToDelete = indices.parallelStream().map(this::historyIndexToFavIndex).filter(i -> i >= 0).collect(Collectors.toSet());
+                    indicesOfAllDataToRemove=indices;
                     break;
                 case FAVOURITE_DATA:
-                    //delete Data from ALL Data
-                    Set<Integer> indicesOfAllDataToRemove = indices.parallelStream().map(this::favIndexToHistoryIndex).collect(Collectors.toSet());
-                    statisticCallData.postValue(IntStream.range(0, Objects.requireNonNull(statisticCallData.getValue()).size()).parallel().boxed().filter(i -> !indicesOfAllDataToRemove.contains(i)).map(i -> statisticCallData.getValue().get(i)).collect(Collectors.toList()));
-                    //delete fav entries
-                    statisticCallFavouriteData.postValue(IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !indices.contains(i)).map(i -> statisticCallFavouriteData.getValue().get(i)).collect(Collectors.toList()));
-                    //update fav indices
-                    deleted=indices.size();
-                    newList=new ArrayList<>(indicesOfFavouriteEntries.size());
-                    for (int i = 0; i < indicesOfFavouriteEntries.size(); i++) {
-                        if(indices.contains(i)){
-                            deleted-=1;
-                        }else newList.add(indicesOfFavouriteEntries.get(i)-deleted);
-                    }
-                    indicesOfFavouriteEntries=newList;
-                    //remember items that are supposed to be deleted from storage to delete them later in saveData()
-                    indicesToDeleteOfEntriesNotCreatedInThisSession.addAll(indicesOfAllDataToRemove.parallelStream().filter(i -> i >= amountOfNewItemsAddedInSession).collect(Collectors.toList()));
+                    favouriteIndicesToDelete=indices;
+                    indicesOfAllDataToRemove = indices.parallelStream().map(this::favIndexToHistoryIndex).collect(Collectors.toSet());
                     break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + dataType);
             }
+            //delete data from All Data
+            statisticCallData.postValue(IntStream.range(0, Objects.requireNonNull(statisticCallData.getValue()).size()).parallel().boxed().filter(i -> !indicesOfAllDataToRemove.contains(i)).map(i -> statisticCallData.getValue().get(i)).collect(Collectors.toList()));
+            //delete fav entries
+            statisticCallFavouriteData.postValue(IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !favouriteIndicesToDelete.contains(i)).map(i -> statisticCallFavouriteData.getValue().get(i)).collect(Collectors.toList()));
+            //update fav indices
+            int deleted=favouriteIndicesToDelete.size();
+            ArrayList<Integer> newList=new ArrayList<>(indicesOfFavouriteEntries.size());
+            for (int i = 0; i < indicesOfFavouriteEntries.size(); i++) {
+                if(favouriteIndicesToDelete.contains(i)){
+                    deleted-=1;
+                }else newList.add(indicesOfFavouriteEntries.get(i)-deleted);
+            }
+            indicesOfFavouriteEntries=newList;
+            //remember items that are supposed to be deleted from storage to delete them later in saveData()
+            indicesToDeleteOfEntriesNotCreatedInThisSession.addAll(indicesOfAllDataToRemove.parallelStream().filter(i -> i >= amountOfNewItemsAddedInSession).collect(Collectors.toList()));
+            //update count of newly created Items
+            long amountOfNewItemsDeleted=indicesOfAllDataToRemove.parallelStream().filter(i->i<amountOfNewItemsAddedInSession).count();
+            amountOfNewItemsAddedInSession-=amountOfNewItemsDeleted;
+            deleted=0;
+            ArrayList<Integer> newList2=new ArrayList<>(indicesOfFavouriteChangedNotCreatedThisSession.size()-(indicesOfAllDataToRemove.size()-(int)amountOfNewItemsDeleted));
+            for (int i = 0; i < indicesOfFavouriteChangedNotCreatedThisSession.size(); i++) {
+                if(indicesOfAllDataToRemove.contains(indicesOfFavouriteChangedNotCreatedThisSession.get(i))){
+                    deleted+=1;
+                }else newList2.add(indicesOfFavouriteChangedNotCreatedThisSession.get(i)-deleted);
+            }
+            indicesOfFavouriteChangedNotCreatedThisSession=newList2;
             return null;
         });
         return lastAsyncTask;
@@ -394,15 +386,12 @@ public class StatisticCallDataManager {
         return lastAsyncTask;
     }
 
-
-    //TODO last part async?
-
     /**
-     * toggle the favourite Mark of an item
+     * toggle the favourite mark of an item
      * @param index the index of the item in the MutableLiveData
      * @param dataType the context of this item
      */
-    public void toggleFav(int index, DataType dataType) {
+    public void toggleFav(int index,@NonNull DataType dataType) {
         int indexOfAllData;
         //positive if index exists in fav negative if it does not exist
         //if it is negative, it indicates the position where the item is to be inserted
@@ -432,9 +421,12 @@ public class StatisticCallDataManager {
 
         //only need to save this information for items not added this session
         if (indexOfAllData >= amountOfNewItemsAddedInSession) {
-            if (indicesOfFavouriteChangedThisSession.contains(indexOfAllData))
-                indicesOfFavouriteChangedThisSession.remove(indexOfAllData);
-            else indicesOfFavouriteChangedThisSession.add(indexOfAllData);
+            //if index<0 the item does not exist in List
+            int indexInFavouriteChanged=Collections.binarySearch(indicesOfFavouriteChangedNotCreatedThisSession,indexOfAllData);
+            if (indexInFavouriteChanged>=0) {
+                indicesOfFavouriteChangedNotCreatedThisSession.remove(indexInFavouriteChanged);
+            }
+            else indicesOfFavouriteChangedNotCreatedThisSession.add(-indexInFavouriteChanged-1,indexOfAllData);
         }
         //toggle favourite Flag
         if (itemAlreadyLoadedInAllData) {
@@ -457,7 +449,6 @@ public class StatisticCallDataManager {
         else {
             //negate number to get insertion point (read function description of binarySearch)
             potentialIndexOfFavData=-potentialIndexOfFavData-1;
-            //find index to insert new item into
             indicesOfFavouriteEntries.add(potentialIndexOfFavData, lineInFile);
             //if this entry is in between the already loaded data, insert it into list
             if (potentialIndexOfFavData <= currentPositionOnFavIndices) {
@@ -471,6 +462,10 @@ public class StatisticCallDataManager {
      * Saves all local data in permanent Storage
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
+    //TODO recover data, if process was killed while Data has been changed (unlikely, only implemented if time is left)
+    //TODO load in chunks if all Data cannot be loaded at once
+    //TODO check if input is correct (if necessary)
+    //TODO adjust current position after deleting
     //TODO check if new Data has been set before saving
     public Future<Void> saveAllData() throws ExecutionException, InterruptedException {
         //check if old request is finished
@@ -522,10 +517,9 @@ public class StatisticCallDataManager {
         }
     }
 
-    //TODO only if not deleted
     private void updateFavouriteMarkOfEntriesNotCreatedInThisSession(byte[] newFile) {
-        for (Integer integer : indicesOfFavouriteChangedThisSession) {
-            int positionOfFavouriteByte = integer * (MAX_SIZE_ITEM + System.lineSeparator().length());
+        for (Integer integer : indicesOfFavouriteChangedNotCreatedThisSession) {
+            int positionOfFavouriteByte = (linesInCurrentFile-integer-1) * (MAX_SIZE_ITEM + System.lineSeparator().length());
             int currentCategory=0;
             int categoryOfFavByte=3;
             while((newFile[positionOfFavouriteByte]!='0'&&newFile[positionOfFavouriteByte]!='1')||categoryOfFavByte!=currentCategory){
@@ -623,6 +617,7 @@ public class StatisticCallDataManager {
     }
 
     //TODO check for corruption
+    //TODO if MAX_SIZE_ENTRIES is not implemented, change this
     private List<Integer> getIndicesFromFavFile() throws IOException {
         //file is at most (MAX_SIZE_ENTRIES+1)*(new String(MAX_SIZE_ENTRIES).length()) big (currently 4004 bytes)
         byte[] file = Files.readAllBytes(fileWhereFavIndicesAreToBeSaved.toPath());
@@ -651,7 +646,7 @@ public class StatisticCallDataManager {
 
     private void resetSession() {
         indicesToDeleteOfEntriesNotCreatedInThisSession.clear();
-        indicesOfFavouriteChangedThisSession.clear();
+        indicesOfFavouriteChangedNotCreatedThisSession.clear();
         amountOfNewItemsAddedInSession = 0;
         linesInCurrentFile = getLinesInFile();
     }
