@@ -1,13 +1,11 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,11 +19,12 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
@@ -48,7 +47,8 @@ public class StatisticFragment extends Fragment {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
             } catch (IOException e) {
-                ErrorDialog.createBasicErrorDialog(getContext(), "We were not able to create new Files", "Please restart the application or it will not function properly", null);
+                Log.e(this.getClass().getName(), ErrorCode.CANNOT_READ_FILE.toString(), e);
+                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, null);
             }
         }
 
@@ -71,17 +71,26 @@ public class StatisticFragment extends Fragment {
     }
 
     private void addToHistory(StatisticCall request) {
-        try {
-            statisticCallViewModel.addData(Collections.singletonList(request)).get();
-            statisticCallViewModel.saveAllData();
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e(TAG,"could not save Data",e);
-            Toast.makeText(getContext(), "Could not save Data of this Session, please restart the Application if you want your Session to be saved", Toast.LENGTH_LONG).show();
-        }
+        statisticCallViewModel.addData(Collections.singletonList(request));
+        statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
+            @Override
+            public void accept(Void unused, Throwable throwable) {
+                if (throwable != null) {
+                    Throwable e = throwable.getCause();
+                    if (e instanceof IOException) {
+                        Log.e(this.getClass().getName(), ErrorCode.CANNOT_SAVE_FILE.toString(), throwable);
+                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_SAVE_FILE, null);
+                    } else {
+                        Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), throwable);
+                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
+                    }
+                }
+            }
+        });
     }
 
     //will be removed once Statistic is finished
-    private void testProgressBar()  {
+    private void testProgressBar() {
         int milliSecondsToLoad = 3000;
         ThreadPoolHandler.getInstance().submit(new Callable<Void>() {
             @Override

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -34,16 +35,16 @@ public class StatisticCallViewModel extends ViewModel {
         return dataManager.requestMoreData(dataType);
     }
 
-    public Future<Void> deleteItems(Set<Integer> indices, StatisticCallDataManager.DataType dataType) throws ExecutionException, InterruptedException {
-        return dataManager.deleteData(indices,dataType);
+    public void deleteItems(Set<Integer> indices, StatisticCallDataManager.DataType dataType){
+        dataManager.deleteData(indices,dataType);
     }
 
-    public Future<Void> deleteAllItems() throws ExecutionException, InterruptedException {
-        return dataManager.deleteAllData();
+    public void deleteAllItems() throws IOException {
+        dataManager.deleteAllData();
     }
 
-    public Future<Void> addData(List<StatisticCall> statisticCalls) throws ExecutionException, InterruptedException {
-        return dataManager.addData(statisticCalls);
+    public void addData(List<StatisticCall> statisticCalls) {
+        dataManager.addData(statisticCalls);
     }
 
     public boolean hasMoreData(StatisticCallDataManager.DataType dataType){
@@ -55,8 +56,8 @@ public class StatisticCallViewModel extends ViewModel {
         dataManager.toggleFav(position,dataType);
     }
 
-    public void saveAllData() throws ExecutionException, InterruptedException {
-        dataManager.saveAllData();
+    public CompletableFuture<Void> saveAllData() {
+        return dataManager.saveAllData();
     }
 
     public void observeData(LifecycleOwner owner, Observer<List<Pair<StatisticCall, Boolean>>> observer, StatisticCallDataManager.DataType dataType) {

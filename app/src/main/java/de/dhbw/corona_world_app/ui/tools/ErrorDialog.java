@@ -5,33 +5,42 @@ import android.content.DialogInterface;
 
 import androidx.appcompat.app.AlertDialog;
 
+import de.dhbw.corona_world_app.R;
+
 public class ErrorDialog {
 
+    public static void showBasicErrorDialog(Context context, ErrorCode errorCode, DialogInterface.OnClickListener onClickPositiveButton, String positiveButtonText){
+        createBasicErrorDialog(context, errorCode, onClickPositiveButton, positiveButtonText).show();
+    }
+    public static void showBasicErrorDialog(Context context, ErrorCode errorCode, DialogInterface.OnClickListener onClickPositiveButton){
+        createBasicErrorDialog(context, errorCode, onClickPositiveButton,null).show();
+    }
 
-    public static AlertDialog createBasicErrorDialog(Context context, String title, String message, DialogInterface.OnClickListener onClickPositiveButton,String positiveButtonText){
+    public static void showTwoOptionErrorDialog(Context context, ErrorCode errorCode, DialogInterface.OnClickListener onClickPositiveButton, DialogInterface.OnClickListener onClickNegativeButton, String positiveButtonText, String negativeButtonText){
+        createTwoOptionErrorDialog(context, errorCode, onClickPositiveButton, onClickNegativeButton,positiveButtonText,negativeButtonText).show();
+    }
+
+    public static void showTwoOptionErrorDialog(Context context, ErrorCode errorCode, DialogInterface.OnClickListener onClickPositiveButton, DialogInterface.OnClickListener onClickNegativeButton){
+        createTwoOptionErrorDialog(context, errorCode, onClickPositiveButton, onClickNegativeButton,null,null);
+    }
+
+    public static AlertDialog createBasicErrorDialog(Context context, ErrorCode errorCode, DialogInterface.OnClickListener onClickPositiveButton, String positiveButtonText){
         if(positiveButtonText==null)positiveButtonText= context.getString(android.R.string.ok);
         AlertDialog.Builder builder=new AlertDialog.Builder(context);
-        builder.setTitle(title);
-        builder.setMessage(message);
+        builder.setTitle(context.getString(R.string.error_title,errorCode.code,errorCode.toString()));
+        builder.setMessage(errorCode.message);
         builder.setPositiveButton(positiveButtonText, onClickPositiveButton);
         return builder.create();
     }
-    public static AlertDialog createBasicErrorDialog(Context context, String title, String message, DialogInterface.OnClickListener onClickPositiveButton){
-        return createBasicErrorDialog(context, title, message, onClickPositiveButton,null);
-    }
 
-    public static AlertDialog createTwoOptionErrorDialog(Context context,String title,String message,DialogInterface.OnClickListener onClickPositiveButton,DialogInterface.OnClickListener onClickNegativeButton, String positiveButtonText,String negativeButtonText){
+    public static AlertDialog createTwoOptionErrorDialog(Context context, ErrorCode errorCode, DialogInterface.OnClickListener onClickPositiveButton, DialogInterface.OnClickListener onClickNegativeButton, String positiveButtonText, String negativeButtonText){
         if(positiveButtonText==null)positiveButtonText= context.getString(android.R.string.ok);
         if(negativeButtonText==null)negativeButtonText= context.getString(android.R.string.cancel);
         AlertDialog.Builder builder=new AlertDialog.Builder(context);
-        builder.setTitle(title);
-        builder.setMessage(message);
+        builder.setTitle(context.getString(R.string.error_title,errorCode.code,errorCode.toString()));
+        builder.setMessage(errorCode.message);
         builder.setPositiveButton(positiveButtonText, onClickPositiveButton);
         builder.setNegativeButton(negativeButtonText,onClickNegativeButton);
         return builder.create();
-    }
-
-    public static AlertDialog createTwoOptionErrorDialog(Context context,String title,String message,DialogInterface.OnClickListener onClickPositiveButton,DialogInterface.OnClickListener onClickNegativeButton){
-        return createTwoOptionErrorDialog(context, title, message, onClickPositiveButton, onClickNegativeButton,null,null);
     }
 }

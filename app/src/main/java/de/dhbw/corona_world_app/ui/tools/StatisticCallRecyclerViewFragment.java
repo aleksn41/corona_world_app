@@ -6,7 +6,6 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
@@ -16,9 +15,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
@@ -60,13 +61,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             @Override
             public void deleteItems(Set<Integer> ItemIds) {
                 Log.v(this.getClass().getName(), "deleting selected favourite Items");
-                try {
-                    statisticCallViewModel.deleteItems(ItemIds, getDataType()).get();
-                } catch (ExecutionException | InterruptedException e) {
-                    Log.e(this.getClass().getName(), "items could not be deleted", e);
-                    //this should not happen
-                    ErrorDialog.createBasicErrorDialog(getContext(),"An critical Error has occurred","It seems that something unexpected happened, please restart the App and if that does not help reinstall the App",null);
-                }
+                statisticCallViewModel.deleteItems(ItemIds, getDataType());
             }
         }, new StatisticCallAdapterOnLastItemLoaded() {
             @Override
@@ -111,12 +106,22 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     @Override
     public void onStop() {
         Log.d(this.getClass().getName()+"|"+getDataType(),"Stopping Fragment");
-        try {
-            statisticCallViewModel.saveAllData();
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e(this.getClass().getName(),"could not save Data",e);
-            Toast.makeText(getContext(), "Could not save Data of this Session, please restart the Application if you want your Session to be saved", Toast.LENGTH_LONG).show();
-        }
+        Log.d(this.getClass().getName()+"|"+getDataType(),"saving All Data");
+        statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
+            @Override
+            public void accept(Void unused, Throwable throwable) {
+                if(throwable!=null) {
+                    Throwable e = throwable.getCause();
+                    if (e instanceof IOException) {
+                        Log.e(this.getClass().getName(),ErrorCode.CANNOT_SAVE_FILE.toString(),throwable);
+                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.CANNOT_SAVE_FILE,null);
+                    } else{
+                        Log.wtf(this.getClass().getName(),ErrorCode.UNEXPECTED_ERROR.toString(),throwable);
+                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.UNEXPECTED_ERROR,null);
+                    }
+                }
+            }
+        });
         super.onStop();
     }
 
@@ -129,18 +134,18 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public abstract void initViewModelData(StatisticCallViewModel statisticCallViewModel);
 
     protected void tryRepairingData(){
-        ErrorDialog.createBasicErrorDialog(getContext(), "Your Data seems to be corrupt", "We were not able to save new Data, we will try to fix this Problem", (dialog, which) -> {
+        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, (dialog, which) -> {
             //TODO implement check to see if Data can be recovered
             boolean canBeRecovered=false;
             if(canBeRecovered){
                 //recover Data
             }else{
-                ErrorDialog.createBasicErrorDialog(getContext(), "We were not able to recover your Data", "Your History and your Favourites must be deleted for this app to function properly, we are so sorry", (dialog1, which1) -> {
+                ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.CANNOT_RESTORE_FILE , (dialog1, which1) -> {
                     try {
-                        statisticCallViewModel.deleteAllItems().get();
-                    } catch (ExecutionException | InterruptedException e1) {
-                        Log.e(this.getClass().getName()+"|"+getDataType(),"Not able to delete corrupt Data", e1);
-                        ErrorDialog.createBasicErrorDialog(getContext(),"There has been an error deleting your Data","Something has gone terribly wrong, please reinstall the app and try again",null);
+                        statisticCallViewModel.deleteAllItems();
+                    } catch (IOException e) {
+                        Log.e(this.getClass().getName(),ErrorCode.CANNOT_DELETE_FILE.toString(),e);
+                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.UNEXPECTED_ERROR,null);
                     }
                 },"I understand");
             }
