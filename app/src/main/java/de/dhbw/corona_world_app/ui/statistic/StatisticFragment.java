@@ -41,6 +41,8 @@ public class StatisticFragment extends Fragment {
 
     TextRoundCornerProgressBar progressBar;
 
+    BarChart chart;
+
     TextView testDisplay;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -70,13 +72,13 @@ public class StatisticFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
-        BarChart chart = (BarChart) root.findViewById(R.id.chart);
-        chart.setData(new BarData(set));
+        chart = (BarChart) root.findViewById(R.id.chart);
         try {
             testProgressBar();
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+        chart.setData(new BarData(set));
         return root;
     }
 
@@ -108,6 +110,7 @@ public class StatisticFragment extends Fragment {
         ThreadPoolHandler.getInstance().submit(new Callable<Void>() {
             @Override
             public Void call() throws InterruptedException {
+                chart.setVisibility(View.GONE);
                 testDisplay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 requireActivity().runOnUiThread(new Runnable() {
@@ -149,7 +152,9 @@ public class StatisticFragment extends Fragment {
                         progressBar.setVisibility(View.GONE);
                         progressBar.setProgress(0);
                         progressBar.setProgressText("");
-                        testDisplay.setVisibility(View.VISIBLE);
+                        chart.setVisibility(View.VISIBLE);
+
+                        //testDisplay.setVisibility(View.VISIBLE);
                     }
                 });
                 return null;
