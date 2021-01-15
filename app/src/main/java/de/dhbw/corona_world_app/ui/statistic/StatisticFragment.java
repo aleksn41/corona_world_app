@@ -12,17 +12,25 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.Chart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.statistic.ChartProvider;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticFragment extends Fragment {
@@ -48,11 +56,22 @@ public class StatisticFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-
+        ChartProvider provider = new ChartProvider();
+        List<BarEntry> entries = new ArrayList<>();
+        entries.add(new BarEntry(0f, 30f));
+        entries.add(new BarEntry(1f, 80f));
+        entries.add(new BarEntry(2f, 60f));
+        entries.add(new BarEntry(3f, 50f));
+        // gap of 2f
+        entries.add(new BarEntry(5f, 70f));
+        entries.add(new BarEntry(6f, 60f));
+        BarDataSet set = new BarDataSet(entries, "Test");
 
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
+        BarChart chart = (BarChart) root.findViewById(R.id.chart);
+        chart.setData(new BarData(set));
         try {
             testProgressBar();
         } catch (ExecutionException | InterruptedException e) {
