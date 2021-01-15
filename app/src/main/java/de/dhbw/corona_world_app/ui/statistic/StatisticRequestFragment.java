@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
+
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -47,6 +50,20 @@ public class StatisticRequestFragment extends Fragment {
         statisticViewModel =
                 new ViewModelProvider(this).get(StatisticViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic_request, container, false);
+
+        ExtendedFloatingActionButton floatingActionButton=root.findViewById(R.id.floating_action_button);
+
+        //change floating button based on position in Scrollview
+        ScrollView scrollView=root.findViewById(R.id.scrollView);
+        scrollView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            boolean atEndOfView=scrollView.getChildAt(0).getBottom()-(scrollView.getHeight()+scrollY)==0;
+            if(atEndOfView){
+                floatingActionButton.extend();
+            }else floatingActionButton.shrink();
+        });
+        //setup FloatingButton
+        if(scrollView.getChildAt(0).getBottom()-(scrollView.getHeight()+scrollView.getScrollY())==0)floatingActionButton.extend();
+        else floatingActionButton.shrink();
 
         ButtonSearchableDialogEnumChooser<ISOCountry> isoCountryButtonSearchableDialogEnumChooser = root.findViewById(R.id.isoCountryChooser);
         isoCountryButtonSearchableDialogEnumChooser.setItems(Arrays.asList(ISOCountry.values()));
@@ -91,7 +108,7 @@ public class StatisticRequestFragment extends Fragment {
         startDateChooser.setOnClickListener(v->startDatePicker.show());
         endDateChooser.setOnClickListener(v->endDatePicker.show());
 
-        root.findViewById(R.id.imageButton).setOnClickListener(v -> {
+       floatingActionButton.setOnClickListener(v -> {
             if (isoCountryButtonSearchableDialogEnumChooser.anyItemSelected() && criteriaButtonSearchableDialogEnumChooser.anyItemSelected() && chartTypeButtonSearchableDialogEnumChooser.anyItemSelected()&&start!=null) {
                 requestStatistic(new StatisticCall(isoCountryButtonSearchableDialogEnumChooser.getSelectedItems(), chartTypeButtonSearchableDialogEnumChooser.getSelectedItems().get(0), criteriaButtonSearchableDialogEnumChooser.getSelectedItems(),start,end));
             } else {
