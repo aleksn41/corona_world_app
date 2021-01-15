@@ -597,7 +597,7 @@ public class StatisticCallDataManager {
     }
 
 
-    private Pair<StatisticCall, Boolean> parseData(String s) throws DataException {
+    private Pair<StatisticCall, Boolean> parseData(@NonNull String s) throws DataException {
         String[] categories = s.split(Pattern.quote(String.valueOf(CATEGORY_SEPARATOR)));
         if (categories.length != AMOUNT_OF_CATEGORIES) throw new DataException("Data is corrupt");
         List<ISOCountry> decodedISOCountries = isoCountryEnum64BitEncoder.decodeListOfEnums(Arrays.asList(categories[0].split(Pattern.quote(String.valueOf(ITEM_SEPARATOR)))));
@@ -666,7 +666,7 @@ public class StatisticCallDataManager {
     }
 
     //TODO used in multiple classes maybe make static?
-    private String listOfStringToString(List<String> list) {
+    private String listOfStringToString(@NonNull List<String> list) {
         StringBuilder stringbuilder = new StringBuilder(list.size() * 4);
         for (int i = 0; i < list.size(); i++) {
             stringbuilder.append(list.get(i));
