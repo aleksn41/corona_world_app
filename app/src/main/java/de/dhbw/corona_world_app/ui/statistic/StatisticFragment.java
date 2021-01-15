@@ -1,5 +1,6 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,11 +69,12 @@ public class StatisticFragment extends Fragment {
         entries.add(new BarEntry(5f, 70f));
         entries.add(new BarEntry(6f, 60f));
         BarDataSet set = new BarDataSet(entries, "Test");
-
+        set.setValueTextColor(Color.GREEN);
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
         chart = (BarChart) root.findViewById(R.id.chart);
+        chart.setBackgroundColor(Color.WHITE);
         try {
             testProgressBar();
         } catch (ExecutionException | InterruptedException e) {
@@ -106,7 +108,7 @@ public class StatisticFragment extends Fragment {
 
     //will be removed once Statistic is finished
     private void testProgressBar() throws ExecutionException, InterruptedException {
-        int milliSecondsToLoad = 3000;
+        int milliSecondsToLoad = 10;
         ThreadPoolHandler.getInstance().submit(new Callable<Void>() {
             @Override
             public Void call() throws InterruptedException {
@@ -153,7 +155,6 @@ public class StatisticFragment extends Fragment {
                         progressBar.setProgress(0);
                         progressBar.setProgressText("");
                         chart.setVisibility(View.VISIBLE);
-
                         //testDisplay.setVisibility(View.VISIBLE);
                     }
                 });
