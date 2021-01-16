@@ -1,5 +1,6 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -63,24 +65,6 @@ public class StatisticFragment extends Fragment {
             }
         }
         ChartValueSetGenerator provider = new ChartValueSetGenerator();
-        List<BarEntry> entries1 = new ArrayList<>();
-        entries1.add(new BarEntry(0f, 20f));
-        entries1.add(new BarEntry(1f, 40f));
-        entries1.add(new BarEntry(2f, 50f));
-        entries1.add(new BarEntry(3f, 70f));
-        entries1.add(new BarEntry(4f, 60f));
-        entries1.add(new BarEntry(5f, 10f));
-        BarDataSet set1 = new BarDataSet(entries1, "Belize: Recovered");
-        set1.setColor(Color.GREEN);
-        set1.setValueTextColor(Color.BLACK);
-        ValueFormatter vf3 = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return "";
-            }
-        };
-        set1.setValueTextSize(40f);
-        set1.setValueFormatter(vf3);
         List<BarEntry> entries = new ArrayList<>();
         entries.add(new BarEntry(0f, 30f));
         entries.add(new BarEntry(1f, 80f));
@@ -91,8 +75,6 @@ public class StatisticFragment extends Fragment {
         BarDataSet set = new BarDataSet(entries, "Belize: Deaths");
         set.setValueTextColor(Color.BLACK);
         set.setValueTextSize(40f);
-
-        set.setValueFormatter(vf3);
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
@@ -127,7 +109,16 @@ public class StatisticFragment extends Fragment {
         des.setText("");
         chart.setDescription(des);
         chart.setPinchZoom(false);
-        chart.setData(new BarData(set, set1));
+        chart.getLegend().setTextColor(R.color.white);
+        List<Float> fl = Arrays.asList(20f, 20f, 30f, 40f, 10f, 80f);
+        TypedArray colorsTyped = getResources().obtainTypedArray(R.array.chartColors);
+        List<Integer> colors = new ArrayList<>();
+        for (int i = 0; i < colorsTyped.length(); i++) {
+            colors.add(colorsTyped.getColor(i, 0));
+        }
+        colorsTyped.recycle();
+        chart.setBackgroundColor(getResources().getColor(R.color.dark_grey));
+        chart.setData(new BarData(set, provider.getBarChartDataSet(fl, "Belize Recovered", colors)));
         return root;
     }
 

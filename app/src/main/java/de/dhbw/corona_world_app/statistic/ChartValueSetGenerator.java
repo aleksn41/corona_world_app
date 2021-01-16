@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ChartValueSetGenerator {
 
-    public BarDataSet getBarChartDataSet(@NonNull List<Float> data, @NonNull String label, int valueTextColor, float valueTextSize, @NonNull List<Integer> colors){
+    public BarDataSet getBarChartDataSet(@NonNull List<Float> data, @NonNull String label, @NonNull List<Integer> colors){
         List<BarEntry> entries = new ArrayList<>();
         int xValue = 0;
         for (Float dataEntry: data) {
@@ -23,14 +23,12 @@ public class ChartValueSetGenerator {
         BarDataSet set = new BarDataSet(entries, label);
         set.setColor(colors.get(0));
         colors.remove(0);
-        set.setValueTextColor(valueTextColor);
         set.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
                 return "";
             }
         });
-        set.setValueTextSize(valueTextSize);
         return set;
     }
 
