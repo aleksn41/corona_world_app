@@ -14,14 +14,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar;
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +34,7 @@ import java.util.concurrent.ExecutionException;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.statistic.ChartProvider;
+import de.dhbw.corona_world_app.statistic.ChartDataProvider;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticFragment extends Fragment {
@@ -64,7 +62,7 @@ public class StatisticFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-        ChartProvider provider = new ChartProvider();
+        ChartDataProvider provider = new ChartDataProvider();
         List<BarEntry> entries1 = new ArrayList<>();
         entries1.add(new BarEntry(0f, 20f));
         entries1.add(new BarEntry(1f, 40f));
@@ -73,6 +71,16 @@ public class StatisticFragment extends Fragment {
         entries1.add(new BarEntry(4f, 60f));
         entries1.add(new BarEntry(5f, 10f));
         BarDataSet set1 = new BarDataSet(entries1, "Belize: Recovered");
+        set1.setColor(Color.GREEN);
+        set1.setValueTextColor(Color.BLACK);
+        ValueFormatter vf3 = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return "";
+            }
+        };
+        set1.setValueTextSize(40f);
+        set1.setValueFormatter(vf3);
         List<BarEntry> entries = new ArrayList<>();
         entries.add(new BarEntry(0f, 30f));
         entries.add(new BarEntry(1f, 80f));
@@ -83,12 +91,7 @@ public class StatisticFragment extends Fragment {
         BarDataSet set = new BarDataSet(entries, "Belize: Deaths");
         set.setValueTextColor(Color.BLACK);
         set.setValueTextSize(40f);
-        ValueFormatter vf3 = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return "";
-            }
-        };
+
         set.setValueFormatter(vf3);
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
@@ -123,7 +126,8 @@ public class StatisticFragment extends Fragment {
         Description des = new Description();
         des.setText("");
         chart.setDescription(des);
-        chart.setData(new BarData(set));
+        chart.setPinchZoom(false);
+        chart.setData(new BarData(set, set1));
         return root;
     }
 
