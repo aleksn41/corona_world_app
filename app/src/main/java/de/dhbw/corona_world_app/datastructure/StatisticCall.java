@@ -11,7 +11,6 @@ import java.util.Objects;
 
 import java.io.Serializable;
 
-//TODO if statistic call is to slow implement Parcelable
 public class StatisticCall implements Serializable {
     public static final LocalDate MIN_DATE = LocalDate.of(2020, 1, 22);
     public static DateTimeFormatter DATE_FORMAT= DateTimeFormatter.ofPattern("dd-MM-yyyy");

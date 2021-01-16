@@ -15,9 +15,14 @@ import androidx.lifecycle.ViewModelProvider;
 import com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.Chart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -60,26 +65,64 @@ public class StatisticFragment extends Fragment {
             }
         }
         ChartProvider provider = new ChartProvider();
+        List<BarEntry> entries1 = new ArrayList<>();
+        entries1.add(new BarEntry(0f, 20f));
+        entries1.add(new BarEntry(1f, 40f));
+        entries1.add(new BarEntry(2f, 50f));
+        entries1.add(new BarEntry(3f, 70f));
+        entries1.add(new BarEntry(4f, 60f));
+        entries1.add(new BarEntry(5f, 10f));
+        BarDataSet set1 = new BarDataSet(entries1, "Belize: Recovered");
         List<BarEntry> entries = new ArrayList<>();
         entries.add(new BarEntry(0f, 30f));
         entries.add(new BarEntry(1f, 80f));
         entries.add(new BarEntry(2f, 60f));
         entries.add(new BarEntry(3f, 50f));
-        // gap of 2f
-        entries.add(new BarEntry(5f, 70f));
-        entries.add(new BarEntry(6f, 60f));
-        BarDataSet set = new BarDataSet(entries, "Test");
-        set.setValueTextColor(Color.GREEN);
+        entries.add(new BarEntry(4f, 70f));
+        entries.add(new BarEntry(5f, 60f));
+        BarDataSet set = new BarDataSet(entries, "Belize: Deaths");
+        set.setValueTextColor(Color.BLACK);
+        set.setValueTextSize(40f);
+        ValueFormatter vf3 = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return "";
+            }
+        };
+        set.setValueFormatter(vf3);
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
         chart = (BarChart) root.findViewById(R.id.chart);
         chart.setBackgroundColor(Color.WHITE);
+        chart.setNoDataTextColor(Color.GREEN);
+        final String[] dates = new String[] { "01.10.", "02.10.", "03.10.", "04.10.", "05.10.", "06.10." };
+        XAxis xaxis = chart.getXAxis();
+        ValueFormatter vf = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return dates[(int) value];
+            }
+        };
+        xaxis.setValueFormatter(vf);
+        YAxis yaxisleft = chart.getAxisLeft();
+        YAxis yaxisright = chart.getAxisRight();
+        ValueFormatter vf2 = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return Integer.toString((int) value);
+            }
+        };
+        yaxisleft.setValueFormatter(vf2);
+        yaxisright.setValueFormatter(vf2);
         try {
             testProgressBar();
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
         chart.setData(new BarData(set));
         return root;
     }
