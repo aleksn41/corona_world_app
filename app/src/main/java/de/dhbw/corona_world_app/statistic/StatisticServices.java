@@ -4,11 +4,11 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public class StatisticServices {
 
-    private ChartDataProvider chartProvider;
+    private ChartValueSetGenerator chartProvider;
 
     public Object getStatistic(StatisticCall statisticCall){
         if(this.chartProvider==null){
-            chartProvider = new ChartDataProvider();
+            chartProvider = new ChartValueSetGenerator();
         }
         switch(statisticCall.getChartType()){
             case BAR: break;

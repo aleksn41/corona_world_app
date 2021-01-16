@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutionException;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.statistic.ChartDataProvider;
+import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticFragment extends Fragment {
@@ -62,7 +62,7 @@ public class StatisticFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-        ChartDataProvider provider = new ChartDataProvider();
+        ChartValueSetGenerator provider = new ChartValueSetGenerator();
         List<BarEntry> entries1 = new ArrayList<>();
         entries1.add(new BarEntry(0f, 20f));
         entries1.add(new BarEntry(1f, 40f));
