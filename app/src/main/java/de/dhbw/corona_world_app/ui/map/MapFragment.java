@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -68,18 +69,17 @@ public class MapFragment extends Fragment {
 
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
-    //loading screen will be implemented by ui-team
     @SuppressLint("SetJavaScriptEnabled")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
-        //TODO your loading the Data before the Fragment is fully loaded, please load Data once Fragment has been setup
         progressBar = root.findViewById(R.id.progress_bar);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10, "Starting...");
+        boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
