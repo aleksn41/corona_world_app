@@ -3,7 +3,7 @@ package de.dhbw.corona_world_app.api;
 public enum API {
     HEROKU("https://coronavirus-19-api.herokuapp.com", "/countries", "/countries/", false, false, "Heroku"),
     RESTCOUNTRIES("https://restcountries.eu/rest/v2", "/all", "/alpha/", true, false, "RestCountries"),
-    POSTMANAPI("https://api.covid19api.com", "/world/total", "/total/country/", true, true, "api.covid19api.com");
+    POSTMANAPI("https://api.covid19api.com", "/world/total", "/country/", true, true, "api.covid19api.com");
 
     private final String url;
 

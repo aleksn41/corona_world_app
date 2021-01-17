@@ -15,7 +15,7 @@ public class TimeframedCountry implements Serializable {
 
     private int[] recovered;
 
-    private long[] population;
+    private long population;
 
     private double[] pop_inf_ratio;
 
@@ -62,16 +62,19 @@ public class TimeframedCountry implements Serializable {
         this.recovered = recovered;
     }
 
-    public long[] getPopulation() {
+    public long getPopulation() {
         return population;
     }
 
-    public void setPopulation(long[] population) {
+    public void setPopulation(long population) {
         this.population = population;
+        for (int i = 0; i < infected.length; i++) {
+            this.pop_inf_ratio[i] = (double) infected[i] / population;
+        }
     }
 
-    public double[] getPop_inf_ratio() {
-        return pop_inf_ratio;
+    public double getPop_inf_ratio(int i) {
+        return (double) getInfected()[i]/getPopulation();
     }
 
     public void setPop_inf_ratio(double[] pop_inf_ratio) {
