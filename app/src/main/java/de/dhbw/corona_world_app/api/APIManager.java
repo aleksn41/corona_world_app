@@ -81,8 +81,8 @@ public class APIManager {
     }
 
     //this method creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of country-objects
-    public static List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame) throws IllegalArgumentException, ExecutionException, InterruptedException {
-        Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList + " ; " + Arrays.toString(timeFrame));
+    public static List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList) throws IllegalArgumentException, ExecutionException, InterruptedException {
+        Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         List<Country> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
@@ -94,9 +94,7 @@ public class APIManager {
                             String attachString;
                             if (Mapper.isInReverseMap(API.HEROKU, isoCountry)) {
                                 attachString = Mapper.mapISOCountryToName(API.HEROKU, isoCountry);
-                                //System.out.println(attachString);
                             } else {
-                                //System.out.println(isoCountry+" here");
                                 attachString = Mapper.denormalizeISOCountryName(isoCountry.name());
                             }
                             url += attachString;
@@ -104,7 +102,7 @@ public class APIManager {
                         }
                 );
                 futureCoronaData.add(future);
-                if (criteriaList.contains(Criteria.POPULATION)) {
+                if (criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION)) {
                     Future<Country> future1 = service.submit(new Callable<Country>() {
                         @Override
                         public Country call() throws Exception {
@@ -113,7 +111,6 @@ public class APIManager {
                     });
                     futurePopData.add(future1);
                 }
-                //System.out.println("Call for " + isoCountry.name() + " ending now " + LocalDateTime.now());
             }
             Logger.logV(TAG, "All requests have been sent...");
             for (int i = 0; i < futureCoronaData.size(); i++) {
@@ -125,7 +122,7 @@ public class APIManager {
             Logger.logV(TAG, "Country-List finished constructing...");
         } else {
             Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
-            throw new IllegalArgumentException("Input country list is too big, max allowed=" + MAX_COUNTRY_LIST_SIZE +"!");
+            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE +"!");
         }
         return returnList;
     }
