@@ -65,22 +65,10 @@ public class StatisticFragment extends Fragment {
             }
         }
         ChartValueSetGenerator provider = new ChartValueSetGenerator();
-        List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0f, 30f));
-        entries.add(new BarEntry(1f, 80f));
-        entries.add(new BarEntry(2f, 60f));
-        entries.add(new BarEntry(3f, 50f));
-        entries.add(new BarEntry(4f, 70f));
-        entries.add(new BarEntry(5f, 60f));
-        BarDataSet set = new BarDataSet(entries, "Belize: Deaths");
-        set.setValueTextColor(Color.BLACK);
-        set.setValueTextSize(40f);
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
         chart = (BarChart) root.findViewById(R.id.chart);
-        chart.setBackgroundColor(Color.WHITE);
-        chart.setNoDataTextColor(Color.GREEN);
         final String[] dates = new String[] { "01.10.", "02.10.", "03.10.", "04.10.", "05.10.", "06.10." };
         XAxis xaxis = chart.getXAxis();
         ValueFormatter vf = new ValueFormatter() {
@@ -108,17 +96,22 @@ public class StatisticFragment extends Fragment {
         Description des = new Description();
         des.setText("");
         chart.setDescription(des);
-        chart.setPinchZoom(false);
-        chart.getLegend().setTextColor(R.color.white);
+        chart.getLegend().setTextColor(Color.WHITE);
+        chart.getXAxis().setTextColor(Color.WHITE);
+        chart.getAxisLeft().setTextColor(Color.WHITE);
+        chart.getAxisRight().setTextColor(Color.WHITE);
         List<Float> fl = Arrays.asList(20f, 20f, 30f, 40f, 10f, 80f);
-        TypedArray colorsTyped = getResources().obtainTypedArray(R.array.chartColors);
+        List<Float> f2 = Arrays.asList(10f, 10f, 25f, 35f, 5f, 67f);
+        List<Float> f = Arrays.asList(30f, 80f, 60f, 50f, 70f, 60f);
+        TypedArray colorsTyped = getActivity().getTheme().getResources().obtainTypedArray(R.array.chartColors);
         List<Integer> colors = new ArrayList<>();
         for (int i = 0; i < colorsTyped.length(); i++) {
             colors.add(colorsTyped.getColor(i, 0));
         }
         colorsTyped.recycle();
         chart.setBackgroundColor(getResources().getColor(R.color.dark_grey));
-        chart.setData(new BarData(set, provider.getBarChartDataSet(fl, "Belize Recovered", colors)));
+        chart.setDoubleTapToZoomEnabled(false);
+        chart.setData(new BarData(provider.getBarChartDataSet(f, "Belize: Deaths", colors), provider.getBarChartDataSet(fl, "Belize: Recovered", colors), provider.getBarChartDataSet(f2, "Belize: Infected", colors)));
         return root;
     }
 
