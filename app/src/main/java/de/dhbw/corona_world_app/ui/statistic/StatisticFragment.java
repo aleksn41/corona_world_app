@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +18,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
+import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.ui.tools.ErrorCode;
-import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticFragment extends Fragment {
@@ -43,19 +40,24 @@ public class StatisticFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
 
-        if (statisticCallViewModel.isNotInit()) {
+        //TODO remove this
+        if (!statisticCallViewModel.isInit()) {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
             } catch (IOException e) {
-                Log.e(this.getClass().getName(), ErrorCode.CANNOT_READ_FILE.toString(), e);
-                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, null);
+                e.printStackTrace();
             }
         }
+
 
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
-        testProgressBar();
+        try {
+            testProgressBar();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         return root;
     }
 
@@ -71,26 +73,18 @@ public class StatisticFragment extends Fragment {
     }
 
     private void addToHistory(StatisticCall request) {
-        statisticCallViewModel.addData(Collections.singletonList(request));
-        statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
-            @Override
-            public void accept(Void unused, Throwable throwable) {
-                if (throwable != null) {
-                    Throwable e = throwable.getCause();
-                    if (e instanceof IOException) {
-                        Log.e(this.getClass().getName(), ErrorCode.CANNOT_SAVE_FILE.toString(), throwable);
-                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_SAVE_FILE, null);
-                    } else {
-                        Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), throwable);
-                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
-                    }
-                }
-            }
-        });
+        try {
+            statisticCallViewModel.addData(Collections.singletonList(request));
+            statisticCallViewModel.saveAllData();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     //will be removed once Statistic is finished
-    private void testProgressBar() {
+    private void testProgressBar() throws ExecutionException, InterruptedException {
         int milliSecondsToLoad = 3000;
         ThreadPoolHandler.getInstance().submit(new Callable<Void>() {
             @Override
