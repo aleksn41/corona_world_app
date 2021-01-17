@@ -43,7 +43,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist,criteriaList,null);
+        List<Country> returnList = APIManager.getData(clist,criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -68,7 +68,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist,criteriaList,null);
+        List<Country> returnList = APIManager.getData(clist,criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
