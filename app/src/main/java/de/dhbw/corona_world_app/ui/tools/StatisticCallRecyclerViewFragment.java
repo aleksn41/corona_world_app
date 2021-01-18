@@ -12,17 +12,19 @@ import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.IOException;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
@@ -36,7 +38,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
-        if(statisticCallViewModel.isNotInit()){
+        if(!statisticCallViewModel.isInit()){
             Log.d(this.getClass().getName(),"init ViewModel");
             initViewModelData(statisticCallViewModel);
         }
@@ -61,7 +63,12 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             @Override
             public void deleteItems(Set<Integer> ItemIds) {
                 Log.v(this.getClass().getName(), "deleting selected favourite Items");
-                statisticCallViewModel.deleteItems(ItemIds, getDataType());
+                try {
+                    statisticCallViewModel.deleteItems(ItemIds, getDataType()).get();
+                } catch (ExecutionException | InterruptedException e) {
+                    Log.e(this.getClass().getName(), "items could not be deleted", e);
+                    //TODO handle
+                }
             }
         }, new StatisticCallAdapterOnLastItemLoaded() {
             @Override
@@ -72,7 +79,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                         statisticCallViewModel.getMoreData(getDataType());
                     } catch (InterruptedException | ExecutionException e) {
                         Log.e(this.getClass().getName(), "error reading more Data", e);
-                        tryRepairingData();
+                        //TODO handle
                     }
                 }
             }
@@ -95,34 +102,23 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
     @Override
     public void onPause() {
-        Log.d(this.getClass().getName()+"|"+getDataType(), "Pausing Fragment");
+        super.onPause();
+        Log.d(this.getClass().getName(), "Pausing Fragment");
         if (deleteMode != null) {
             deleteMode.finish();
             deleteMode = null;
         }
-        super.onPause();
     }
 
     @Override
     public void onStop() {
-        Log.d(this.getClass().getName()+"|"+getDataType(),"Stopping Fragment");
-        Log.d(this.getClass().getName()+"|"+getDataType(),"saving All Data");
-        statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
-            @Override
-            public void accept(Void unused, Throwable throwable) {
-                if(throwable!=null) {
-                    Throwable e = throwable.getCause();
-                    if (e instanceof IOException) {
-                        Log.e(this.getClass().getName(),ErrorCode.CANNOT_SAVE_FILE.toString(),throwable);
-                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.CANNOT_SAVE_FILE,null);
-                    } else{
-                        Log.wtf(this.getClass().getName(),ErrorCode.UNEXPECTED_ERROR.toString(),throwable);
-                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.UNEXPECTED_ERROR,null);
-                    }
-                }
-            }
-        });
         super.onStop();
+        try {
+            statisticCallViewModel.saveAllData();
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(this.getClass().getName(),"could not save Data",e);
+            //TODO handle
+        }
     }
 
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();
@@ -132,23 +128,4 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public abstract ShowStatisticInterface getShowStatisticInterface();
 
     public abstract void initViewModelData(StatisticCallViewModel statisticCallViewModel);
-
-    protected void tryRepairingData(){
-        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, (dialog, which) -> {
-            //TODO implement check to see if Data can be recovered
-            boolean canBeRecovered=false;
-            if(canBeRecovered){
-                //recover Data
-            }else{
-                ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.CANNOT_RESTORE_FILE , (dialog1, which1) -> {
-                    try {
-                        statisticCallViewModel.deleteAllItems();
-                    } catch (IOException e) {
-                        Log.e(this.getClass().getName(),ErrorCode.CANNOT_DELETE_FILE.toString(),e);
-                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.UNEXPECTED_ERROR,null);
-                    }
-                },"I understand");
-            }
-        });
-    }
 }

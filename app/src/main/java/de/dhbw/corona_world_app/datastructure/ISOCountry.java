@@ -2,8 +2,7 @@ package de.dhbw.corona_world_app.datastructure;
 
 import androidx.annotation.NonNull;
 
-public enum ISOCountry {
-
+public enum ISOCountry{
     Afghanistan("AF","Afghanistan"),
     Aland_Islands("AX","Åland Islands"),
     Albania("AL","Albania"),
@@ -269,5 +268,8 @@ public enum ISOCountry {
 
     public String getDisplayName(){return this.displayName;}
 
-
+    @Override
+    public String toString() {
+        return getDisplayName();
+    }
 }

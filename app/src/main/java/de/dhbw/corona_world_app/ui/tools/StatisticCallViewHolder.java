@@ -8,8 +8,6 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.varunest.sparkbutton.SparkButton;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -19,13 +17,13 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public class StatisticCallViewHolder extends RecyclerView.ViewHolder implements StatisticCallViewHolderInterface<Pair<StatisticCall, Boolean>> {
     private final TextView textView;
-    private final SparkButton sparkButton;
+    private final ImageView imageView;
 
     private static final char ITEM_SEPARATOR = ',';
     public StatisticCallViewHolder(View view) {
         super(view);
         textView = view.findViewById(R.id.StatisticCallItemTextView);
-        sparkButton = view.findViewById(R.id.starButton);
+        imageView = view.findViewById(R.id.statisticCallItemImageView);
     }
 
     public void setItem(Pair<StatisticCall, Boolean> item) {
@@ -35,11 +33,11 @@ public class StatisticCallViewHolder extends RecyclerView.ViewHolder implements 
         textView.setText(itemView.getContext().getString(R.string.statistic_call_info, listOfStringToString(item.first.getCountryList().parallelStream().map(Enum::toString).collect(Collectors.toList())), listOfStringToString(item.first.getCriteriaList().parallelStream().map(Enum::toString).collect(Collectors.toList())), item.first.getChartType(),item.first.getStartDate().format(StatisticCall.DATE_FORMAT),item.first.getEndDate()==null?"Now":item.first.getEndDate().format(StatisticCall.DATE_FORMAT)));
         //TODO Get Colors from Color Resource
         //TODO support Light mode
-        sparkButton.setChecked(item.second);
+        imageView.setColorFilter(Color.parseColor(item.second ? "yellow" : "white"));
     }
 
-    public SparkButton getSparkButton() {
-        return sparkButton;
+    public ImageView getImageView() {
+        return imageView;
     }
 
     private String listOfStringToString(List<String> list) {

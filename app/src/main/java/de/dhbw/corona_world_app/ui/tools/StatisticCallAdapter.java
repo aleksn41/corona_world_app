@@ -109,7 +109,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         //give the itemOnActionCallback Interface to the Item, such that it can implement its own logic
         holder.setItem(getItem(holder.getAdapterPosition()));
         //setActionCallback if available
-        if(itemOnActionCallback!=null)holder.getSparkButton().setOnClickListener(v -> itemOnActionCallback.callback(holder.getAdapterPosition()));
+        if(itemOnActionCallback!=null)holder.getImageView().setOnClickListener(v -> itemOnActionCallback.callback(holder.getAdapterPosition()));
         //check if its the last item
         if(holder.getAdapterPosition()==getItemCount()-1){
             onLastItemLoaded.onLastItemLoaded();
