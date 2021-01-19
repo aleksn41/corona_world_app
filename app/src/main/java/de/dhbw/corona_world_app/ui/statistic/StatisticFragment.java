@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class StatisticFragment extends Fragment {
 
     private static final String TAG = StatisticFragment.class.getSimpleName();
 
-    TextRoundCornerProgressBar progressBar;
+    LinearProgressIndicator progressBar;
 
     TextView testDisplay;
 
@@ -97,18 +97,11 @@ public class StatisticFragment extends Fragment {
             public Void call() throws InterruptedException {
                 testDisplay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
-                requireActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressBar.setProgressText("loading Country Information");
-                    }
-                });
                 Thread.sleep(milliSecondsToLoad);
                 requireActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         progressBar.setProgress(20);
-                        progressBar.setProgressText("parsing Information");
                     }
                 });
                 Thread.sleep(milliSecondsToLoad);
@@ -116,7 +109,6 @@ public class StatisticFragment extends Fragment {
                     @Override
                     public void run() {
                         progressBar.setProgress(40);
-                        progressBar.setProgressText("analyzing Information");
                     }
                 });
                 Thread.sleep(milliSecondsToLoad);
@@ -124,7 +116,6 @@ public class StatisticFragment extends Fragment {
                     @Override
                     public void run() {
                         progressBar.setProgress(80);
-                        progressBar.setProgressText("finalizing Statistic");
                     }
                 });
                 Thread.sleep(milliSecondsToLoad);
@@ -132,10 +123,8 @@ public class StatisticFragment extends Fragment {
                     @Override
                     public void run() {
                         progressBar.setProgress(100);
-                        progressBar.setProgressText("finished");
                         progressBar.setVisibility(View.GONE);
                         progressBar.setProgress(0);
-                        progressBar.setProgressText("");
                         testDisplay.setVisibility(View.VISIBLE);
                     }
                 });

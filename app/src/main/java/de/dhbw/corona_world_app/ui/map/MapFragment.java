@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.json.JSONException;
 
@@ -38,7 +38,7 @@ public class MapFragment extends Fragment {
 
     MutableLiveData<String> webViewString = new MutableLiveData<>();
 
-    TextRoundCornerProgressBar progressBar;
+    LinearProgressIndicator progressBar;
 
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
@@ -49,14 +49,12 @@ public class MapFragment extends Fragment {
         @Override
         public void endLoadingScreen() {
             progressBar.setProgress(0);
-            progressBar.setProgressText("");
             progressBar.setVisibility(View.GONE);
         }
 
         @Override
-        public void setProgressBar(int progress, @NonNull String message) {
+        public void setProgressBar(int progress) {
             progressBar.setProgress(progress);
-            progressBar.setProgressText(message);
         }
 
         @Override
@@ -74,11 +72,11 @@ public class MapFragment extends Fragment {
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         //TODO your loading the Data before the Fragment is fully loaded, please load Data once Fragment has been setup
-        progressBar = root.findViewById(R.id.progress_bar);
+        progressBar = root.findViewById(R.id.progressBar);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
-        loadingScreen.setProgressBar(10, "Starting...");
+        loadingScreen.setProgressBar(10);
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
@@ -90,7 +88,7 @@ public class MapFragment extends Fragment {
         webSettings.setSupportZoom(true);
 
         ExecutorService service = ThreadPoolHandler.getInstance();
-        loadingScreen.setProgressBar(20, "Requesting data...");
+        loadingScreen.setProgressBar(20);
         Log.v(TAG, "Requesting all countries...");
         service.execute(new Runnable() {
             @Override
@@ -102,14 +100,14 @@ public class MapFragment extends Fragment {
                 }
             }
         });
-        loadingScreen.setProgressBar(30, "Request sent...");
+        loadingScreen.setProgressBar(30);
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
-            loadingScreen.setProgressBar(50, "Answer arrived...");
+            loadingScreen.setProgressBar(50);
             Log.v(TAG, "Requested countries have arrived");
-            loadingScreen.setProgressBar(70, "Decrypting data...");
+            loadingScreen.setProgressBar(70);
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
             Log.v(TAG, "Loading WebView with WebString...");
-            loadingScreen.setProgressBar(100, "Visualizing data...");
+            loadingScreen.setProgressBar(100);
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
             //TODO this is called before it is actually loaded see if it can be fixed
             loadingScreen.endLoadingScreen();
