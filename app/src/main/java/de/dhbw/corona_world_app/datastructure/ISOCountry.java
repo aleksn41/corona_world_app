@@ -269,5 +269,9 @@ public enum ISOCountry {
 
     public String getDisplayName(){return this.displayName;}
 
+    @Override
+    public String toString() {
+        return getDisplayName();
+    }
 
 }
