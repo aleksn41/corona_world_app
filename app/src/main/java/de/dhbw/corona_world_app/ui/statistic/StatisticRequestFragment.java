@@ -35,11 +35,16 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
+import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
+import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
@@ -61,6 +66,14 @@ public class StatisticRequestFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        Logger.disableLogging();
+        if(Logger.getDebbuging()) {
+            List<ISOCountry> clist = new ArrayList<>();
+            clist.add(ISOCountry.Belize);
+            List<Criteria> crlist = new ArrayList<>();
+            crlist.add(Criteria.DEATHS);
+            requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now(), null));
+        }
         statisticViewModel =
                 new ViewModelProvider(this).get(StatisticViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic_request, container, false);
