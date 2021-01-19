@@ -20,19 +20,28 @@ import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.R;
 
-public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter implements Filterable {
+public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter implements Filterable, StatisticRequestRule.RuleEnumAdapter<T> {
     private final Context context;
     HashSet<T> selectedItems;
     List<T> originalItems;
     List<T> filteredItems;
+    int originalLimit;
     int limit;
+    LimitListener limitListener;
+    StatisticRequestRule.OnItemsChangeListener itemsChangeListener;
 
-    public MultiAutoCompleteTextViewAdapter(Context context, Class<T> tClass,int limit) {
+    interface LimitListener{
+        void onLimitReached(int limit);
+    }
+
+    public MultiAutoCompleteTextViewAdapter(Context context, Class<T> tClass,int limit,LimitListener limitListener) {
         this.context=context;
         originalItems = Arrays.asList(tClass.getEnumConstants());
         selectedItems=new HashSet<>();
         filteredItems= originalItems;
         this.limit=limit;
+        this.originalLimit=limit;
+        this.limitListener=limitListener;
     }
 
     @Override
@@ -43,6 +52,7 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
                 FilterResults results = new FilterResults();
                 if(limit!=-1&&selectedItems.size()==limit){
                     results.values=new ArrayList<>();
+                    if(limitListener!=null)limitListener.onLimitReached(limit);
                     return results;
                 }
                 if (constraint == null || constraint.length() == 0) {
@@ -108,18 +118,31 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
     public void selectItem(int position){
         T currentItem=getItem(position);
         selectedItems.add(currentItem);
+        itemsChangeListener.onItemChange();
     }
 
     public void unSelectItem(T item){
         selectedItems.remove(item);
+        itemsChangeListener.onItemChange();
     }
 
     public boolean anySelected(){
         return !selectedItems.isEmpty();
     }
 
+    @Override
+    public void setOnItemsChangeListener(StatisticRequestRule.OnItemsChangeListener listener) {
+        this.itemsChangeListener=listener;
+    }
+
     public List<T> getSelectedItems(){
         return new ArrayList<>(selectedItems);
+    }
+
+    @Override
+    public void conditionApplies(boolean allowOnlyOneItem) {
+        if(allowOnlyOneItem)limit=1;
+        else limit=originalLimit;
     }
 
     public T getFirstFilteredItem(){

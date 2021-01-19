@@ -15,9 +15,9 @@ public class StatisticRequestRule {
 
     public Rule rule;
 
-    RuleISOCountryAdapter isoCountryAdapter;
-    RuleChartTypeAdapter chartTypeAdapter;
-    RuleCriteriaAdapter criteriaAdapter;
+    RuleEnumAdapter<ISOCountry> isoCountryAdapter;
+    RuleEnumAdapter<ChartType> chartTypeAdapter;
+    RuleEnumAdapter<Criteria> criteriaAdapter;
     RuleDateRangeInterface ruleDateRangeInterface;
 
     OnItemsChangeListener checkCondition=new OnItemsChangeListener() {
@@ -36,8 +36,7 @@ public class StatisticRequestRule {
         boolean allowOnlyOneCountry;
         boolean allowOnlyOneCriteria;
         boolean startAndEndDateMustBeSame;
-        //allow certain ChartTypes
-        ChartTypeAllowedInterface chartTypeAllowedInterface;
+        boolean doNotAllowBarChart;
     }
 
     interface ChartTypeAllowedInterface {
@@ -48,21 +47,10 @@ public class StatisticRequestRule {
         void onItemChange();
     }
 
-    private interface RuleEnumAdapter<T extends Enum<T>> {
+    public interface RuleEnumAdapter<T extends Enum<T>> {
         void setOnItemsChangeListener(OnItemsChangeListener listener);
         List<T> getSelectedItems();
-    }
-
-    public interface RuleISOCountryAdapter extends RuleEnumAdapter<ISOCountry> {
-        void conditionApplies(boolean allowOnlyOneCountry);
-    }
-
-    public interface RuleChartTypeAdapter extends RuleEnumAdapter<ChartType> {
-        void conditionApplies(ChartTypeAllowedInterface chartTypeAllowedInterface);
-    }
-
-    public interface RuleCriteriaAdapter extends RuleEnumAdapter<Criteria> {
-        void conditionApplies(boolean allowOnlyOneCriteria);
+        void conditionApplies(boolean allowOnlyOneItem);
     }
 
     public interface RuleDateRangeInterface{
@@ -73,7 +61,7 @@ public class StatisticRequestRule {
         void conditionApplies(boolean startAndEndDateMustBeSame);
     }
 
-    StatisticRequestRule(@NonNull RuleISOCountryAdapter isoCountryAdapter, @NonNull RuleCriteriaAdapter criteriaAdapter, @NonNull RuleChartTypeAdapter chartTypeAdapter,@NonNull RuleDateRangeInterface ruleDateRangeInterface){
+    StatisticRequestRule(@NonNull RuleEnumAdapter<ISOCountry> isoCountryAdapter, @NonNull RuleEnumAdapter<Criteria> criteriaAdapter, @NonNull RuleEnumAdapter<ChartType> chartTypeAdapter,@NonNull RuleDateRangeInterface ruleDateRangeInterface){
         init();
         this.isoCountryAdapter=isoCountryAdapter;
         this.criteriaAdapter=criteriaAdapter;
@@ -98,17 +86,12 @@ public class StatisticRequestRule {
         rule.allowOnlyOneCountry=false;
         rule.allowOnlyOneCriteria=false;
         rule.startAndEndDateMustBeSame=false;
-        rule.chartTypeAllowedInterface= new ChartTypeAllowedInterface() {
-            @Override
-            public boolean isAllowed(ChartType chartType) {
-                return true;
-            }
-        };
+        rule.doNotAllowBarChart=false;
     }
     private void applyRule(Rule rule){
         isoCountryAdapter.conditionApplies(rule.allowOnlyOneCountry);
         criteriaAdapter.conditionApplies(rule.allowOnlyOneCriteria);
-        chartTypeAdapter.conditionApplies(rule.chartTypeAllowedInterface);
+        chartTypeAdapter.conditionApplies(rule.doNotAllowBarChart);
         ruleDateRangeInterface.conditionApplies(rule.startAndEndDateMustBeSame);
     }
 }

@@ -57,7 +57,7 @@ public class StatisticRequestFragment extends Fragment {
     DatePickerDialog startDatePicker;
     DatePickerDialog endDatePicker;
 
-    HashMap<Chip, ISOCountry> chipToISOCountry = new HashMap<>();
+    StatisticRequestRule rule;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -79,17 +79,17 @@ public class StatisticRequestFragment extends Fragment {
         if (scrollView.getChildAt(0).getBottom() - (scrollView.getHeight() + scrollView.getScrollY()) == 0)
             floatingActionButton.extend();
         else floatingActionButton.shrink();
-
+        //TODO visually show that limit is reached
         CustomNachoTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
-        MultiAutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE);
+        MultiAutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE,null);
         setupNachoTextView(ISOCountry.class, isoCountryNachoTextView, isoCountryAdapter);
 
         CustomNachoTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
-        MultiAutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1);
+        MultiAutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1,null);
         setupNachoTextView(Criteria.class, criteriaNachoTextView, criteriaAdapter);
 
         CustomNachoTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
-        MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ChartType.class, 1);
+        MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ChartType.class, 1,null);
         setupNachoTextView(ChartType.class, chartTypeNachoTextView, chartTypeAdapter);
 
         //get current Date
