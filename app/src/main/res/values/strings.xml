@@ -22,4 +22,6 @@
     <string name="time_picker_title">Choose the time range of the statistic</string>
     <string name="pick_start_date">Start Date</string>
     <string name="pick_end_date">End Date</string>
+    <string name="fab_content_desc">Create Statistic</string>
+    <string name="error_title">Error Code: %1$d (%2$s)</string>
 </resources>

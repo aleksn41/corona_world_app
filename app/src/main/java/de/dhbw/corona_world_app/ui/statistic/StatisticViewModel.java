@@ -39,6 +39,7 @@ public class StatisticViewModel extends ViewModel {
         mText.setValue("Statistics");
     }
 
+    //TODO once api-branch is merged this can be implemented properly
     public BarChart getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         if(dataSetGenerator==null){
@@ -60,23 +61,29 @@ public class StatisticViewModel extends ViewModel {
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), new LocalDateTime[]{LocalDateTime.now(), LocalDateTime.now()});
         if(countryList2D && criteriaList2D && dates2D) throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
         if(countryList2D){
+            //multiple countries stuff:
+            //if coupled with time -> grouped bars
+            //if coupled with criteria -> grouped by country
             if(dates2D) {
                 //make api call with time constraint
                 //BarDataSet data = dataSetGenerator.getBarChartDataSet();
             }
-            if(criteriaList2D){
 
+            if(criteriaList2D){
+                //multiple criteria stuff:
+                //if coupled with time -> overlaying bars
+                //if coupled with countries -> grouped by country
             }
         } else {
 
-        }
-        //multiple countries stuff:
-        //if coupled with time -> grouped bars
-        //if coupled with criteria -> grouped by country
+            if(dates2D) {
+                //is alone or with criteria
+            }
 
-        //multiple criteria stuff:
-        //if coupled with time -> overlaying bars
-        //if coupled with countries -> grouped by country
+            if(criteriaList2D){
+                //is alone...
+            }
+        }
 
         //time stuff:
         //if more than 7 days -> avg of 2 days
