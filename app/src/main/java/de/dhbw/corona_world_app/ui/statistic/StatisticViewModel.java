@@ -84,7 +84,6 @@ public class StatisticViewModel extends ViewModel {
         //if bigger than 3 months -> avg of months
         //optional: if bigger than 12 months -> avg of 2 months
         //optional: if bigger than 2 years -> avg per year
-
         return null;
     }
 
