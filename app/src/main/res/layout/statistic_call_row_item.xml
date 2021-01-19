@@ -16,14 +16,15 @@
         android:layout_gravity="center"
         android:background="@drawable/rectangle" />
 
-    <ImageView
-        android:id="@+id/statisticCallItemImageView"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_centerVertical="true"
+    <com.varunest.sparkbutton.SparkButton
+        android:id="@+id/starButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"
         android:layout_alignEnd="@id/StatisticCallItemTextView"
         android:layout_marginEnd="@dimen/margin_big"
-        android:src="@drawable/ic_favourites_star24dp"
-        android:contentDescription="@string/description_Star"
-        app:tint="@color/yellow" />
+        app:sparkbutton_activeImage="@drawable/ic_star_on"
+        app:sparkbutton_animationSpeed=".85"
+        app:sparkbutton_iconSize="30dp"
+        app:sparkbutton_inActiveImage="@drawable/ic_star_off" />
 </RelativeLayout>
