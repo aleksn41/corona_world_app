@@ -89,7 +89,14 @@ public class StatisticRequestFragment extends Fragment {
         setupNachoTextView(Criteria.class, criteriaNachoTextView, criteriaAdapter);
 
         CustomNachoTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
-        MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ChartType.class, 1,null);
+        MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1,null){
+            //special case where if condition applies, a bar chart cannot be shown
+            @Override
+            public void conditionApplies(boolean allowOnlyOneItem) {
+
+                super.conditionApplies(allowOnlyOneItem);
+            }
+        };
         setupNachoTextView(ChartType.class, chartTypeNachoTextView, chartTypeAdapter);
 
         //get current Date
