@@ -363,7 +363,7 @@ public class StatisticCallDataManager {
             long amountOfNewItemsDeleted = indicesOfAllDataToRemove.parallelStream().filter(i -> i < amountOfNewItemsAddedInSession).count();
             amountOfNewItemsAddedInSession -= amountOfNewItemsDeleted;
             deleted = 0;
-            ArrayList<Integer> newList2 = new ArrayList<>(indicesOfFavouriteChangedNotCreatedThisSession.size() - (indicesOfAllDataToRemove.size() - (int) amountOfNewItemsDeleted));
+            ArrayList<Integer> newList2 = new ArrayList<>(indicesOfFavouriteChangedNotCreatedThisSession.size());
             for (int i = 0; i < indicesOfFavouriteChangedNotCreatedThisSession.size(); i++) {
                 if (indicesOfAllDataToRemove.contains(indicesOfFavouriteChangedNotCreatedThisSession.get(i))) {
                     deleted += 1;
