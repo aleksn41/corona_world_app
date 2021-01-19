@@ -25,6 +25,7 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
     HashSet<T> selectedItems;
     List<T> originalItems;
     List<T> filteredItems;
+    HashSet<T> blackListItems;
     int originalLimit;
     int limit;
     LimitListener limitListener;
@@ -42,6 +43,7 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
         this.limit=limit;
         this.originalLimit=limit;
         this.limitListener=limitListener;
+        this.blackListItems=new HashSet<>();
     }
 
     @Override
@@ -59,7 +61,7 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
                     results.values = originalItems;
                     results.count = originalItems.size();
                 } else {
-                    List<T> tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p)&&containsIgnoreCase(p.toString(), String.valueOf(constraint))).collect(Collectors.toList());
+                    List<T> tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p)&&containsIgnoreCase(p.toString(), String.valueOf(constraint))&&!blackListItems.contains(p)).collect(Collectors.toList());
                     results.values = tempFilteredItems;
                     results.count = tempFilteredItems.size();
                 }
@@ -143,6 +145,15 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
     public void conditionApplies(boolean allowOnlyOneItem) {
         if(allowOnlyOneItem)limit=1;
         else limit=originalLimit;
+    }
+
+    public void addToBlackList(T item){
+        blackListItems.add(item);
+        unSelectItem(item);
+    }
+
+    public void removeFromBlackList(T item){
+        blackListItems.remove(item);
     }
 
     public T getFirstFilteredItem(){

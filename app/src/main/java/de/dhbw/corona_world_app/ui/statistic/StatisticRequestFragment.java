@@ -93,7 +93,7 @@ public class StatisticRequestFragment extends Fragment {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
-
+                addToBlackList(ChartType.BAR);
                 super.conditionApplies(allowOnlyOneItem);
             }
         };
