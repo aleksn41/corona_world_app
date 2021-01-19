@@ -28,9 +28,9 @@ public class StringToCountryParser {
         int[] recovered = new int[jsonArray.length()];
         int[] infected = new int[jsonArray.length()];
         country.setPop_inf_ratio(new double[jsonArray.length()]);
-        country.setCountry(ISOCountry.valueOf(Mapper.normalizeCountryName(jsonArray.getJSONObject(0).getString("Country"))));
+        country.setCountry(Mapper.mapISOCodeToISOCountry(Mapper.normalizeCountryName(jsonArray.getJSONObject(0).getString("CountryCode"))));
         for (int i = 0; i < jsonArray.length(); i++) {
-            dates[i] = LocalDate.parse(jsonArray.getJSONObject(i).getString("Date").substring(0, 9));
+            dates[i] = LocalDate.parse(jsonArray.getJSONObject(i).getString("Date").substring(0, 10));
             infected[i] = jsonArray.getJSONObject(i).getInt("Confirmed");
             recovered[i] = jsonArray.getJSONObject(i).getInt("Recovered");
             deaths[i] = jsonArray.getJSONObject(i).getInt("Deaths");

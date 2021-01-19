@@ -2,6 +2,7 @@ package de.dhbw.corona_world_app.datastructure;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Arrays;
 
 public class TimeframedCountry implements Serializable {
 
@@ -79,5 +80,18 @@ public class TimeframedCountry implements Serializable {
 
     public void setPop_inf_ratio(double[] pop_inf_ratio) {
         this.pop_inf_ratio = pop_inf_ratio;
+    }
+
+    @Override
+    public String toString() {
+        return "TimeframedCountry{" +
+                "country=" + country +
+                ", dates=" + Arrays.toString(dates) +
+                ", deaths=" + Arrays.toString(deaths) +
+                ", infected=" + Arrays.toString(infected) +
+                ", recovered=" + Arrays.toString(recovered) +
+                ", population=" + population +
+                ", pop_inf_ratio=" + Arrays.toString(pop_inf_ratio) +
+                '}';
     }
 }
