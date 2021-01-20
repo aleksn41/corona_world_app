@@ -193,6 +193,7 @@ public class StatisticRequestFragment extends Fragment {
                     startDatePicker.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
                         @Override
                         public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                            start = LocalDate.of(year, month + 1, dayOfMonth);
                             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
                             endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
