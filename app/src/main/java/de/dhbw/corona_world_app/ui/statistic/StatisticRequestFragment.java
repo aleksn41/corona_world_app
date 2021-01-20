@@ -197,6 +197,7 @@ public class StatisticRequestFragment extends Fragment {
                             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
                             endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
+                            endDatePicker.getDatePicker().updateDate(year,month+1,dayOfMonth);
                             end=start;
                             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
                             endDatePicker.getDatePicker().setOnDateChangedListener(null);
