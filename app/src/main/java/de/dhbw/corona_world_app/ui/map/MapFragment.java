@@ -72,15 +72,12 @@ public class MapFragment extends Fragment {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
-        progressBar = root.findViewById(R.id.progress_bar);
-        //TODO your loading the Data before the Fragment is fully loaded, please load Data once Fragment has been setup
         progressBar = root.findViewById(R.id.progressBar);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
-        loadingScreen.setProgressBar(10, "Starting...");
-        boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
         loadingScreen.setProgressBar(10);
+        boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
@@ -97,20 +94,18 @@ public class MapFragment extends Fragment {
         webSettings.setSupportZoom(true);
 
         ExecutorService service = ThreadPoolHandler.getInstance();
-        loadingScreen.setProgressBar(20);
         Log.v(TAG, "Requesting all countries...");
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    loadingScreen.setProgressBar(25, "Requesting data...");
+                    loadingScreen.setProgressBar(25);
                     mapViewModel.initCountryList();
                 } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
                     Logger.logE(TAG, "Exception during initiation of country list!", e);
                 }
             }
         });
-        loadingScreen.setProgressBar(30);
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
             loadingScreen.setProgressBar(50);
             Log.v(TAG, "Requested countries have arrived");
