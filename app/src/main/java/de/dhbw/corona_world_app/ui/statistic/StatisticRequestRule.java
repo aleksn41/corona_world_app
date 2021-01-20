@@ -23,7 +23,7 @@ public class StatisticRequestRule {
     OnItemsChangeListener checkCondition=new OnItemsChangeListener() {
         @Override
         public void onItemChange() {
-            if(rule.conditionSatisfied(isoCountryAdapter.getSelectedItems().size(),criteriaAdapter.getSelectedItems().size(),chartTypeAdapter.getSelectedItems().get(0),ruleDateRangeInterface.getStartDate(),ruleDateRangeInterface.getEndDate())){
+            if(rule.conditionSatisfied(isoCountryAdapter.getSelectedItems().size(),criteriaAdapter.getSelectedItems().size(),chartTypeAdapter.getSelectedItems().size()==0?null:chartTypeAdapter.getSelectedItems().get(0),ruleDateRangeInterface.getStartDate(),ruleDateRangeInterface.getEndDate())){
                 applyRule(rule);
             }
         }
