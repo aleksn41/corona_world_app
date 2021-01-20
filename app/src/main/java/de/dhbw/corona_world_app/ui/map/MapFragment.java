@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,7 +10,6 @@ import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -69,25 +67,21 @@ public class MapFragment extends Fragment {
 
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
+    //loading screen will be implemented by ui-team
     @SuppressLint("SetJavaScriptEnabled")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
+        //TODO your loading the Data before the Fragment is fully loaded, please load Data once Fragment has been setup
         progressBar = root.findViewById(R.id.progress_bar);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10, "Starting...");
-        boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
-        myWebView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                loadingScreen.endLoadingScreen();
-            }
-        });
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(false);
@@ -96,18 +90,19 @@ public class MapFragment extends Fragment {
         webSettings.setSupportZoom(true);
 
         ExecutorService service = ThreadPoolHandler.getInstance();
+        loadingScreen.setProgressBar(20, "Requesting data...");
         Log.v(TAG, "Requesting all countries...");
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    loadingScreen.setProgressBar(25, "Requesting data...");
                     mapViewModel.initCountryList();
                 } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
                     Logger.logE(TAG, "Exception during initiation of country list!", e);
                 }
             }
         });
+        loadingScreen.setProgressBar(30, "Request sent...");
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
             loadingScreen.setProgressBar(50, "Answer arrived...");
             Log.v(TAG, "Requested countries have arrived");
@@ -116,6 +111,8 @@ public class MapFragment extends Fragment {
             Log.v(TAG, "Loading WebView with WebString...");
             loadingScreen.setProgressBar(100, "Visualizing data...");
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
+            //TODO this is called before it is actually loaded see if it can be fixed
+            loadingScreen.endLoadingScreen();
         });
         return root;
     }

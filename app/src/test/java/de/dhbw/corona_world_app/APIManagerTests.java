@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
-import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
 
 import static org.junit.Assert.*;
 
@@ -45,23 +43,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist,criteriaList);
-        assertNotNull(returnList);
-        System.out.println(returnList);
-    }
-
-    @Test
-    public void testGetDataOneCountryTimeFrame() throws Throwable {
-        APIManager.disableLogsForTesting();
-        APIManager.createAPICall("https://google.de");
-        List<ISOCountry> clist = new ArrayList<>();
-        clist.add(ISOCountry.Germany);
-        List<Criteria> criteriaList = new ArrayList<>();
-        criteriaList.add(Criteria.DEATHS);
-        criteriaList.add(Criteria.INFECTED);
-        criteriaList.add(Criteria.RECOVERED);
-        criteriaList.add(Criteria.POPULATION);
-        List<TimeframedCountry> returnList = APIManager.getData(clist,criteriaList, LocalDate.of(2020,6,1), LocalDate.of(2020,6,3));
+        List<Country> returnList = APIManager.getData(clist,criteriaList,null);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -86,7 +68,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist,criteriaList);
+        List<Country> returnList = APIManager.getData(clist,criteriaList,null);
         assertNotNull(returnList);
         System.out.println(returnList);
     }

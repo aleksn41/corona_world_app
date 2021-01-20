@@ -5,7 +5,6 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,31 +13,21 @@ import java.util.Map;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
-import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
 
 public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();
 
-    public static TimeframedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse) throws JSONException {
-        JSONArray jsonArray = new JSONArray(toParse);
-        TimeframedCountry country = new TimeframedCountry();
-        LocalDate[] dates = new LocalDate[jsonArray.length()];
-        int[] deaths = new int[jsonArray.length()];
-        int[] recovered = new int[jsonArray.length()];
-        int[] infected = new int[jsonArray.length()];
-        country.setPop_inf_ratio(new double[jsonArray.length()]);
-        country.setCountry(Mapper.mapISOCodeToISOCountry(Mapper.normalizeCountryName(jsonArray.getJSONObject(0).getString("CountryCode"))));
-        for (int i = 0; i < jsonArray.length(); i++) {
-            dates[i] = LocalDate.parse(jsonArray.getJSONObject(i).getString("Date").substring(0, 10));
-            infected[i] = jsonArray.getJSONObject(i).getInt("Confirmed");
-            recovered[i] = jsonArray.getJSONObject(i).getInt("Recovered");
-            deaths[i] = jsonArray.getJSONObject(i).getInt("Deaths");
+    public static Country parseFromHeroOneCountry(String toParse, Country country){
+        String[] splitArray = toParse.split(",");
+        for (String string : splitArray) {
+            String[] jsonPair = string.split(":");
+            switch (jsonPair[0]) {
+                case"\"deaths\"":country.setDeaths(Integer.parseInt(jsonPair[1]));break;
+                case"\"cases\"":country.setInfected(Integer.parseInt(jsonPair[1]));break;
+                case"\"recovered\"":country.setRecovered(Integer.parseInt(jsonPair[1]));break;
+            }
         }
-        country.setDates(dates);
-        country.setDeaths(deaths);
-        country.setRecovered(recovered);
-        country.setInfected(infected);
         return country;
     }
 
