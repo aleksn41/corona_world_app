@@ -16,4 +16,16 @@
         <item name="windowActionModeOverlay">true</item>
         <!-- Customize your theme here. -->
     </style>
+    <array name="chartColors">
+        <item>@color/dark_grey</item>
+        <item>#329d61</item>
+        <item>@color/dark_blue</item>
+        <item>#00ff1f</item>
+        <item>@color/light_blue</item>
+        <item>@color/red</item>
+        <item>#a46f33</item>
+        <item>#ffa201</item>
+        <item>#ff01ff</item>
+        <item>#dd6fa6</item>
+    </array>
 </resources>
