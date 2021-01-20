@@ -30,6 +30,8 @@ public class Logger {
         }
     }
 
+    public static boolean getDebbuging(){return !logOn; }
+
     public static void disableLogging(){
         logOn = false;
     }
