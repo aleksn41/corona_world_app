@@ -70,6 +70,7 @@ public class StatisticRequestFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        //TODO delete after debugging is done
         Logger.disableLogging();
         if(Logger.getDebbuging()) {
             List<ISOCountry> clist = new ArrayList<>();
@@ -129,14 +130,14 @@ public class StatisticRequestFragment extends Fragment {
             start = LocalDate.of(year12, month12 + 1, dayOfMonth);
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-            //if(startDateChange!=null)startDateChange.onItemChange();
+            if(startDateChange!=null)startDateChange.onItemChange();
         }, year, month, day);
 
         endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, (view, year1, month1, dayOfMonth) -> {
             end = LocalDate.of(year1, month1 + 1, dayOfMonth);
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
             startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-            //if(endDateChange!=null)endDateChange.onItemChange();
+            if(endDateChange!=null)endDateChange.onItemChange();
         }, year, month, day);
 
         //sets the min date to the beginning of Corona
