@@ -32,7 +32,7 @@ public class StatisticCallViewHolder extends RecyclerView.ViewHolder implements 
         //TODO Change what Information appears in what order
         Objects.requireNonNull(item.first);
         Objects.requireNonNull(item.second);
-        textView.setText(itemView.getContext().getString(R.string.statistic_call_info, listOfStringToString(item.first.getCountryList().parallelStream().map(Enum::toString).collect(Collectors.toList())), listOfStringToString(item.first.getCriteriaList().parallelStream().map(Enum::toString).collect(Collectors.toList())), item.first.getChartType(),item.first.getStartDate().format(StatisticCall.DATE_FORMAT),item.first.getEndDate()==null?"Now":item.first.getEndDate().format(StatisticCall.DATE_FORMAT)));
+        textView.setText(itemView.getContext().getString(R.string.statistic_call_info, listOfStringToString(item.first.getCountryList().parallelStream().map(Enum::toString).collect(Collectors.toList())), listOfStringToString(item.first.getCriteriaList().parallelStream().map(Enum::toString).collect(Collectors.toList())), item.first.getChartType(),item.first.getStartDate()==StatisticCall.NOW?"Now":item.first.getStartDate().format(StatisticCall.DATE_FORMAT),item.first.getEndDate()==StatisticCall.NOW?"Now":item.first.getEndDate().format(StatisticCall.DATE_FORMAT)));
         //TODO Get Colors from Color Resource
         //TODO support Light mode
         sparkButton.setChecked(item.second);

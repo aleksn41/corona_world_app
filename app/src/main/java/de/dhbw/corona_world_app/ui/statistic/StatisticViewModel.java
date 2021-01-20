@@ -58,7 +58,7 @@ public class StatisticViewModel extends ViewModel {
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = !statisticCall.getStartDate().isEqual(statisticCall.getEndDate());
-        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), new LocalDateTime[]{LocalDateTime.now(), LocalDateTime.now()});
+        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList());
         if(countryList2D && criteriaList2D && dates2D) throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
         if(countryList2D){
             //multiple countries stuff:
