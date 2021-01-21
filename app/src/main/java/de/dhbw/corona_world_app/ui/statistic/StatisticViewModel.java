@@ -62,9 +62,12 @@ public class StatisticViewModel extends ViewModel {
         colorsTyped.recycle();
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
-        boolean dates2D = !statisticCall.getStartDate().isEqual(statisticCall.getEndDate());
+        boolean dates2D = statisticCall.getStartDate() != null ? !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
         if (countryList2D && criteriaList2D && dates2D)
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
+
+        BarData barData = new BarData();
+        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
 
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
@@ -84,8 +87,6 @@ public class StatisticViewModel extends ViewModel {
                 step = 360;
             }
 
-            BarData barData = new BarData();
-            apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
             List<String> dates = new ArrayList<>();
             for (int i = 0; i < dayDifference; i += step) {
                 String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
@@ -101,7 +102,7 @@ public class StatisticViewModel extends ViewModel {
 
             for (TimeframedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
-                    if(statisticCall.getCriteriaList().contains(criteria)) {
+                    if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(step, dayDifference, country, criteria);
                         barData.addDataSet(dataSetGenerator.getBarChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
                     }
@@ -112,18 +113,26 @@ public class StatisticViewModel extends ViewModel {
             setStyle(chart, context);
             return chart;
         } else {
-
-            if (countryList2D) {
-                //is alone or with criteria
+            List<String> countries = new ArrayList<>();
+            for (TimeframedCountry country : apiGottenList) {
+                countries.add(country.getCountry().getDisplayName());
+                for (Criteria criteria : criteriaOrder) {
+                    if (statisticCall.getCriteriaList().contains(criteria)) {
+                        List<Float> data = getDataList(1, 1, country, criteria);
+                        barData.addDataSet(dataSetGenerator.getBarChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
+                    }
+                }
             }
-
-            if (criteriaList2D) {
-                //is alone...
-            }
-
-
+            chart.getXAxis().setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    return countries.get((int) value);
+                }
+            });
+            chart.setData(barData);
+            setStyle(chart, context);
+            return chart;
         }
-        return null;
     }
 
     private String getDateFormatted(LocalDate date) {
