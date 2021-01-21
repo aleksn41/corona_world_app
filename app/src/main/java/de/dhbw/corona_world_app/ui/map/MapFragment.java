@@ -95,11 +95,11 @@ public class MapFragment extends Fragment {
 
         ExecutorService service = ThreadPoolHandler.getInstance();
         Log.v(TAG, "Requesting all countries...");
+        loadingScreen.setProgressBar(25);
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    loadingScreen.setProgressBar(25);
                     mapViewModel.initCountryList();
                 } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
                     Logger.logE(TAG, "Exception during initiation of country list!", e);
