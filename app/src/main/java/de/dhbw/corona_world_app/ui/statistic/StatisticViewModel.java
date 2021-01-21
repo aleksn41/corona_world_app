@@ -73,7 +73,7 @@ public class StatisticViewModel extends ViewModel {
         if(dates2D){
 
             int step = 0;
-            int dayDifference = (int) DAYS.between(statisticCall.getStartDate(), statisticCall.getEndDate());
+            int dayDifference = (int) DAYS.between(statisticCall.getStartDate(), statisticCall.getEndDate()) + 1;
             if(dayDifference <= 7){
                 step = 1;
             } else if(dayDifference <= 21){
@@ -101,7 +101,8 @@ public class StatisticViewModel extends ViewModel {
                 apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
                 List<String> dates = new ArrayList<>();
                 for(int i = 0; i < dayDifference; i += step){
-                    dates.add(apiGottenList.get(0).getDates()[i].toString());
+                    String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
+                    dates.add(dateFormatted);
                 }
 
                 chart.getXAxis().setValueFormatter(new ValueFormatter() {
@@ -147,6 +148,11 @@ public class StatisticViewModel extends ViewModel {
         return null;
     }
 
+    private String getDateFormatted(LocalDate date){
+        String year = Integer.toString(date.getYear());
+        return date.getDayOfMonth()+"."+date.getMonthValue()+"."+year.substring(2);
+    }
+
     private void setStyle(BarChart chart, Context context) {
         //this is just to get the background-color...
         TypedValue typedValue = new TypedValue();
@@ -180,11 +186,11 @@ public class StatisticViewModel extends ViewModel {
             switch (criteria){
                 case HEALTHY: data.add((float) country.getPopulation()-country.getInfected()[i]); break;
                 case INFECTED: data.add((float) country.getInfected()[i]); break;
-                case DEATHS: data.add((float) country.getDeaths()[i]);
-                case RECOVERED: data.add((float) country.getRecovered()[i]);
-                case ID_RATION: data.add((float) country.getInfected()[i]/country.getDeaths()[i]);
-                case IH_RATION: data.add((float) country.getPop_inf_ratio(i));
-                case POPULATION: data.add((float) country.getPopulation());
+                case DEATHS: data.add((float) country.getDeaths()[i]);break;
+                case RECOVERED: data.add((float) country.getRecovered()[i]);break;
+                case ID_RATION: data.add((float) country.getInfected()[i]/country.getDeaths()[i]);break;
+                case IH_RATION: data.add((float) country.getPop_inf_ratio(i));break;
+                case POPULATION: data.add((float) country.getPopulation());break;
             }
         }
         return data;

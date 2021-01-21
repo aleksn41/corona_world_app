@@ -25,6 +25,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,6 +50,8 @@ public class StatisticFragment extends Fragment {
 
     private StatisticCallViewModel statisticCallViewModel;
 
+    private StatisticViewModel statisticViewModel;
+
     private static final String TAG = StatisticFragment.class.getSimpleName();
 
     LinearProgressIndicator progressBar;
@@ -71,11 +74,19 @@ public class StatisticFragment extends Fragment {
             }
         }
 
-        ChartValueSetGenerator provider = new ChartValueSetGenerator();
+       // ChartValueSetGenerator provider = new ChartValueSetGenerator();
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         testDisplay = root.findViewById(R.id.statisticCallItemTextView);
+        statisticViewModel = new ViewModelProvider(requireActivity()).get(StatisticViewModel.class);
         chart = (BarChart) root.findViewById(R.id.chart);
+        Bundle bundle = getArguments();
+        try {
+            statisticViewModel.getBarChart(StatisticFragmentArgs.fromBundle(bundle).getStatisticCall(), chart, getContext());
+        } catch (ExecutionException | InterruptedException | JSONException e) {
+            e.printStackTrace();
+        }
+        /*
         final String[] dates = new String[] { "01.10.", "02.10.", "03.10.", "04.10.", "05.10.", "06.10." };
         XAxis xaxis = chart.getXAxis();
         ValueFormatter vf = new ValueFormatter() {
@@ -119,6 +130,7 @@ public class StatisticFragment extends Fragment {
         chart.setBackgroundColor(getResources().getColor(R.color.dark_grey));
         chart.setDoubleTapToZoomEnabled(false);
         chart.setData(new BarData(provider.getBarChartDataSet(f, "Belize: Deaths", colors), provider.getBarChartDataSet(fl, "Belize: Recovered", colors), provider.getBarChartDataSet(f2, "Belize: Infected", colors)));
+        */
         return root;
     }
 
@@ -128,7 +140,7 @@ public class StatisticFragment extends Fragment {
         if (bundle != null) {
             StatisticCall request = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
             boolean isNewRequest = StatisticFragmentArgs.fromBundle(bundle).getIsNewRequest();
-            testDisplay.setText(request.toString());
+            //testDisplay.setText(request.toString());
             if (isNewRequest) addToHistory(request);
         }
     }
@@ -190,6 +202,7 @@ public class StatisticFragment extends Fragment {
                         progressBar.setProgress(100);
                         progressBar.setVisibility(View.GONE);
                         progressBar.setProgress(0);
+                        testDisplay.setVisibility(View.GONE);
                         chart.setVisibility(View.VISIBLE);
                         //testDisplay.setVisibility(View.VISIBLE);
                     }
