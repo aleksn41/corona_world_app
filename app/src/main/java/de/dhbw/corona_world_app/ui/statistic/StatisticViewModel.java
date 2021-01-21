@@ -2,24 +2,20 @@ package de.dhbw.corona_world_app.ui.statistic;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.util.TypedValue;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.json.JSONException;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -27,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
-import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
@@ -39,15 +34,14 @@ public class StatisticViewModel extends ViewModel {
 
     private static final String TAG = StatisticViewModel.class.getName();
 
-    private ChartValueSetGenerator dataSetGenerator;
+    private final Criteria[] criteriaOrder = new Criteria[]{Criteria.POPULATION, Criteria.HEALTHY, Criteria.INFECTED, Criteria.RECOVERED, Criteria.DEATHS, Criteria.IH_RATION, Criteria.ID_RATION};
 
-    private MutableLiveData<String> mText;
+    private ChartValueSetGenerator dataSetGenerator;
 
     private File pathToCacheDir;
 
     public StatisticViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("Statistics");
+
     }
 
     //TODO once api-branch is merged this can be implemented properly
@@ -106,9 +100,11 @@ public class StatisticViewModel extends ViewModel {
             });
 
             for (TimeframedCountry country : apiGottenList) {
-                for (Criteria criteria : statisticCall.getCriteriaList()) {
-                    List<Float> data = getDataList(step, dayDifference, country, criteria);
-                    barData.addDataSet(dataSetGenerator.getBarChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
+                for (Criteria criteria : criteriaOrder) {
+                    if(statisticCall.getCriteriaList().contains(criteria)) {
+                        List<Float> data = getDataList(step, dayDifference, country, criteria);
+                        barData.addDataSet(dataSetGenerator.getBarChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
+                    }
                 }
             }
 
@@ -158,6 +154,9 @@ public class StatisticViewModel extends ViewModel {
         chart.getXAxis().setTextColor(textColor);
         chart.getAxisLeft().setTextColor(textColor);
         chart.getAxisRight().setTextColor(textColor);
+        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisRight().setAxisMinimum(0f);
 
         arr2.recycle();
     }

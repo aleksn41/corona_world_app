@@ -56,7 +56,6 @@ public class StatisticRequestFragment extends Fragment {
     private StatisticViewModel statisticViewModel;
 
     //setup DatePicker
-
     private LocalDate start;
     private LocalDate end;
 
