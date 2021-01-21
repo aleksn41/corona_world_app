@@ -74,12 +74,13 @@ public class StatisticRequestFragment extends Fragment {
         Logger.disableLogging();
         if(Logger.getDebbuging()) {
             List<ISOCountry> clist = new ArrayList<>();
-            clist.add(ISOCountry.Belize);
+            clist.add(ISOCountry.Germany);
+            //clist.add(ISOCountry.Belize);
             List<Criteria> crlist = new ArrayList<>();
             //crlist.add(Criteria.HEALTHY);
             crlist.add(Criteria.INFECTED);
-            crlist.add(Criteria.DEATHS);
-            requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now().minusDays(5), LocalDate.now()));
+            //crlist.add(Criteria.DEATHS);
+            requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now().minusDays(89), LocalDate.now()));
         }
         statisticViewModel =
                 new ViewModelProvider(this).get(StatisticViewModel.class);

@@ -53,7 +53,7 @@ public class StatisticViewModel extends ViewModel {
     //TODO once api-branch is merged this can be implemented properly
     public BarChart getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
-        if(dataSetGenerator==null){
+        if (dataSetGenerator == null) {
             dataSetGenerator = new ChartValueSetGenerator();
         }
         float barSpace = 0.02f;
@@ -69,88 +69,71 @@ public class StatisticViewModel extends ViewModel {
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = !statisticCall.getStartDate().isEqual(statisticCall.getEndDate());
-        if(countryList2D && criteriaList2D && dates2D) throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
-        if(dates2D){
+        if (countryList2D && criteriaList2D && dates2D)
+            throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
 
+
+        if (dates2D) {
+            //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
             int step = 0;
             int dayDifference = (int) DAYS.between(statisticCall.getStartDate(), statisticCall.getEndDate()) + 1;
-            if(dayDifference <= 7){
+            if (dayDifference <= 7) {
                 step = 1;
-            } else if(dayDifference <= 21){
+            } else if (dayDifference <= 21) {
                 step = 2;
-            } else if(dayDifference <= 90){
+            } else if (dayDifference <= 90) {
                 step = 7;
-            } else if(dayDifference <= 360){
+            } else if (dayDifference <= 360) {
                 step = 30;
-            } else if(dayDifference <= 720){
+            } else if (dayDifference <= 720) {
                 step = 60;
             } else {
                 step = 360;
             }
 
-            //multiple countries stuff:
-            //if coupled with time -> grouped bars
-            //if coupled with criteria -> grouped by country
-            if(countryList2D) {
-                //make api call with time constraint
-                //BarDataSet data = dataSetGenerator.getBarChartDataSet();
+            BarData barData = new BarData();
+            apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+            List<String> dates = new ArrayList<>();
+            for (int i = 0; i < dayDifference; i += step) {
+                String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
+                dates.add(dateFormatted);
             }
 
-            if(criteriaList2D){
-                BarData barData = new BarData();
-                apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-                List<String> dates = new ArrayList<>();
-                for(int i = 0; i < dayDifference; i += step){
-                    String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
-                    dates.add(dateFormatted);
+            chart.getXAxis().setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    return dates.get((int) value);
                 }
+            });
 
-                chart.getXAxis().setValueFormatter(new ValueFormatter() {
-                    @Override
-                    public String getFormattedValue(float value) {
-                        return dates.get((int) value);
-                    }
-                });
-
-                for (TimeframedCountry country: apiGottenList) {
-                    for (Criteria criteria:statisticCall.getCriteriaList()) {
-                        List<Float> data = getDataList(step, dayDifference, country, criteria);
-                        barData.addDataSet(dataSetGenerator.getBarChartDataSet(data, country.getCountry().getDisplayName()+": "+criteria.getDisplayName(), colors));
-                    }
+            for (TimeframedCountry country : apiGottenList) {
+                for (Criteria criteria : statisticCall.getCriteriaList()) {
+                    List<Float> data = getDataList(step, dayDifference, country, criteria);
+                    barData.addDataSet(dataSetGenerator.getBarChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
                 }
-
-                chart.setData(barData);
-                setStyle(chart, context);
-                return chart;
-                //multiple criteria stuff:
-                //if coupled with time -> overlaying bars
-                //if coupled with countries -> grouped by country
             }
+
+            chart.setData(barData);
+            setStyle(chart, context);
+            return chart;
         } else {
 
-            if(countryList2D) {
+            if (countryList2D) {
                 //is alone or with criteria
             }
 
-            if(criteriaList2D){
+            if (criteriaList2D) {
                 //is alone...
             }
 
 
         }
-
-        //time stuff:
-        //if more than 7 days -> avg of 2 days
-        //if more than 3 weeks -> avg of weeks
-        //if bigger than 3 months -> avg of months
-        //optional: if bigger than 12 months -> avg of 2 months
-        //optional: if bigger than 2 years -> avg per year
         return null;
     }
 
-    private String getDateFormatted(LocalDate date){
+    private String getDateFormatted(LocalDate date) {
         String year = Integer.toString(date.getYear());
-        return date.getDayOfMonth()+"."+date.getMonthValue()+"."+year.substring(2);
+        return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
     }
 
     private void setStyle(BarChart chart, Context context) {
@@ -182,21 +165,35 @@ public class StatisticViewModel extends ViewModel {
 
     private List<Float> getDataList(int step, int stoppingCondition, TimeframedCountry country, Criteria criteria) {
         List<Float> data = new ArrayList<>();
-        for (int i = 0; i < stoppingCondition; i += step){
-            switch (criteria){
-                case HEALTHY: data.add((float) country.getPopulation()-country.getInfected()[i]); break;
-                case INFECTED: data.add((float) country.getInfected()[i]); break;
-                case DEATHS: data.add((float) country.getDeaths()[i]);break;
-                case RECOVERED: data.add((float) country.getRecovered()[i]);break;
-                case ID_RATION: data.add((float) country.getInfected()[i]/country.getDeaths()[i]);break;
-                case IH_RATION: data.add((float) country.getPop_inf_ratio(i));break;
-                case POPULATION: data.add((float) country.getPopulation());break;
+        for (int i = 0; i < stoppingCondition; i += step) {
+            switch (criteria) {
+                case HEALTHY:
+                    data.add((float) country.getPopulation() - country.getInfected()[i]);
+                    break;
+                case INFECTED:
+                    data.add((float) country.getInfected()[i]);
+                    break;
+                case DEATHS:
+                    data.add((float) country.getDeaths()[i]);
+                    break;
+                case RECOVERED:
+                    data.add((float) country.getRecovered()[i]);
+                    break;
+                case ID_RATION:
+                    data.add((float) country.getInfected()[i] / country.getDeaths()[i]);
+                    break;
+                case IH_RATION:
+                    data.add((float) country.getPop_inf_ratio(i));
+                    break;
+                case POPULATION:
+                    data.add((float) country.getPopulation());
+                    break;
             }
         }
         return data;
     }
 
-    public void setPathToCacheDir(File pathToCacheDir){
+    public void setPathToCacheDir(File pathToCacheDir) {
         this.pathToCacheDir = pathToCacheDir;
     }
 }
