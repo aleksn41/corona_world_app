@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
@@ -23,6 +22,7 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +51,7 @@ public class StatisticFragment extends Fragment {
 
     private static final String TAG = StatisticFragment.class.getSimpleName();
 
-    TextRoundCornerProgressBar progressBar;
+    LinearProgressIndicator progressBar;
 
     BarChart chart;
 
@@ -162,18 +162,11 @@ public class StatisticFragment extends Fragment {
                 chart.setVisibility(View.GONE);
                 testDisplay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
-                requireActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressBar.setProgressText("loading Country Information");
-                    }
-                });
                 Thread.sleep(milliSecondsToLoad);
                 requireActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         progressBar.setProgress(20);
-                        progressBar.setProgressText("parsing Information");
                     }
                 });
                 Thread.sleep(milliSecondsToLoad);
@@ -181,7 +174,6 @@ public class StatisticFragment extends Fragment {
                     @Override
                     public void run() {
                         progressBar.setProgress(40);
-                        progressBar.setProgressText("analyzing Information");
                     }
                 });
                 Thread.sleep(milliSecondsToLoad);
@@ -189,7 +181,6 @@ public class StatisticFragment extends Fragment {
                     @Override
                     public void run() {
                         progressBar.setProgress(80);
-                        progressBar.setProgressText("finalizing Statistic");
                     }
                 });
                 Thread.sleep(milliSecondsToLoad);
@@ -197,10 +188,8 @@ public class StatisticFragment extends Fragment {
                     @Override
                     public void run() {
                         progressBar.setProgress(100);
-                        progressBar.setProgressText("finished");
                         progressBar.setVisibility(View.GONE);
                         progressBar.setProgress(0);
-                        progressBar.setProgressText("");
                         chart.setVisibility(View.VISIBLE);
                         //testDisplay.setVisibility(View.VISIBLE);
                     }
