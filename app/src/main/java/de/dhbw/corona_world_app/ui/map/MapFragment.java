@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.json.JSONException;
 
@@ -40,7 +40,7 @@ public class MapFragment extends Fragment {
 
     MutableLiveData<String> webViewString = new MutableLiveData<>();
 
-    TextRoundCornerProgressBar progressBar;
+    LinearProgressIndicator progressBar;
 
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
@@ -51,14 +51,12 @@ public class MapFragment extends Fragment {
         @Override
         public void endLoadingScreen() {
             progressBar.setProgress(0);
-            progressBar.setProgressText("");
             progressBar.setVisibility(View.GONE);
         }
 
         @Override
-        public void setProgressBar(int progress, @NonNull String message) {
+        public void setProgressBar(int progress) {
             progressBar.setProgress(progress);
-            progressBar.setProgressText(message);
         }
 
         @Override
@@ -74,11 +72,11 @@ public class MapFragment extends Fragment {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
-        progressBar = root.findViewById(R.id.progress_bar);
+        progressBar = root.findViewById(R.id.progressBar);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
-        loadingScreen.setProgressBar(10, "Starting...");
+        loadingScreen.setProgressBar(10);
         boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
@@ -101,7 +99,7 @@ public class MapFragment extends Fragment {
             @Override
             public void run() {
                 try {
-                    loadingScreen.setProgressBar(25, "Requesting data...");
+                    loadingScreen.setProgressBar(25);
                     mapViewModel.initCountryList();
                 } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
                     Logger.logE(TAG, "Exception during initiation of country list!", e);
@@ -109,12 +107,12 @@ public class MapFragment extends Fragment {
             }
         });
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
-            loadingScreen.setProgressBar(50, "Answer arrived...");
+            loadingScreen.setProgressBar(50);
             Log.v(TAG, "Requested countries have arrived");
-            loadingScreen.setProgressBar(70, "Decrypting data...");
+            loadingScreen.setProgressBar(70);
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
             Log.v(TAG, "Loading WebView with WebString...");
-            loadingScreen.setProgressBar(100, "Visualizing data...");
+            loadingScreen.setProgressBar(100);
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
         });
         return root;

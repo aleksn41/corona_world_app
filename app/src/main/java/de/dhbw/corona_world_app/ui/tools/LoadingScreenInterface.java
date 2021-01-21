@@ -8,7 +8,7 @@ public interface LoadingScreenInterface {
 
     public void endLoadingScreen();
 
-    public void setProgressBar(int progress, @NonNull String message);
+    public void setProgressBar(int progress);
 
     public float getProgress();
 }

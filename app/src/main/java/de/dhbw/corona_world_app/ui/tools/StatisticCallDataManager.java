@@ -599,6 +599,7 @@ public class StatisticCallDataManager {
         try (FileWriter writer = new FileWriter(fileWhereAllDataIsToBeSaved, true)) {
             StringBuilder stringToWrite = new StringBuilder(MAX_SIZE_ITEM + System.lineSeparator().length());
             List<String> temp;
+            String now=new String(new char[]{ITEM_SEPARATOR, ITEM_SEPARATOR, ITEM_SEPARATOR});
             for (int i = amountOfNewItemsAddedInSession - 1; i >= 0; i--) {
 
                 temp = isoCountryEnum64BitEncoder.encodeListOfEnums(statisticCallData.getValue().get(i).first.getCountryList());
@@ -615,10 +616,10 @@ public class StatisticCallDataManager {
                 stringToWrite.append(statisticCallData.getValue().get(i).second ? '1' : '0');
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                stringToWrite.append(statisticCallData.getValue().get(i).first.getStartDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
+                stringToWrite.append(statisticCallData.getValue().get(i).first.getStartDate() == StatisticCall.NOW? now:statisticCallData.getValue().get(i).first.getStartDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                stringToWrite.append(statisticCallData.getValue().get(i).first.getEndDate() == null ? new String(new char[]{ITEM_SEPARATOR, ITEM_SEPARATOR, ITEM_SEPARATOR}) : statisticCallData.getValue().get(i).first.getEndDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
+                stringToWrite.append(statisticCallData.getValue().get(i).first.getEndDate() == StatisticCall.NOW ? now : statisticCallData.getValue().get(i).first.getEndDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
 
                 stringToWrite.append(createPaddingString(MAX_SIZE_ITEM - stringToWrite.length()));
                 stringToWrite.append(System.lineSeparator());
@@ -638,7 +639,6 @@ public class StatisticCallDataManager {
         if (!categories[3].equals("0") && !categories[3].equals("1"))
             throw new DataException("Data is corrupt");
         LocalDate startDay = parseByteArrayToLocaleDate(categories[4].getBytes(), categories[4].length());
-        if (startDay == null) throw new DataException("start Date cannot be null");
         LocalDate endDay = parseByteArrayToLocaleDate(categories[5].getBytes(), categories[5].length());
         try {
             StatisticCall parsedStatisticCall = new StatisticCall(decodedISOCountries, decodedChartType.get(0), decodedCriteria, startDay, endDay);

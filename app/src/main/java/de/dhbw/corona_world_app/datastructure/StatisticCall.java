@@ -14,6 +14,7 @@ import java.io.Serializable;
 public class StatisticCall implements Serializable {
     public static final LocalDate MIN_DATE = LocalDate.of(2020, 1, 22);
     public static DateTimeFormatter DATE_FORMAT= DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public static final LocalDate NOW=null;
 
     private List<ISOCountry> countryList;
 
@@ -21,14 +22,14 @@ public class StatisticCall implements Serializable {
 
     private List<Criteria> criteriaList;
 
-    private LocalDate startDate;
+    private final LocalDate startDate;
 
-    private LocalDate endDate;
+    private final LocalDate endDate;
 
-    public StatisticCall(@NonNull List<ISOCountry> countryList, @NonNull ChartType chartType, @NonNull List<Criteria> criteriaList, @NonNull LocalDate startDate, LocalDate endDate) {
-        if (startDate.isBefore(MIN_DATE))
+    public StatisticCall(@NonNull List<ISOCountry> countryList, @NonNull ChartType chartType, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) {
+        if (startDate!=NOW&&startDate.isBefore(MIN_DATE))
             throw new IllegalArgumentException("Parameter \"startDate\"=" + startDate.toString() + " is too early! Expected Date is after 21.01.2020.");
-        if (endDate!=null&&endDate.isBefore(startDate))
+        if (endDate!=NOW&&(startDate==NOW||endDate.isBefore(startDate)))
             throw new IllegalArgumentException("Parameter \"endDate\"=" + endDate.toString() + " is before parameter \"startDate\"!");
 
         this.countryList = countryList;
@@ -66,20 +67,8 @@ public class StatisticCall implements Serializable {
         return startDate;
     }
 
-    public void setStartDate(@NonNull LocalDate startDate) {
-        if (startDate.isBefore(MIN_DATE))
-            throw new IllegalArgumentException("Parameter \"startDate\"=" + startDate.toString() + " is too early! Expected Date is after 21.01.2020.");
-        this.startDate = startDate;
-    }
-
     public LocalDate getEndDate() {
         return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        if (endDate.isBefore(startDate))
-            throw new IllegalArgumentException("Parameter \"endDate\"=" + endDate.toString() + " is before parameter \"startDate\"!");
-        this.endDate = endDate;
     }
 
     @Override
@@ -105,8 +94,8 @@ public class StatisticCall implements Serializable {
                 "countryList=" + countryList +
                 ", chartType=" + chartType +
                 ", criteriaList=" + criteriaList +
-                ", startDate=" + startDate.format(DATE_FORMAT) +
-                ", endDate=" + (endDate==null?"Now":endDate.format(DATE_FORMAT)) +
+                ", startDate=" + (startDate==NOW?"Now":startDate.format(DATE_FORMAT)) +
+                ", endDate=" + (endDate==NOW?"Now":endDate.format(DATE_FORMAT)) +
                 '}';
     }
 }
