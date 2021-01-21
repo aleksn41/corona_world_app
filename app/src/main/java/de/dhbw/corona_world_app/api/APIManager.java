@@ -133,16 +133,22 @@ public class APIManager {
 
     public static List<TimeframedCountry> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
+        if((startDate == null && endDate != null) || startDate.isBefore(endDate)) throw new IllegalArgumentException("Ending date is before starting date!");
         List<TimeframedCountry> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
+        if(startDate == null) startDate = LocalDate.now();
+        if(endDate == null) endDate = LocalDate.now();
+
+        final LocalDate finalStartDate = startDate;
+        final LocalDate finalEndDate = endDate;
         if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
             for (ISOCountry isoCountry : countryList) {
                 Future<String> future = service.submit(() -> {
                             String url = API.POSTMANAPI.getUrl();
                             url += API.POSTMANAPI.getOneCountry();
                             url += isoCountry.getISOCode();
-                            url += getFormattedTimeFrameURLSnippet(API.POSTMANAPI, startDate, endDate);
+                            url += getFormattedTimeFrameURLSnippet(API.POSTMANAPI, finalStartDate, finalEndDate);
                             return createAPICall(url);
                         }
                 );
