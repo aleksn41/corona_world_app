@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
@@ -19,6 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 
 //TODO instead of Pairs use an extra Hashset for the selected Items
 public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean>, StatisticCallViewHolder> {
@@ -72,7 +74,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
     //used to add an Callback when the last item is loaded
     private final StatisticCallAdapterOnLastItemLoaded onLastItemLoaded;
 
-    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface,StatisticCallAdapterOnLastItemLoaded onLastItemLoaded) {
+    //used to show Statistic when user wants to see a certain Statistic
+    private final ShowStatisticInterface showStatisticInterface;
+
+    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface,StatisticCallAdapterOnLastItemLoaded onLastItemLoaded,ShowStatisticInterface showStatisticInterface) {
         super(new DiffUtil.ItemCallback<Pair<StatisticCall,Boolean>>() {
 
             @Override
@@ -88,6 +93,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         this.itemOnActionCallback=itemOnActionCallback;
         this.deleteInterface = deleteInterface;
         this.onLastItemLoaded=onLastItemLoaded;
+        this.showStatisticInterface=showStatisticInterface;
     }
 
     @NotNull
@@ -103,7 +109,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         //give the itemOnActionCallback Interface to the Item, such that it can implement its own logic
         holder.setItem(getItem(holder.getAdapterPosition()));
         //setActionCallback if available
-        if(itemOnActionCallback!=null)holder.getImageView().setOnClickListener(v -> itemOnActionCallback.callback(holder.getAdapterPosition()));
+        if(itemOnActionCallback!=null)holder.getSparkButton().setOnClickListener(v -> itemOnActionCallback.callback(holder.getAdapterPosition()));
         //check if its the last item
         if(holder.getAdapterPosition()==getItemCount()-1){
             onLastItemLoaded.onLastItemLoaded();
@@ -118,13 +124,13 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
             return true;
         });
 
-        //if the item is clicked, go to Statistic with the call TODO instead show pop up with more info and a confirmation he wants to see the statistic
+        //if the item is clicked, go to Statistic with the call
         holder.itemView.setOnClickListener(v -> {
             if(multiSelectForDeleteActivated){
                 selectItemToDelete(holder.getAdapterPosition(),holder);
             }else{
-                //TODO
-                //goToStatistic(getItem(position))
+                //TODO  show pop up with more info and a confirmation he wants to see the statistic
+                goToStatistic(getItem(holder.getAdapterPosition()).first);
             }
         });
         setMarkedItem(holder,selectedItemsToDelete.contains(holder.getAdapterPosition()));
@@ -149,6 +155,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
     private void setMarkedItem(StatisticCallViewHolder holder,boolean mark){
         holder.itemView.setAlpha(mark?0.3f:1f);
+    }
+
+    private void goToStatistic(StatisticCall request){
+        showStatisticInterface.showStatisticCall(request);
     }
 }
 

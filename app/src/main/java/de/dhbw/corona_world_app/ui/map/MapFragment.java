@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,11 +11,14 @@ import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.json.JSONException;
 
@@ -36,44 +40,52 @@ public class MapFragment extends Fragment {
 
     MutableLiveData<String> webViewString = new MutableLiveData<>();
 
+    LinearProgressIndicator progressBar;
+
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
         public void startLoadingScreen() {
-
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         public void endLoadingScreen() {
-
+            progressBar.setProgress(0);
+            progressBar.setVisibility(View.GONE);
         }
 
         @Override
-        public void setProgressBar(int progress, @NonNull String message) {
-
+        public void setProgressBar(int progress) {
+            progressBar.setProgress(progress);
         }
 
         @Override
-        public int getProgress() {
-            return 0;
+        public float getProgress() {
+            return progressBar.getProgress();
         }
     };
 
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
-    //loading screen will be implemented by ui-team
     @SuppressLint("SetJavaScriptEnabled")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.v(TAG,"Starting loading screen");
-        loadingScreen.startLoadingScreen();
-
-        Log.v(TAG,"Creating MapFragment view");
+        Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
+        progressBar = root.findViewById(R.id.progressBar);
+        Log.v(TAG, "Starting loading screen");
+        loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
-        loadingScreen.setProgressBar(10,"Starting...");
+        loadingScreen.setProgressBar(10);
+        boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
 
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
+        myWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                loadingScreen.endLoadingScreen();
+            }
+        });
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(false);
@@ -82,28 +94,26 @@ public class MapFragment extends Fragment {
         webSettings.setSupportZoom(true);
 
         ExecutorService service = ThreadPoolHandler.getInstance();
-        loadingScreen.setProgressBar(20,"Requesting data...");
-        Log.v(TAG,"Requesting all countries...");
+        Log.v(TAG, "Requesting all countries...");
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
+                    loadingScreen.setProgressBar(25);
                     mapViewModel.initCountryList();
                 } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
-                    Logger.logE(TAG,"Exception during initiation of country list!", e);
+                    Logger.logE(TAG, "Exception during initiation of country list!", e);
                 }
             }
         });
-        loadingScreen.setProgressBar(30,"Request sent...");
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
-            loadingScreen.setProgressBar(50,"Answer arrived...");
-            Log.v(TAG,"Requested countries have arrived");
-            loadingScreen.setProgressBar(70,"Decrypting data...");
+            loadingScreen.setProgressBar(50);
+            Log.v(TAG, "Requested countries have arrived");
+            loadingScreen.setProgressBar(70);
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
-            Log.v(TAG,"Loading WebView with WebString...");
-            loadingScreen.setProgressBar(100,"Visualizing data...");
+            Log.v(TAG, "Loading WebView with WebString...");
+            loadingScreen.setProgressBar(100);
             myWebView.loadData(webViewString.getValue(), "text/html", "base64");
-            loadingScreen.endLoadingScreen();
         });
         return root;
     }

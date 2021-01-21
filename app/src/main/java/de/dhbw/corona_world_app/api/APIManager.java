@@ -3,7 +3,10 @@ package de.dhbw.corona_world_app.api;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +24,7 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -81,8 +85,8 @@ public class APIManager {
     }
 
     //this method creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of country-objects
-    public static List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDateTime[] timeFrame) throws IllegalArgumentException, ExecutionException, InterruptedException {
-        Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList + " ; " + Arrays.toString(timeFrame));
+    public static List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList) throws IllegalArgumentException, ExecutionException, InterruptedException {
+        Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         List<Country> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
@@ -94,9 +98,7 @@ public class APIManager {
                             String attachString;
                             if (Mapper.isInReverseMap(API.HEROKU, isoCountry)) {
                                 attachString = Mapper.mapISOCountryToName(API.HEROKU, isoCountry);
-                                //System.out.println(attachString);
                             } else {
-                                //System.out.println(isoCountry+" here");
                                 attachString = Mapper.denormalizeISOCountryName(isoCountry.name());
                             }
                             url += attachString;
@@ -104,7 +106,7 @@ public class APIManager {
                         }
                 );
                 futureCoronaData.add(future);
-                if (criteriaList.contains(Criteria.POPULATION)) {
+                if (criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION)) {
                     Future<Country> future1 = service.submit(new Callable<Country>() {
                         @Override
                         public Country call() throws Exception {
@@ -113,7 +115,6 @@ public class APIManager {
                     });
                     futurePopData.add(future1);
                 }
-                //System.out.println("Call for " + isoCountry.name() + " ending now " + LocalDateTime.now());
             }
             Logger.logV(TAG, "All requests have been sent...");
             for (int i = 0; i < futureCoronaData.size(); i++) {
@@ -125,7 +126,48 @@ public class APIManager {
             Logger.logV(TAG, "Country-List finished constructing...");
         } else {
             Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
-            throw new IllegalArgumentException("Input country list is too big, max allowed=" + MAX_COUNTRY_LIST_SIZE +"!");
+            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE +"!");
+        }
+        return returnList;
+    }
+
+    public static List<TimeframedCountry> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
+        Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
+        List<TimeframedCountry> returnList = new ArrayList<>();
+        List<Future<String>> futureCoronaData = new ArrayList<>();
+        List<Future<Country>> futurePopData = new ArrayList<>();
+        if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
+            for (ISOCountry isoCountry : countryList) {
+                Future<String> future = service.submit(() -> {
+                            String url = API.POSTMANAPI.getUrl();
+                            url += API.POSTMANAPI.getOneCountry();
+                            url += isoCountry.getISOCode();
+                            url += getFormattedTimeFrameURLSnippet(API.POSTMANAPI, startDate, endDate);
+                            return createAPICall(url);
+                        }
+                );
+                futureCoronaData.add(future);
+                if (criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION)) {
+                    Future<Country> future1 = service.submit(new Callable<Country>() {
+                        @Override
+                        public Country call() throws Exception {
+                            return StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name());
+                        }
+                    });
+                    futurePopData.add(future1);
+                }
+            }
+            Logger.logV(TAG, "All requests have been sent...");
+            for (int i = 0; i < futureCoronaData.size(); i++) {
+                String currentString = futureCoronaData.get(i).get();
+                TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString);
+                country.setPopulation(futurePopData.get(i).get().getPopulation());
+                returnList.add(country);
+            }
+            Logger.logV(TAG, "Country-List finished constructing...");
+        } else {
+            Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
+            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE +"!");
         }
         return returnList;
     }
@@ -149,6 +191,15 @@ public class APIManager {
         String toReturn;
         toReturn = Objects.requireNonNull(client.newCall(request).execute().body()).string();
         return toReturn;
+    }
+
+    private static String getFormattedTimeFrameURLSnippet(API api,LocalDate from, LocalDate to) throws IllegalAccessException {
+        switch (api){
+            case POSTMANAPI: return "?from=" + LocalDateTime.of(from, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME) + "&to=" + LocalDateTime.of(to, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME);
+            case HEROKU: throw new IllegalAccessException("API "+ API.HEROKU.getName()+" does not support time frames!");
+            case RESTCOUNTRIES: throw new IllegalAccessException("API "+ API.RESTCOUNTRIES.getName()+" does not support time frames!");
+            default: throw new IllegalArgumentException("Given API has not been implemented to use time frames!");
+        }
     }
 
     public static boolean isCacheEnabled() {

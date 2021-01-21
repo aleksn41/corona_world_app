@@ -13,6 +13,8 @@ public class Mapper {
 
     private static Map<String, ISOCountry> restcountriesToStandardMap;
 
+    private static Map<String, ISOCountry> isoCodeToISOCountryMap;
+
     private static Map<API,Map<String,ISOCountry>> apisToMap;
     //for faster reverse mapping (so that the reverse map must not be initialized on every function call)
     private static Map<ISOCountry, String> reverseMap;
@@ -103,6 +105,17 @@ public class Mapper {
                     break;
             }
         }
+    }
+
+    public static ISOCountry mapISOCodeToISOCountry(String isoCode){
+        if(isoCode.length() != 2) throw new IllegalArgumentException("The given String is no ISOCode! Example:\"DE\"");
+        if(isoCodeToISOCountryMap == null){
+            isoCodeToISOCountryMap = new HashMap<>();
+            for (ISOCountry country:ISOCountry.values()) {
+                isoCodeToISOCountryMap.put(country.getISOCode(), country);
+            }
+        }
+        return isoCodeToISOCountryMap.get(isoCode);
     }
 
     public static boolean isInBlacklist(String countryName){

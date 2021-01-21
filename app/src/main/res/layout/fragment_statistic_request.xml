@@ -1,130 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/statisticCallRequest"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.statistic.StatisticRequestFragment">
+    android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/IsoCountryChooserTitle"
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/statisticCallRequest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".ui.statistic.StatisticRequestFragment">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/IsoCountryChooserTitle"
+                style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/iso_country_chooser_title"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <de.dhbw.corona_world_app.ui.statistic.CustomNachoTextView
+                android:id="@+id/nachoIsoCountryTextView"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle"
+                android:hint="Countries"
+                app:chipSpacing="8dp"
+                app:chipTextSize="16dp"
+                app:chipHeight="30dp"
+                app:chipVerticalSpacing="3dp"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/criteriaChooserTitle"
+                style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                android:text="@string/criteria_chooser_title"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/nachoIsoCountryTextView" />
+
+            <de.dhbw.corona_world_app.ui.statistic.CustomNachoTextView
+                android:id="@+id/nachoCriteriaTextView"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                android:hint="Criteria"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle"
+                app:chipSpacing="8dp"
+                app:chipTextSize="16dp"
+                app:chipHeight="30dp"
+                app:chipVerticalSpacing="3dp"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/chartTypeChooserTitle"
+                style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                android:text="@string/chart_type_chooser_title"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/nachoCriteriaTextView" />
+
+
+            <de.dhbw.corona_world_app.ui.statistic.CustomNachoTextView
+                android:id="@+id/nachoChartTypeTextView"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                android:hint="Chart-Type"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle"
+                app:chipSpacing="8dp"
+                app:chipTextSize="16dp"
+                app:chipHeight="30dp"
+                app:chipVerticalSpacing="3dp"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/timePickerTitle"
+                style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                android:text="@string/time_picker_title"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/nachoChartTypeTextView" />
+
+            <Button
+                android:id="@+id/startDateChooser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                android:text="@string/pick_start_date"
+                app:layout_constraintEnd_toStartOf="@id/endDateChooser"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/timePickerTitle" />
+
+            <Button
+                android:id="@+id/endDateChooser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_huge"
+                android:layout_marginBottom="@dimen/margin_huge"
+                android:text="@string/pick_end_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/startDateChooser"
+                app:layout_constraintTop_toBottomOf="@id/timePickerTitle" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/endDateChooser"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/floating_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:text="@string/iso_country_chooser_title"
-        android:textAlignment="center"
-        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
-        android:id="@+id/isoCountryChooser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_big"
-        android:textAlignment="center"
-        android:text="@string/iso_country_chooser_display"
-        app:hintText="@string/iso_country_chooser_display"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/fab_content_desc"
+        android:text="@string/fab_content_desc"
+        app:icon="@android:drawable/ic_menu_send" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/criteriaChooserTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_huge"
-        android:text="@string/criteria_chooser_title"
-        android:textAlignment="center"
-        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/isoCountryChooser"
-        />
-
-    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
-        android:id="@+id/criteriaChooser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_big"
-        android:textAlignment="center"
-        android:text="@string/criteria_chooser_display"
-        app:hintText="@string/criteria_chooser_display"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/chartTypeChooserTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_huge"
-        android:text="@string/chart_type_chooser_title"
-        android:textAlignment="center"
-        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/criteriaChooser"
-        />
-
-    <de.dhbw.corona_world_app.ui.statistic.ButtonSearchableDialogEnumChooser
-        android:id="@+id/chartTypeChooser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_big"
-        android:layout_marginBottom="?attr/actionBarSize"
-        android:textAlignment="center"
-        android:text="@string/chart_type_chooser_display"
-        app:hintText="@string/chart_type_chooser_display"
-        app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/timePickerTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_huge"
-        android:text="@string/time_picker_title"
-        android:textAlignment="center"
-        style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chartTypeChooser"
-        />
-
-    <Button
-        android:id="@+id/startDateChooser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_huge"
-        app:layout_constraintEnd_toStartOf="@id/endDateChooser"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/timePickerTitle"
-        android:text="@string/pick_start_date" />
-
-    <Button
-        android:id="@+id/endDateChooser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_huge"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/startDateChooser"
-        app:layout_constraintTop_toBottomOf="@id/timePickerTitle"
-        android:text="@string/pick_end_date" />
-
-    <ImageButton
-        android:id="@+id/imageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_huge"
-        android:layout_marginStart="@dimen/margin_medium"
-        android:src="@android:drawable/ic_menu_send"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/startDateChooser"
-        android:contentDescription="Create new Statistic" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

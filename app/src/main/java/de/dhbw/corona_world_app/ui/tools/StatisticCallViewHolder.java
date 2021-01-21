@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.varunest.sparkbutton.SparkButton;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -17,27 +19,27 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public class StatisticCallViewHolder extends RecyclerView.ViewHolder implements StatisticCallViewHolderInterface<Pair<StatisticCall, Boolean>> {
     private final TextView textView;
-    private final ImageView imageView;
+    private final SparkButton sparkButton;
 
     private static final char ITEM_SEPARATOR = ',';
     public StatisticCallViewHolder(View view) {
         super(view);
         textView = view.findViewById(R.id.StatisticCallItemTextView);
-        imageView = view.findViewById(R.id.statisticCallItemImageView);
+        sparkButton = view.findViewById(R.id.starButton);
     }
 
     public void setItem(Pair<StatisticCall, Boolean> item) {
         //TODO Change what Information appears in what order
         Objects.requireNonNull(item.first);
         Objects.requireNonNull(item.second);
-        textView.setText(itemView.getContext().getString(R.string.statistic_call_info, listOfStringToString(item.first.getCountryList().parallelStream().map(Enum::toString).collect(Collectors.toList())), listOfStringToString(item.first.getCriteriaList().parallelStream().map(Enum::toString).collect(Collectors.toList())), item.first.getChartType(),item.first.getStartDate().format(StatisticCall.DATE_FORMAT),item.first.getEndDate()==null?"Now":item.first.getEndDate().format(StatisticCall.DATE_FORMAT)));
+        textView.setText(itemView.getContext().getString(R.string.statistic_call_info, listOfStringToString(item.first.getCountryList().parallelStream().map(Enum::toString).collect(Collectors.toList())), listOfStringToString(item.first.getCriteriaList().parallelStream().map(Enum::toString).collect(Collectors.toList())), item.first.getChartType(),item.first.getStartDate()==StatisticCall.NOW?"Now":item.first.getStartDate().format(StatisticCall.DATE_FORMAT),item.first.getEndDate()==StatisticCall.NOW?"Now":item.first.getEndDate().format(StatisticCall.DATE_FORMAT)));
         //TODO Get Colors from Color Resource
         //TODO support Light mode
-        imageView.setColorFilter(Color.parseColor(item.second ? "yellow" : "white"));
+        sparkButton.setChecked(item.second);
     }
 
-    public ImageView getImageView() {
-        return imageView;
+    public SparkButton getSparkButton() {
+        return sparkButton;
     }
 
     private String listOfStringToString(List<String> list) {
