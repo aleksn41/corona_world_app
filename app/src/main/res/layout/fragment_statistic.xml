@@ -14,11 +14,6 @@
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="98dp" >
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/statisticCallItemTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/request_not_found" />
     </com.github.mikephil.charting.charts.BarChart>
 
 

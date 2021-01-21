@@ -72,7 +72,6 @@ public class StatisticViewModel extends ViewModel {
         if (countryList2D && criteriaList2D && dates2D)
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
 
-
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
             int step = 0;

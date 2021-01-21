@@ -77,7 +77,6 @@ public class StatisticFragment extends Fragment {
        // ChartValueSetGenerator provider = new ChartValueSetGenerator();
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
-        testDisplay = root.findViewById(R.id.statisticCallItemTextView);
         statisticViewModel = new ViewModelProvider(requireActivity()).get(StatisticViewModel.class);
         chart = (BarChart) root.findViewById(R.id.chart);
         Bundle bundle = getArguments();

@@ -71,7 +71,7 @@ public class StatisticRequestFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         //TODO delete after debugging is done
-        Logger.disableLogging();
+        //Logger.disableLogging();
         if(Logger.getDebbuging()) {
             List<ISOCountry> clist = new ArrayList<>();
             clist.add(ISOCountry.Germany);
