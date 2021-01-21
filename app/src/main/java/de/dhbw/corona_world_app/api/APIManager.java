@@ -140,6 +140,8 @@ public class APIManager {
         if(startDate == null) startDate = LocalDate.now();
         if(endDate == null) endDate = LocalDate.now();
 
+        boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
+
         final LocalDate finalStartDate = startDate;
         final LocalDate finalEndDate = endDate;
         if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
@@ -153,7 +155,8 @@ public class APIManager {
                         }
                 );
                 futureCoronaData.add(future);
-                if (criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION)) {
+
+                if (popNeeded) {
                     Future<Country> future1 = service.submit(new Callable<Country>() {
                         @Override
                         public Country call() throws Exception {
@@ -167,7 +170,7 @@ public class APIManager {
             for (int i = 0; i < futureCoronaData.size(); i++) {
                 String currentString = futureCoronaData.get(i).get();
                 TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString);
-                country.setPopulation(futurePopData.get(i).get().getPopulation());
+                if(popNeeded) country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
             Logger.logV(TAG, "Country-List finished constructing...");
