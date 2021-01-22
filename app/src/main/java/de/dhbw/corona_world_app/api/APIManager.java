@@ -1,5 +1,7 @@
 package de.dhbw.corona_world_app.api;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -52,7 +54,7 @@ public class APIManager {
     }
 
     //gets the data of the whole world through the specified api -> throws the cause of the ExecutionException
-    public static List<Country> getDataWorld(API api) throws ExecutionException, JSONException, InterruptedException {
+    public static List<Country> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
         Logger.logV(TAG, "Getting Data for every Country from api " + api.getName());
 
         List<Country> returnList = null;
@@ -85,7 +87,7 @@ public class APIManager {
     }
 
     //this method creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of country-objects
-    public static List<Country> getData(List<ISOCountry> countryList, List<Criteria> criteriaList) throws IllegalArgumentException, ExecutionException, InterruptedException {
+    public static List<Country> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList) throws IllegalArgumentException, ExecutionException, InterruptedException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         List<Country> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
@@ -131,7 +133,7 @@ public class APIManager {
         return returnList;
     }
 
-    public static List<TimeframedCountry> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
+    public static List<TimeframedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         if ((startDate == null && endDate != null))
             throw new IllegalArgumentException("Ending date is before starting date!");
@@ -194,7 +196,7 @@ public class APIManager {
     }
 
     //creates a GET-Call to an url and returns the {@code String} body
-    public static String createAPICall(String url) throws IOException {
+    public static String createAPICall(@NonNull String url) throws IOException {
         Logger.logV(TAG, "Making api call to " + url + " ...");
         OkHttpClient client = new OkHttpClient();
         final Request request = new Request.Builder()
@@ -205,7 +207,7 @@ public class APIManager {
         return toReturn;
     }
 
-    private static String getFormattedTimeFrameURLSnippet(API api, LocalDate from, LocalDate to) throws IllegalAccessException {
+    private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) throws IllegalAccessException {
         switch (api) {
             case POSTMANAPI:
                 return "?from=" + LocalDateTime.of(from, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME) + "&to=" + LocalDateTime.of(to, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME);
