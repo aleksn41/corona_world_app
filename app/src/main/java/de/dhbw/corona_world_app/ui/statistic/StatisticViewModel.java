@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
@@ -69,13 +70,13 @@ public class StatisticViewModel extends ViewModel {
         BarData barData = new BarData();
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
         LocalDate startDate = statisticCall.getStartDate();
-        LocalDate endDate = statisticCall.getStartDate();
+        LocalDate endDate = statisticCall.getEndDate();
         if(startDate==null) startDate = LocalDate.now();
         if(endDate==null) endDate = LocalDate.now();
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
             int step = 0;
-            int dayDifference = (int) DAYS.between(startDate, endDate) + 1;
+            int dayDifference = (int) DAYS.between(startDate, endDate) + (endDate.equals(LocalDate.now()) ? 0 : 1);
             if (dayDifference <= 7) {
                 step = 1;
             } else if (dayDifference <= 21) {
@@ -103,6 +104,7 @@ public class StatisticViewModel extends ViewModel {
                 }
             });
 
+            //todo when multiple countries are selected the country with the bigger numbers should be in the background
             for (TimeframedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
@@ -116,15 +118,24 @@ public class StatisticViewModel extends ViewModel {
             setStyle(chart, context);
             return chart;
         } else {
+
             List<String> countries = new ArrayList<>();
-            for (TimeframedCountry country : apiGottenList) {
-                countries.add(country.getCountry().getDisplayName());
-                for (Criteria criteria : criteriaOrder) {
+            for (TimeframedCountry country: apiGottenList) {
+                countries.add(country.getCountry().getISOCode());
+            }
+
+            for (Criteria criteria : criteriaOrder) {
+                List<Float> countriesData = new ArrayList<>();
+                for (TimeframedCountry country : apiGottenList) {
+                    //for constructing x-axis description
+
                     if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(1, 1, country, criteria);
-                        barData.addDataSet(dataSetGenerator.getBarChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
+                        countriesData.add(data.get(0));
+
                     }
                 }
+                barData.addDataSet(dataSetGenerator.getBarChartDataSet(countriesData, criteria.getDisplayName(), colors));
             }
             chart.getXAxis().setValueFormatter(new ValueFormatter() {
                 @Override
@@ -169,6 +180,9 @@ public class StatisticViewModel extends ViewModel {
         //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         chart.getAxisLeft().setAxisMinimum(0f);
         chart.getAxisRight().setAxisMinimum(0f);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.getXAxis().setGranularityEnabled(true);
+        chart.getXAxis().setGranularity(1f);
 
         arr2.recycle();
     }
