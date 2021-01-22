@@ -57,30 +57,30 @@ public class APIManager {
 
         List<Country> returnList = null;
 
-            Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
+        Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
-            int cnt = 0;
+        int cnt = 0;
 
-            String apiReturn = future.get();
-            returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
+        String apiReturn = future.get();
+        returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
 
-            Map<ISOCountry, Long> popMap = getAllCountriesPopData();
+        Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
-            for (Country country : returnList) {
-                if (country.getISOCountry() != null && !Mapper.isInBlacklist(country.getISOCountry().name())) {
-                    if (popMap.containsKey(country.getISOCountry())) {
-                        country.setPopulation(popMap.get(country.getISOCountry()));
-                    } else {
-                        cnt += 1;
-                        Logger.logD("APIManager.getDataWorld", "country \"" + country.getISOCountry().name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
-                    }
+        for (Country country : returnList) {
+            if (country.getISOCountry() != null && !Mapper.isInBlacklist(country.getISOCountry().name())) {
+                if (popMap.containsKey(country.getISOCountry())) {
+                    country.setPopulation(popMap.get(country.getISOCountry()));
+                } else {
+                    cnt += 1;
+                    Logger.logD("APIManager.getDataWorld", "country \"" + country.getISOCountry().name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
                 }
             }
+        }
 
-            Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
-            returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
+        Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
+        returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
 
-            Logger.logD(TAG, "Putting live data into Cache...");
+        Logger.logD(TAG, "Putting live data into Cache...");
         return returnList;
     }
 
@@ -126,19 +126,22 @@ public class APIManager {
             Logger.logV(TAG, "Country-List finished constructing...");
         } else {
             Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
-            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE +"!");
+            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE + "!");
         }
         return returnList;
     }
 
     public static List<TimeframedCountry> getData(List<ISOCountry> countryList, List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
-        if((startDate == null && endDate != null) || startDate.isBefore(endDate)) throw new IllegalArgumentException("Ending date is before starting date!");
+        if ((startDate == null && endDate != null))
+            throw new IllegalArgumentException("Ending date is before starting date!");
+        if (startDate != null && endDate != null && endDate.isBefore(startDate))
+            throw new IllegalArgumentException("Ending date is before starting date!");
         List<TimeframedCountry> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
-        if(startDate == null) startDate = LocalDate.now();
-        if(endDate == null) endDate = LocalDate.now();
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
 
         boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
 
@@ -170,13 +173,13 @@ public class APIManager {
             for (int i = 0; i < futureCoronaData.size(); i++) {
                 String currentString = futureCoronaData.get(i).get();
                 TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString);
-                if(popNeeded) country.setPopulation(futurePopData.get(i).get().getPopulation());
+                if (popNeeded) country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
             Logger.logV(TAG, "Country-List finished constructing...");
         } else {
             Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
-            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE +"!");
+            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE + "!");
         }
         return returnList;
     }
@@ -202,12 +205,16 @@ public class APIManager {
         return toReturn;
     }
 
-    private static String getFormattedTimeFrameURLSnippet(API api,LocalDate from, LocalDate to) throws IllegalAccessException {
-        switch (api){
-            case POSTMANAPI: return "?from=" + LocalDateTime.of(from, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME) + "&to=" + LocalDateTime.of(to, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME);
-            case HEROKU: throw new IllegalAccessException("API "+ API.HEROKU.getName()+" does not support time frames!");
-            case RESTCOUNTRIES: throw new IllegalAccessException("API "+ API.RESTCOUNTRIES.getName()+" does not support time frames!");
-            default: throw new IllegalArgumentException("Given API has not been implemented to use time frames!");
+    private static String getFormattedTimeFrameURLSnippet(API api, LocalDate from, LocalDate to) throws IllegalAccessException {
+        switch (api) {
+            case POSTMANAPI:
+                return "?from=" + LocalDateTime.of(from, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME) + "&to=" + LocalDateTime.of(to, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME);
+            case HEROKU:
+                throw new IllegalAccessException("API " + API.HEROKU.getName() + " does not support time frames!");
+            case RESTCOUNTRIES:
+                throw new IllegalAccessException("API " + API.RESTCOUNTRIES.getName() + " does not support time frames!");
+            default:
+                throw new IllegalArgumentException("Given API has not been implemented to use time frames!");
         }
     }
 
