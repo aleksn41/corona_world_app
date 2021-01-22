@@ -15,6 +15,7 @@
         <item name="windowActionModeOverlay">true</item>
         <!-- Customize your theme here. -->
     </style>
+    <!-- 60 Colors should be more than sufficient -->
     <array name="chartColors">
         <item>@color/white</item>
         <item>#329d61</item>
@@ -26,5 +27,55 @@
         <item>#ffa201</item>
         <item>#ff01ff</item>
         <item>#dd6fa6</item>
+        <item>#fce339</item>
+        <item>#291407</item>
+        <item>#b6425e</item>
+        <item>#90d8ee</item>
+        <item>#0e22c7</item>
+        <item>#312f57</item>
+        <item>#759b5a</item>
+        <item>#b5d508</item>
+        <item>#3f3aa0</item>
+        <item>#c2cf48</item>
+        <item>#00bbeb</item>
+        <item>#1cfbf8</item>
+        <item>#8321a2</item>
+        <item>#e7a2f3</item>
+        <item>#d0e431</item>
+        <item>#a59953</item>
+        <item>#d0459d</item>
+        <item>#6454f1</item>
+        <item>#80216b</item>
+        <item>#aaafb3</item>
+        <item>#bc0c36</item>
+        <item>#ec6242</item>
+        <item>#c08711</item>
+        <item>#2b6477</item>
+        <item>#1d1d43</item>
+        <item>#56d8b4</item>
+        <item>#245612</item>
+        <item>#79432f</item>
+        <item>#cddb97</item>
+        <item>#f50047</item>
+        <item>#93bca0</item>
+        <item>#b61bfc</item>
+        <item>#f1b8c7</item>
+        <item>#aafb1b</item>
+        <item>#eabda6</item>
+        <item>#9b9cc8</item>
+        <item>#606aff</item>
+        <item>#6ac59d</item>
+        <item>#75230d</item>
+        <item>#cffef9</item>
+        <item>#ae9993</item>
+        <item>#2f9911</item>
+        <item>#5d6b1e</item>
+        <item>#3df79a</item>
+        <item>#ff9866</item>
+        <item>#f28988</item>
+        <item>#f3e694</item>
+        <item>#5c397e</item>
+        <item>#f0b506</item>
+        <item>#ce0677</item>
     </array>
 </resources>

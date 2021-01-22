@@ -56,7 +56,6 @@ public class StatisticRequestFragment extends Fragment {
     private StatisticViewModel statisticViewModel;
 
     //setup DatePicker
-
     private LocalDate start;
     private LocalDate end;
 
@@ -74,10 +73,13 @@ public class StatisticRequestFragment extends Fragment {
         //Logger.disableLogging();
         if(Logger.getDebbuging()) {
             List<ISOCountry> clist = new ArrayList<>();
-            clist.add(ISOCountry.Belize);
+            clist.add(ISOCountry.Germany);
+            //clist.add(ISOCountry.Belize);
             List<Criteria> crlist = new ArrayList<>();
-            crlist.add(Criteria.DEATHS);
-            requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now(), null));
+            //crlist.add(Criteria.HEALTHY);
+            crlist.add(Criteria.INFECTED);
+            //crlist.add(Criteria.DEATHS);
+            requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now().minusDays(89), LocalDate.now()));
         }
         statisticViewModel =
                 new ViewModelProvider(this).get(StatisticViewModel.class);
