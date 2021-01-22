@@ -85,51 +85,6 @@ public class StatisticFragment extends Fragment {
         } catch (ExecutionException | InterruptedException | JSONException e) {
             e.printStackTrace();
         }
-        /*
-        final String[] dates = new String[] { "01.10.", "02.10.", "03.10.", "04.10.", "05.10.", "06.10." };
-        XAxis xaxis = chart.getXAxis();
-        ValueFormatter vf = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return dates[(int) value];
-            }
-        };
-        xaxis.setValueFormatter(vf);
-        YAxis yaxisleft = chart.getAxisLeft();
-        YAxis yaxisright = chart.getAxisRight();
-        ValueFormatter vf2 = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return Integer.toString((int) value);
-            }
-        };
-        yaxisleft.setValueFormatter(vf2);
-        yaxisright.setValueFormatter(vf2);
-        try {
-            testProgressBar();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        Description des = new Description();
-        des.setText("");
-        chart.setDescription(des);
-        chart.getLegend().setTextColor(Color.WHITE);
-        chart.getXAxis().setTextColor(Color.WHITE);
-        chart.getAxisLeft().setTextColor(Color.WHITE);
-        chart.getAxisRight().setTextColor(Color.WHITE);
-        List<Float> fl = Arrays.asList(20f, 20f, 30f, 40f, 10f, 80f);
-        List<Float> f2 = Arrays.asList(10f, 10f, 25f, 35f, 5f, 67f);
-        List<Float> f = Arrays.asList(30f, 80f, 60f, 50f, 70f, 60f);
-        TypedArray colorsTyped = getActivity().getTheme().getResources().obtainTypedArray(R.array.chartColors);
-        List<Integer> colors = new ArrayList<>();
-        for (int i = 0; i < colorsTyped.length(); i++) {
-            colors.add(colorsTyped.getColor(i, 0));
-        }
-        colorsTyped.recycle();
-        chart.setBackgroundColor(getResources().getColor(R.color.dark_grey));
-        chart.setDoubleTapToZoomEnabled(false);
-        chart.setData(new BarData(provider.getBarChartDataSet(f, "Belize: Deaths", colors), provider.getBarChartDataSet(fl, "Belize: Recovered", colors), provider.getBarChartDataSet(f2, "Belize: Infected", colors)));
-        */
         return root;
     }
 
