@@ -43,7 +43,8 @@
                 app:chipSpacing="8dp"
                 app:chipTextSize="16dp"
                 app:chipHeight="30dp"
-                app:chipVerticalSpacing="3dp"/>
+                app:chipVerticalSpacing="3dp"
+                android:saveEnabled="false"/>
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/criteriaChooserTitle"
@@ -70,7 +71,8 @@
                 app:chipSpacing="8dp"
                 app:chipTextSize="16dp"
                 app:chipHeight="30dp"
-                app:chipVerticalSpacing="3dp"/>
+                app:chipVerticalSpacing="3dp"
+                android:saveEnabled="false"/>
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/chartTypeChooserTitle"
@@ -98,7 +100,8 @@
                 app:chipSpacing="8dp"
                 app:chipTextSize="16dp"
                 app:chipHeight="30dp"
-                app:chipVerticalSpacing="3dp"/>
+                app:chipVerticalSpacing="3dp"
+                android:saveEnabled="false"/>
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/timePickerTitle"
