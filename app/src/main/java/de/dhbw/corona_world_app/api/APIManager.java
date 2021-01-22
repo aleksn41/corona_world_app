@@ -30,6 +30,8 @@ import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 public class APIManager {
 
     public static final int MAX_COUNTRY_LIST_SIZE = 10;
@@ -145,10 +147,20 @@ public class APIManager {
         if (startDate == null) startDate = LocalDate.now();
         if (endDate == null) endDate = LocalDate.now();
 
+        final LocalDate finalStartDate;
+        final LocalDate finalEndDate = endDate;
+
+        //this is only needed because the api cannot handle when start and end date are equal and returns all dates' data
+        boolean startAndEndEqual = startDate.equals(endDate);
+        if(startAndEndEqual){
+            finalStartDate = startDate.minusDays(1);
+        } else {
+            finalStartDate = startDate;
+        }
+
         boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
 
-        final LocalDate finalStartDate = startDate;
-        final LocalDate finalEndDate = endDate;
+
         if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
             for (ISOCountry isoCountry : countryList) {
                 Future<String> future = service.submit(() -> {
@@ -174,7 +186,7 @@ public class APIManager {
             Logger.logV(TAG, "All requests have been sent...");
             for (int i = 0; i < futureCoronaData.size(); i++) {
                 String currentString = futureCoronaData.get(i).get();
-                TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString);
+                TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString, countryList.get(i), startAndEndEqual);
                 if (popNeeded) country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
