@@ -137,7 +137,7 @@ public class APIManager {
 
     public static List<TimeframedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
-        if ((startDate == null && endDate != null) || (startDate != null && endDate != null && endDate.isBefore(startDate)))
+        if (endDate != null && (startDate == null || endDate.isBefore(startDate)))
             throw new IllegalArgumentException("Ending date is before starting date!");
         List<TimeframedCountry> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
