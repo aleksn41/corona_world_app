@@ -62,17 +62,20 @@ public class StatisticViewModel extends ViewModel {
         colorsTyped.recycle();
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
-        boolean dates2D = statisticCall.getStartDate() != null ? !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
+        boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
         if (countryList2D && criteriaList2D && dates2D)
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
 
         BarData barData = new BarData();
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-
+        LocalDate startDate = statisticCall.getStartDate();
+        LocalDate endDate = statisticCall.getStartDate();
+        if(startDate==null) startDate = LocalDate.now();
+        if(endDate==null) endDate = LocalDate.now();
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
             int step = 0;
-            int dayDifference = (int) DAYS.between(statisticCall.getStartDate(), statisticCall.getEndDate()) + 1;
+            int dayDifference = (int) DAYS.between(startDate, endDate) + 1;
             if (dayDifference <= 7) {
                 step = 1;
             } else if (dayDifference <= 21) {
