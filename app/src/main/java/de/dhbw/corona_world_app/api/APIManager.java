@@ -168,6 +168,7 @@ public class APIManager {
                 countryToAdd.setDates(new LocalDate[]{startDate});
                 countryToAdd.setDeaths(new int[]{country.getDeaths()});
                 countryToAdd.setRecovered(new int[]{country.getRecovered()});
+                countryToAdd.setPop_inf_ratio(new double[1]);
                 countryToAdd.setPopulation(country.getPopulation());
                 countryToAdd.setCountry(country.getISOCountry());
                 timeframedCountries.add(countryToAdd);
