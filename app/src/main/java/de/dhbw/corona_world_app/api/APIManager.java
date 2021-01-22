@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +93,9 @@ public class APIManager {
         List<Country> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
+
+        boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
+
         if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
             for (ISOCountry isoCountry : countryList) {
                 Future<String> future = service.submit(() -> {
@@ -110,7 +112,7 @@ public class APIManager {
                         }
                 );
                 futureCoronaData.add(future);
-                if (criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION)) {
+                if (popNeeded) {
                     Future<Country> future1 = service.submit(new Callable<Country>() {
                         @Override
                         public Country call() throws Exception {
@@ -124,7 +126,7 @@ public class APIManager {
             for (int i = 0; i < futureCoronaData.size(); i++) {
                 String currentString = futureCoronaData.get(i).get();
                 Country country = StringToCountryParser.parseFromHeroOneCountry(currentString);
-                country.setPopulation(futurePopData.get(i).get().getPopulation());
+                if (popNeeded) country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
             Logger.logV(TAG, "Country-List finished constructing...");
@@ -157,43 +159,58 @@ public class APIManager {
         }
 
         boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
-
-
-        if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
-            for (ISOCountry isoCountry : countryList) {
-                Future<String> future = service.submit(() -> {
-                            String url = API.POSTMANAPI.getUrl();
-                            url += API.POSTMANAPI.getOneCountry();
-                            url += isoCountry.getISOCode();
-                            url += getFormattedTimeFrameURLSnippet(API.POSTMANAPI, finalStartDate, finalEndDate);
-                            return createAPICall(url);
-                        }
-                );
-                futureCoronaData.add(future);
-
-                if (popNeeded) {
-                    Future<Country> future1 = service.submit(new Callable<Country>() {
-                        @Override
-                        public Country call() throws Exception {
-                            return StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name());
-                        }
-                    });
-                    futurePopData.add(future1);
-                }
+        if(startAndEndEqual && startDate.equals(LocalDate.now())){
+            List<Country> countries = getData(countryList, criteriaList);
+            List<TimeframedCountry> timeframedCountries = new ArrayList<>();
+            for (Country country: countries) {
+                TimeframedCountry countryToAdd = new TimeframedCountry();
+                countryToAdd.setInfected(new int[]{country.getInfected()});
+                countryToAdd.setDates(new LocalDate[]{startDate});
+                countryToAdd.setDeaths(new int[]{country.getDeaths()});
+                countryToAdd.setRecovered(new int[]{country.getRecovered()});
+                countryToAdd.setPopulation(country.getPopulation());
+                countryToAdd.setCountry(country.getISOCountry());
+                timeframedCountries.add(countryToAdd);
             }
-            Logger.logV(TAG, "All requests have been sent...");
-            for (int i = 0; i < futureCoronaData.size(); i++) {
-                String currentString = futureCoronaData.get(i).get();
-                TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString, countryList.get(i), startAndEndEqual);
-                if (popNeeded) country.setPopulation(futurePopData.get(i).get().getPopulation());
-                returnList.add(country);
-            }
-            Logger.logV(TAG, "Country-List finished constructing...");
+            return timeframedCountries;
         } else {
-            Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
-            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE + "!");
+            if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
+                for (ISOCountry isoCountry : countryList) {
+                    Future<String> future = service.submit(() -> {
+                                String url = API.POSTMANAPI.getUrl();
+                                url += API.POSTMANAPI.getOneCountry();
+                                url += isoCountry.getISOCode();
+                                url += getFormattedTimeFrameURLSnippet(API.POSTMANAPI, finalStartDate, finalEndDate);
+                                return createAPICall(url);
+                            }
+                    );
+                    futureCoronaData.add(future);
+
+                    if (popNeeded) {
+                        Future<Country> future1 = service.submit(new Callable<Country>() {
+                            @Override
+                            public Country call() throws Exception {
+                                return StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name());
+                            }
+                        });
+                        futurePopData.add(future1);
+                    }
+                }
+                Logger.logV(TAG, "All requests have been sent...");
+                for (int i = 0; i < futureCoronaData.size(); i++) {
+                    String currentString = futureCoronaData.get(i).get();
+                    TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString, countryList.get(i), startAndEndEqual);
+                    if (popNeeded)
+                        country.setPopulation(futurePopData.get(i).get().getPopulation());
+                    returnList.add(country);
+                }
+                Logger.logV(TAG, "Country-List finished constructing...");
+            } else {
+                Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
+                throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE + "!");
+            }
+            return returnList;
         }
-        return returnList;
     }
 
     //Gets a map with ISOCountries mapped to a {@code long} population count gotten by the restcountries api.
