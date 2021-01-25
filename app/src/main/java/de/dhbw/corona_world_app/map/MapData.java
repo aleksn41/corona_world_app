@@ -18,7 +18,24 @@ public class MapData {
 
     private static Map<String, String> ISOCodeToDisplayName;
 
-    String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script><script type=\"text/javascript\">" +
+    String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>" +
+            "  <style>\n" +
+            "         " +
+            "         " +
+            "         @import url('https://fonts.googleapis.com/css?family=Open+Sans');\n" +
+            "         *, *:before, *:after { font-style: normal !important; }\n" +
+            "         body { position: relative !important; }\n" +
+            "         form { background-color: #ffffff; }\n" +
+            "         #ii { margin-top: 80px }\n" +
+            "         .panel { display: flex; flex-wrap:wrap; justify-content: center; align-items: center; }\n" +
+            "         #chart { height: 70vh; width: 96vw; }\n" +
+            "         .group.group:after, .chart.chart:after, .root.root:after { color: #FFFFFF; }\n" +
+            "         div.google-visualization-tooltip { background-color: #FFFFFF; border-radius: 6px; max-width: device-width; max-height: device-height; font-size: 4px}\n" +
+            "         div.google-visualization-tooltip > ul > li > span { color: gold; }\n" +
+            "         #groupOpt { display:none; }\n" +
+            "         #groupOpt.on { display:block;}\n" +
+            "  </style>" +
+            "  <script type=\"text/javascript\">" +
             "  window.goToStats = (country) => {console.log(country);};" +
             "  google.charts.load('current', {" +
             "  'packages':['geochart']," +
@@ -42,18 +59,21 @@ public class MapData {
             "    legend: 'none'," +
             "    tooltip: {isHtml: true}" +
             "  };" +
+            "  function formatNumber(x) {\n" +
+            "    return x.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, \",\");\n" +
+            "}" +
             "  function createCustomHTMLContent(ISOCountryName, ratio, totalHealthy, totalInfected, totalDeaths) {\n" +
-            "  return '<div style=\"padding:5px 5px 5px 5px;\">' +\n" +
-            "      '<table class=\"countryData_layout\">' + '<tr>' +\n" +
+            "  return '<div style=\"padding:5px 5px 5px 5px; font-size:1px\">' +\n" +
+            "      '<table class=\"countryData_layout\" style=\"font-size:1px\">' + '<tr>' +\n" +
             "      '<td>Infected Population: </td>' +\n" +
             "      '<td><b>' + Math.round((ratio + Number.EPSILON) * 1000) / 1000 + '%</b></td>' + '</tr>' + '<tr>' +\n" +
             "      '<td>Total Healthy: </td>' +\n" +
-            "      '<td><b>' + totalHealthy + '</b></td>' + '</tr>' + '<tr>' +\n" +
+            "      '<td><b>' + formatNumber(totalHealthy) + '</b></td>' + '</tr>' + '<tr>' +\n" +
             "      '<td>Total Infected: </td>' +\n" +
-            "      '<td><b>' + totalInfected + '</b></td>' + '</tr>' + '<tr>' +\n" +
+            "      '<td><b>' + formatNumber(totalInfected) + '</b></td>' + '</tr>' + '<tr>' +\n" +
             "      '<td>Total Deaths: </td>' +\n" +
-            "      '<td><b>' + totalDeaths + '</b></td>' + '</tr>' + '</table>' + '</div>' + " +
-            "      '<center><button type=\"button\" id=\"goTo\" onClick=\"window.goToStats(\\''+ISOCountryName+'\\')\">Go to statistics page</button></center>'" +
+            "      '<td><b>' + formatNumber(totalDeaths) + '</b></td>' + '</tr>' + '</table>' + '</div>' + " +
+            "      '<center><button type=\"button\" id=\"goTo\" style=\"font-size:1px\" onClick=\"window.goToStats(\\''+ISOCountryName+'\\')\">Go to statistics page</button></center>'" +
             "  }" +
             "  var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));" +
             "  chart.draw(dataTable, options);};</script></head>" +
