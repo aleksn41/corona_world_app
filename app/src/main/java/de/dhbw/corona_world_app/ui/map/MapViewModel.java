@@ -61,7 +61,6 @@ public class MapViewModel extends ViewModel {
 
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         List<Country> apiGottenList;
-        APIManager.enableCache();
         if(!APIManager.isCacheEnabled() || worldCacheAge==null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
             apiGottenList = APIManager.getDataWorld(API.HEROKU);
             if (apiGottenList == null || !(apiGottenList.size() > 0)) {
