@@ -32,7 +32,7 @@ public class MapData {
             "         #groupOpt.on { display:block;}\n" +
             "  </style>" +
             "  <script type=\"text/javascript\">" +
-            "  window.goToStats = (country) => {console.log(country);};" +
+            "  openStats = (country) => {jsinterface.setISOCountry(country)};" +
             "  google.charts.load('current', {" +
             "  'packages':['geochart']," +
             "  'mapsApiKey': '" + MapsKey.apiKey + "'});" +
@@ -49,7 +49,7 @@ public class MapData {
             "     var selectedItem = chart.getSelection()[0];" +
             "     if(selectedItem != null){" +
             "        var true_selected = dataTable.getValue(selectedItem.row, 0);" +
-            "        console.log(true_selected);" +
+            "        openStats(true_selected);" +
             "     } else {" +
             "        console.log(\"Nothing was selected.\");" +
             "     }" +

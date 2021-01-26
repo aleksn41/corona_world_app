@@ -37,6 +37,10 @@ public class MapViewModel extends ViewModel {
 
     public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
 
+    public void init(boolean cacheDisabled, boolean longTermDisabled){
+        APIManager.setSettings(!cacheDisabled, !longTermDisabled);
+    }
+
     public void cacheDataWorld(@NonNull List<Country> worldData) throws IOException {
         FileOutputStream fileOut = new FileOutputStream(pathToCacheDir + "/world_cache.ser");
         ObjectOutputStream out = new ObjectOutputStream(fileOut);

@@ -9,18 +9,18 @@ import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class JavaScriptInterface {
 
-    private MutableLiveData<ISOCountry> current;
+    public MutableLiveData<ISOCountry> current = new MutableLiveData<>();
+
+    public JavaScriptInterface(){
+
+    }
 
     @JavascriptInterface
     public void setISOCountry(String isoCode){
-        current.setValue(Mapper.mapISOCodeToISOCountry(isoCode));
-    }
-
-    public MutableLiveData<ISOCountry> getCurrent() {
-        return current;
-    }
-
-    public void setCurrent(MutableLiveData<ISOCountry> current) {
-        this.current = current;
+        if(isoCode == null){
+            current.postValue(null);
+        } else {
+            current.postValue(Mapper.mapISOCodeToISOCountry(isoCode));
+        }
     }
 }

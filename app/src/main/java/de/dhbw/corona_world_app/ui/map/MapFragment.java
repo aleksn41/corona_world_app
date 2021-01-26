@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 public class MapFragment extends Fragment {
@@ -78,7 +80,7 @@ public class MapFragment extends Fragment {
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
         boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
-
+        mapViewModel.init(requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false), requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("storage_deactivated", false));
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
         myWebView.setWebViewClient(new WebViewClient() {
@@ -92,7 +94,11 @@ public class MapFragment extends Fragment {
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
         webSettings.setSupportZoom(true);
-
+        JavaScriptInterface jsInterface = new JavaScriptInterface();
+        myWebView.addJavascriptInterface(jsInterface, "jsinterface");
+        jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
+            System.out.println(isoCountry);
+        });
         ExecutorService service = ThreadPoolHandler.getInstance();
         Log.v(TAG, "Requesting all countries...");
         loadingScreen.setProgressBar(25);
