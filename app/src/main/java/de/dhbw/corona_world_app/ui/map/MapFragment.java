@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
@@ -79,8 +80,8 @@ public class MapFragment extends Fragment {
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
-        boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
-        boolean storageDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("storage_deactivated", false);
+        boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated",false);
+        boolean storageDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("storage_deactivated",false);
         Log.d(TAG, "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + " and storage " + (storageDisabled ? "disabled" : "enabled") + "...");
         mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
