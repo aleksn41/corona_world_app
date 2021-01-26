@@ -17,20 +17,6 @@ public class MapData {
     private static final String TAG = MapData.class.getName();
 
     String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>" +
-            "  <style>\n" +
-            "         @import url('https://fonts.googleapis.com/css?family=Open+Sans');\n" +
-            "         *, *:before, *:after { font-style: normal !important; }\n" +
-            "         body { position: relative !important; }\n" +
-            "         form { background-color: #ffffff; }\n" +
-            "         #ii { margin-top: 80px }\n" +
-            "         .panel { display: flex; flex-wrap:wrap; justify-content: center; align-items: center; }\n" +
-            "         #chart { height: 70vh; width: 96vw; }\n" +
-            "         .group.group:after, .chart.chart:after, .root.root:after { color: #FFFFFF; }\n" +
-            "         div.google-visualization-tooltip {position: absolute !important; background-color: #FFFFFF; border-radius: 6px; max-width: device-width; max-height: device-height; font-size: 4px}\n" +
-            "         div.google-visualization-tooltip > ul > li > span { color: gold; }\n" +
-            "         #groupOpt { display:none; }\n" +
-            "         #groupOpt.on { display:block;}\n" +
-            "  </style>" +
             "  <script type=\"text/javascript\">" +
             "  openStats = (country) => {jsinterface.setISOCountry(country)};" +
             "  google.charts.load('current', {" +
