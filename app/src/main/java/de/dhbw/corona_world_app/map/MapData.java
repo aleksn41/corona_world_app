@@ -51,7 +51,7 @@ public class MapData {
             "        var true_selected = dataTable.getValue(selectedItem.row, 0);" +
             "        openStats(true_selected);" +
             "     } else {" +
-            "        console.log(\"Nothing was selected.\");" +
+            "        openStats(null);" +
             "     }" +
             "  });" +
             "  var options = {" +
