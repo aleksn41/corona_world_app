@@ -80,7 +80,9 @@ public class MapFragment extends Fragment {
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
         boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
-        mapViewModel.init(requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false), requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("storage_deactivated", false));
+        boolean storageDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("storage_deactivated", false);
+        Log.d(TAG, "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + " and storage " + (storageDisabled ? "disabled" : "enabled") + "...");
+        mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
         myWebView.setWebViewClient(new WebViewClient() {
@@ -114,7 +116,7 @@ public class MapFragment extends Fragment {
         });
         mapViewModel.mCountryList.observe(getViewLifecycleOwner(), countries -> {
             loadingScreen.setProgressBar(50);
-            Log.v(TAG, "Requested countries have arrived");
+            Log.v(TAG, "Requested countries are ready for use...");
             loadingScreen.setProgressBar(70);
             webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
             Log.v(TAG, "Loading WebView with WebString...");
