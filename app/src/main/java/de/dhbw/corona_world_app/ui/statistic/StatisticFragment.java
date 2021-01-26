@@ -1,7 +1,5 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,23 +13,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.charts.PieChart;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
@@ -41,8 +31,6 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
-
-import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
 
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
@@ -56,7 +44,11 @@ public class StatisticFragment extends Fragment {
 
     LinearProgressIndicator progressBar;
 
-    BarChart chart;
+    BarChart barChart;
+
+    PieChart pieChart;
+
+    LineChart lineChart;
 
     TextView testDisplay;
 
@@ -78,12 +70,25 @@ public class StatisticFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         statisticViewModel = new ViewModelProvider(requireActivity()).get(StatisticViewModel.class);
-        chart = (BarChart) root.findViewById(R.id.chart);
+        barChart = (BarChart) root.findViewById(R.id.bar_chart);
+        pieChart = (PieChart) root.findViewById(R.id.pie_chart);
+        lineChart = (LineChart) root.findViewById(R.id.line_chart);
+        barChart.setVisibility(View.GONE);
+        pieChart.setVisibility(View.GONE);
+        lineChart.setVisibility(View.GONE);
+
         Bundle bundle = getArguments();
+        StatisticCall statisticCall = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
+
         try {
-            statisticViewModel.getBarChart(StatisticFragmentArgs.fromBundle(bundle).getStatisticCall(), chart, getContext());
+            switch (statisticCall.getChartType()){
+                case BAR: statisticViewModel.getBarChart(statisticCall, barChart, getContext()); barChart.setVisibility(View.VISIBLE) ;break;
+                case PIE: statisticViewModel.getPieChart(statisticCall, pieChart, getContext()); pieChart.setVisibility(View.VISIBLE) ;break;
+                case LINE: lineChart.setVisibility(View.VISIBLE); break;
+                default: throw new IllegalStateException("A not yet implemented chart type was selected!");
+            }
         } catch (ExecutionException | InterruptedException | JSONException e) {
-            e.printStackTrace();
+            Log.e(TAG, "An error has occurred while creating the statistic!", e);
         }
         return root;
     }
@@ -119,13 +124,11 @@ public class StatisticFragment extends Fragment {
     }
 
     //will be removed once Statistic is finished
-
     private void testProgressBar() throws ExecutionException, InterruptedException {
         int milliSecondsToLoad = 10;
         ThreadPoolHandler.getInstance().submit(new Callable<Void>() {
             @Override
             public Void call() throws InterruptedException {
-                chart.setVisibility(View.GONE);
                 testDisplay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 Thread.sleep(milliSecondsToLoad);
@@ -157,7 +160,7 @@ public class StatisticFragment extends Fragment {
                         progressBar.setVisibility(View.GONE);
                         progressBar.setProgress(0);
                         testDisplay.setVisibility(View.GONE);
-                        chart.setVisibility(View.VISIBLE);
+                        //barChart.setVisibility(View.VISIBLE);
                         //testDisplay.setVisibility(View.VISIBLE);
                     }
                 });

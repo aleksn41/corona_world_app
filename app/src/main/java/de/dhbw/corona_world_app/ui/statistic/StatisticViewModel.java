@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -45,7 +46,6 @@ public class StatisticViewModel extends ViewModel {
 
     }
 
-    //TODO once api-branch is merged this can be implemented properly
     public BarChart getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         if (dataSetGenerator == null) {
@@ -104,7 +104,7 @@ public class StatisticViewModel extends ViewModel {
                 }
             });
 
-            //todo when multiple countries are selected the country with the bigger numbers should be in the background
+            //todo when multiple countries are selected the country with the bigger numbers should be in the background (implement compareTo and sort list)
             for (TimeframedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
@@ -149,9 +149,36 @@ public class StatisticViewModel extends ViewModel {
         }
     }
 
+    public PieChart getPieChart(StatisticCall statisticCall, PieChart chart, Context context){
+        return null;
+    }
+
     private String getDateFormatted(LocalDate date) {
         String year = Integer.toString(date.getYear());
         return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
+    }
+
+    private void setStyle(PieChart chart, Context context){
+        //this is just to get the background-color...
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
+        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
+        chart.setBackgroundColor(arr.getColor(0, -1));
+        arr.recycle();
+
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
+
+        //again, just to get the text-color...
+        TypedValue typedValue2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
+        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
+        int textColor = arr2.getColor(0, -1);
+
+        chart.getLegend().setTextColor(textColor);
+        chart.setCenterTextColor(textColor);
+        arr2.recycle();
     }
 
     private void setStyle(BarChart chart, Context context) {
