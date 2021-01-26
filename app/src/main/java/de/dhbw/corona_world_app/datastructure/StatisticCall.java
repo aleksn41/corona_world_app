@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import java.time.LocalDate;
 
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,6 +70,17 @@ public class StatisticCall implements Serializable {
 
     public LocalDate getEndDate() {
         return endDate;
+    }
+
+    public String getTitle(){
+        if (startDate != NOW && (endDate == NOW || startDate.isBefore(endDate))) return "Statistic";
+        else if(startDate == NOW) return "Statistic: " + getDateFormatted(LocalDate.now());
+        else return "Statistic: " + getDateFormatted(this.startDate);
+    }
+
+    private String getDateFormatted(LocalDate date) {
+        String year = Integer.toString(date.getYear());
+        return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
     }
 
     @Override

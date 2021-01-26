@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">corona_world_app</string>
+    <string name="app_name">Corona World</string>
     <string name="title_world">World Map</string>
     <string name="title_statistic_request">Statistic Chooser</string>
     <string name="title_statistic">Statistic</string>
