@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
@@ -41,6 +42,8 @@ public class StatisticFragment extends Fragment {
     private StatisticViewModel statisticViewModel;
 
     private static final String TAG = StatisticFragment.class.getSimpleName();
+
+    private ExecutorService service = ThreadPoolHandler.getInstance();
 
     LinearProgressIndicator progressBar;
 
@@ -82,8 +85,8 @@ public class StatisticFragment extends Fragment {
 
         try {
             switch (statisticCall.getChartType()){
-                case BAR: statisticViewModel.getBarChart(statisticCall, barChart, getContext()); barChart.setVisibility(View.VISIBLE) ;break;
-                case PIE: statisticViewModel.getPieChart(statisticCall, pieChart, getContext()); pieChart.setVisibility(View.VISIBLE) ;break;
+                case BAR: barChart.setVisibility(View.VISIBLE); statisticViewModel.getBarChart(statisticCall, barChart, getContext()) ;break;
+                case PIE: pieChart.setVisibility(View.VISIBLE); statisticViewModel.getPieChart(statisticCall, pieChart, getContext()); break;
                 case LINE: lineChart.setVisibility(View.VISIBLE); break;
                 default: throw new IllegalStateException("A not yet implemented chart type was selected!");
             }
@@ -99,7 +102,6 @@ public class StatisticFragment extends Fragment {
         if (bundle != null) {
             StatisticCall request = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
             boolean isNewRequest = StatisticFragmentArgs.fromBundle(bundle).getIsNewRequest();
-            //testDisplay.setText(request.toString());
             if (isNewRequest) addToHistory(request);
         }
     }

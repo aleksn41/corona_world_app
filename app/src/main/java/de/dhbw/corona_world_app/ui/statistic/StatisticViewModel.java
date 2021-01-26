@@ -8,17 +8,21 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -46,21 +50,20 @@ public class StatisticViewModel extends ViewModel {
 
     }
 
-    public BarChart getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
-        Logger.logV(TAG, "Getting bar chart for " + statisticCall);
+    public void init(){
         if (dataSetGenerator == null) {
             dataSetGenerator = new ChartValueSetGenerator();
         }
+    }
+
+    public BarChart getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
+        Logger.logV(TAG, "Getting bar chart for " + statisticCall);
+        init();
         float barSpace = 0.02f;
         float barWidth = 0.45f;
         APIManager.enableCache();
         List<TimeframedCountry> apiGottenList;
-        TypedArray colorsTyped = context.getTheme().getResources().obtainTypedArray(R.array.chartColors);
-        List<Integer> colors = new ArrayList<>();
-        for (int i = 0; i < colorsTyped.length(); i++) {
-            colors.add(colorsTyped.getColor(i, 0));
-        }
-        colorsTyped.recycle();
+        List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
@@ -150,7 +153,21 @@ public class StatisticViewModel extends ViewModel {
     }
 
     public PieChart getPieChart(StatisticCall statisticCall, PieChart chart, Context context){
-        return null;
+        init();
+        chart.setData(new PieData(dataSetGenerator.getPieChart(Arrays.asList(1f,2f,3f), Arrays.asList("White","Green","Blue"), "Test", getColors(context))));
+        setStyle(chart, context);
+        return chart;
+    }
+
+    @NotNull
+    private List<Integer> getColors(Context context) {
+        TypedArray colorsTyped = context.getTheme().getResources().obtainTypedArray(R.array.chartColors);
+        List<Integer> colors = new ArrayList<>();
+        for (int i = 0; i < colorsTyped.length(); i++) {
+            colors.add(colorsTyped.getColor(i, 0));
+        }
+        colorsTyped.recycle();
+        return colors;
     }
 
     private String getDateFormatted(LocalDate date) {
@@ -163,7 +180,8 @@ public class StatisticViewModel extends ViewModel {
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
         TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
-        chart.setBackgroundColor(arr.getColor(0, -1));
+        int backgroundColor = arr.getColor(0, -1);
+        chart.setBackgroundColor(backgroundColor);
         arr.recycle();
 
         Description des = new Description();
@@ -177,7 +195,10 @@ public class StatisticViewModel extends ViewModel {
         int textColor = arr2.getColor(0, -1);
 
         chart.getLegend().setTextColor(textColor);
-        chart.setCenterTextColor(textColor);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.setDrawEntryLabels(false);
+        chart.setDrawHoleEnabled(false);
+        chart.setDrawCenterText(false);
         arr2.recycle();
     }
 
