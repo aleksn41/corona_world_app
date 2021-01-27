@@ -87,7 +87,7 @@ public class StatisticFragment extends Fragment {
             switch (statisticCall.getChartType()){
                 case BAR: barChart.setVisibility(View.VISIBLE); statisticViewModel.getBarChart(statisticCall, barChart, getContext()) ;break;
                 case PIE: pieChart.setVisibility(View.VISIBLE); statisticViewModel.getPieChart(statisticCall, pieChart, getContext()); break;
-                case LINE: lineChart.setVisibility(View.VISIBLE); break;
+                case LINE: lineChart.setVisibility(View.VISIBLE); statisticViewModel.getLineChart(statisticCall, lineChart, getContext()); break;
                 default: throw new IllegalStateException("A not yet implemented chart type was selected!");
             }
         } catch (ExecutionException | InterruptedException | JSONException e) {
