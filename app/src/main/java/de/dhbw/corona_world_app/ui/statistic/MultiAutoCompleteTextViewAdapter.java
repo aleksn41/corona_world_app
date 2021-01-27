@@ -31,19 +31,19 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
     LimitListener limitListener;
     StatisticRequestRule.OnItemsChangeListener itemsChangeListener;
 
-    interface LimitListener{
+    interface LimitListener {
         void onLimitReached(int limit);
     }
 
-    public MultiAutoCompleteTextViewAdapter(Context context, Class<T> tClass,int limit,LimitListener limitListener) {
-        this.context=context;
+    public MultiAutoCompleteTextViewAdapter(Context context, Class<T> tClass, int limit, LimitListener limitListener) {
+        this.context = context;
         originalItems = Arrays.asList(tClass.getEnumConstants());
-        selectedItems=new HashSet<>();
-        filteredItems= originalItems;
-        this.limit=limit;
-        this.originalLimit=limit;
-        this.limitListener=limitListener;
-        this.blackListItems=new HashSet<>();
+        selectedItems = new HashSet<>();
+        filteredItems = originalItems;
+        this.limit = limit;
+        this.originalLimit = limit;
+        this.limitListener = limitListener;
+        this.blackListItems = new HashSet<>();
     }
 
     @Override
@@ -52,21 +52,22 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
-                if(limit!=-1&&selectedItems.size()==limit){
-                    results.values=new ArrayList<>();
-                    if(limitListener!=null)limitListener.onLimitReached(limit);
+                if (limit != -1 && selectedItems.size() == limit) {
+                    results.values = new ArrayList<>();
+                    if (limitListener != null) limitListener.onLimitReached(limit);
                     return results;
                 }
                 if (constraint == null || constraint.length() == 0) {
                     results.values = originalItems;
                     results.count = originalItems.size();
                 } else {
-                    List<T> tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p)&&containsIgnoreCase(p.toString(), String.valueOf(constraint))&&!blackListItems.contains(p)).collect(Collectors.toList());
+                    List<T> tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p) && containsIgnoreCase(p.toString(), String.valueOf(constraint)) && !blackListItems.contains(p)).collect(Collectors.toList());
                     results.values = tempFilteredItems;
                     results.count = tempFilteredItems.size();
                 }
                 return results;
             }
+
             @SuppressWarnings("unchecked")
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
@@ -108,56 +109,56 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if(convertView==null){
-            convertView= LayoutInflater.from(context).inflate(R.layout.exposed_dropdown_list_item,parent,false);
+        if (convertView == null) {
+            convertView = LayoutInflater.from(context).inflate(R.layout.exposed_dropdown_list_item, parent, false);
         }
-        T currentItem=getItem(position);
-        TextView textView=convertView.findViewById(R.id.exposedTextView);
+        T currentItem = getItem(position);
+        TextView textView = convertView.findViewById(R.id.exposedTextView);
         textView.setText(currentItem.toString());
         return convertView;
     }
 
-    public void selectItem(int position){
-        T currentItem=getItem(position);
+    public void selectItem(int position) {
+        T currentItem = getItem(position);
         selectedItems.add(currentItem);
         itemsChangeListener.onItemChange();
     }
 
-    public void unSelectItem(T item){
+    public void unSelectItem(T item) {
         selectedItems.remove(item);
         itemsChangeListener.onItemChange();
     }
 
-    public boolean anySelected(){
+    public boolean anySelected() {
         return !selectedItems.isEmpty();
     }
 
     @Override
     public void setOnItemsChangeListener(StatisticRequestRule.OnItemsChangeListener listener) {
-        this.itemsChangeListener=listener;
+        this.itemsChangeListener = listener;
     }
 
-    public List<T> getSelectedItems(){
+    public List<T> getSelectedItems() {
         return new ArrayList<>(selectedItems);
     }
 
     @Override
     public void conditionApplies(boolean allowOnlyOneItem) {
-        if(allowOnlyOneItem)limit=1;
-        else limit=originalLimit;
+        if (allowOnlyOneItem) limit = 1;
+        else limit = originalLimit;
     }
 
-    public void addToBlackList(T item){
+    public void addToBlackList(T item) {
         blackListItems.add(item);
         //unSelectItem(item);
     }
 
-    public void removeFromBlackList(T item){
+    public void removeFromBlackList(T item) {
         blackListItems.remove(item);
     }
 
-    public T getFirstFilteredItem(){
-        if(filteredItems.size()>0)return filteredItems.get(0);
+    public T getFirstFilteredItem() {
+        if (filteredItems.size() > 0) return filteredItems.get(0);
         else return null;
     }
 }

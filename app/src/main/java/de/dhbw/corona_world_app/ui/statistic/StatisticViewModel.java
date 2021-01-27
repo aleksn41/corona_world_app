@@ -50,7 +50,7 @@ public class StatisticViewModel extends ViewModel {
 
     }
 
-    public void init(){
+    public void init() {
         if (dataSetGenerator == null) {
             dataSetGenerator = new ChartValueSetGenerator();
         }
@@ -73,8 +73,8 @@ public class StatisticViewModel extends ViewModel {
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
         LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
-        if(startDate==null) startDate = LocalDate.now();
-        if(endDate==null) endDate = LocalDate.now();
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
             int dayDifference = (int) DAYS.between(startDate, endDate) + (endDate.equals(LocalDate.now()) ? 0 : 1);
@@ -98,7 +98,7 @@ public class StatisticViewModel extends ViewModel {
         } else {
 
             List<String> countries = new ArrayList<>();
-            for (TimeframedCountry country: apiGottenList) {
+            for (TimeframedCountry country : apiGottenList) {
                 countries.add(country.getCountry().getISOCode());
             }
 
@@ -141,7 +141,7 @@ public class StatisticViewModel extends ViewModel {
         });
     }
 
-    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context){
+    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) {
         init();
         List<TimeframedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
@@ -151,7 +151,7 @@ public class StatisticViewModel extends ViewModel {
         if (countryList2D && criteriaList2D && dates2D)
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
         //todo implement
-        chart.setData(new PieData(dataSetGenerator.getPieChartDataSet(Arrays.asList(1f,2f,3f,4f,4f,4f,4f,4f,4f,3f,3f,3f,3f,3f,3f,3f,3f,3f), Arrays.asList("White","Green","Blue","","","","","","","","","","","","","","","",""), "Test", colors)));
+        chart.setData(new PieData(dataSetGenerator.getPieChartDataSet(Arrays.asList(1f, 2f, 3f, 4f, 4f, 4f, 4f, 4f, 4f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f), Arrays.asList("White", "Green", "Blue", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""), "Test", colors)));
         setStyle(chart, context);
     }
 
@@ -168,8 +168,8 @@ public class StatisticViewModel extends ViewModel {
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
         LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
-        if(startDate==null) startDate = LocalDate.now();
-        if(endDate==null) endDate = LocalDate.now();
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
 
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
@@ -181,7 +181,7 @@ public class StatisticViewModel extends ViewModel {
 
         }
 
-        chart.setData(new LineData(dataSetGenerator.getLineChartDataSet(Arrays.asList(150f,2123f,33213f,31233f), "Test", colors), dataSetGenerator.getLineChartDataSet(Arrays.asList(1503f,21223f,3213f,3233f), "Test2", colors)));
+        chart.setData(new LineData(dataSetGenerator.getLineChartDataSet(Arrays.asList(150f, 2123f, 33213f, 31233f), "Test", colors), dataSetGenerator.getLineChartDataSet(Arrays.asList(1503f, 21223f, 3213f, 3233f), "Test2", colors)));
         setStyle(chart, context);
     }
 
@@ -252,7 +252,7 @@ public class StatisticViewModel extends ViewModel {
         arr2.recycle();
     }
 
-    private void setStyle(PieChart chart, Context context){
+    private void setStyle(PieChart chart, Context context) {
         //this is just to get the background-color...
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);

@@ -69,7 +69,7 @@ public class StatisticFragment extends Fragment {
             }
         }
 
-       // ChartValueSetGenerator provider = new ChartValueSetGenerator();
+        // ChartValueSetGenerator provider = new ChartValueSetGenerator();
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         statisticViewModel = new ViewModelProvider(requireActivity()).get(StatisticViewModel.class);
@@ -84,11 +84,21 @@ public class StatisticFragment extends Fragment {
         StatisticCall statisticCall = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
 
         try {
-            switch (statisticCall.getChartType()){
-                case BAR: barChart.setVisibility(View.VISIBLE); statisticViewModel.getBarChart(statisticCall, barChart, getContext()) ;break;
-                case PIE: pieChart.setVisibility(View.VISIBLE); statisticViewModel.getPieChart(statisticCall, pieChart, getContext()); break;
-                case LINE: lineChart.setVisibility(View.VISIBLE); statisticViewModel.getLineChart(statisticCall, lineChart, getContext()); break;
-                default: throw new IllegalStateException("A not yet implemented chart type was selected!");
+            switch (statisticCall.getChartType()) {
+                case BAR:
+                    barChart.setVisibility(View.VISIBLE);
+                    statisticViewModel.getBarChart(statisticCall, barChart, getContext());
+                    break;
+                case PIE:
+                    pieChart.setVisibility(View.VISIBLE);
+                    statisticViewModel.getPieChart(statisticCall, pieChart, getContext());
+                    break;
+                case LINE:
+                    lineChart.setVisibility(View.VISIBLE);
+                    statisticViewModel.getLineChart(statisticCall, lineChart, getContext());
+                    break;
+                default:
+                    throw new IllegalStateException("A not yet implemented chart type was selected!");
             }
         } catch (ExecutionException | InterruptedException | JSONException e) {
             Log.e(TAG, "An error has occurred while creating the statistic!", e);

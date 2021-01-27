@@ -71,7 +71,7 @@ public class StatisticRequestFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         //TODO delete after debugging is done
         //Logger.disableLogging();
-        if(Logger.getDebbuging()) {
+        if (Logger.getDebbuging()) {
             List<ISOCountry> clist = new ArrayList<>();
             clist.add(ISOCountry.Germany);
             //clist.add(ISOCountry.Belize);
@@ -101,15 +101,15 @@ public class StatisticRequestFragment extends Fragment {
         else floatingActionButton.shrink();
         //TODO visually show that limit is reached
         CustomNachoTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
-        MultiAutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE,null);
+        MultiAutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, null);
         setupNachoTextView(ISOCountry.class, isoCountryNachoTextView, isoCountryAdapter);
 
         CustomNachoTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
-        MultiAutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1,null);
+        MultiAutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1, null);
         setupNachoTextView(Criteria.class, criteriaNachoTextView, criteriaAdapter);
 
         CustomNachoTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
-        MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1,null){
+        MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, null) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
@@ -132,14 +132,14 @@ public class StatisticRequestFragment extends Fragment {
             start = LocalDate.of(year12, month12 + 1, dayOfMonth);
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-            if(startDateChange!=null)startDateChange.onItemChange();
+            if (startDateChange != null) startDateChange.onItemChange();
         }, year, month, day);
 
         endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, (view, year1, month1, dayOfMonth) -> {
             end = LocalDate.of(year1, month1 + 1, dayOfMonth);
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
             startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-            if(endDateChange!=null)endDateChange.onItemChange();
+            if (endDateChange != null) endDateChange.onItemChange();
         }, year, month, day);
 
         //sets the min date to the beginning of Corona
@@ -151,17 +151,17 @@ public class StatisticRequestFragment extends Fragment {
         endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
 
         //Default selection is now
-        start=StatisticCall.NOW;
+        start = StatisticCall.NOW;
         startDateChooser.setText("Now");
-        end=StatisticCall.NOW;
+        end = StatisticCall.NOW;
         endDateChooser.setText("Now");
 
         startDateChooser.setOnClickListener(v -> startDatePicker.show());
         endDateChooser.setOnClickListener(v -> endDatePicker.show());
 
         //setup RuleWatcher
-        rule= new StatisticRequestRule(isoCountryAdapter, criteriaAdapter, chartTypeAdapter, new StatisticRequestRule.RuleDateRangeInterface() {
-            boolean changed=false;
+        rule = new StatisticRequestRule(isoCountryAdapter, criteriaAdapter, chartTypeAdapter, new StatisticRequestRule.RuleDateRangeInterface() {
+            boolean changed = false;
 
             @Override
             public LocalDate getStartDate() {
@@ -175,19 +175,19 @@ public class StatisticRequestFragment extends Fragment {
 
             @Override
             public void setOnStartDateChangeListener(StatisticRequestRule.OnItemsChangeListener listener) {
-                startDateChange=listener;
+                startDateChange = listener;
             }
 
             @Override
             public void setOnEndDateChangeListener(StatisticRequestRule.OnItemsChangeListener listener) {
-                   endDateChange=listener;
+                endDateChange = listener;
             }
 
             @Override
             public void conditionApplies(boolean startAndEndDateMustBeSame) {
-                if(startAndEndDateMustBeSame) {
+                if (startAndEndDateMustBeSame) {
                     //If necessary change Dates to now if they are different
-                    if (start != end){
+                    if (start != end) {
                         throw new IllegalStateException("Unexpected State, start and end are different but must be same");
                     }
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
@@ -199,32 +199,35 @@ public class StatisticRequestFragment extends Fragment {
                             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
                             endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
-                            endDatePicker.getDatePicker().updateDate(year,month+1,dayOfMonth);
-                            end=start;
+                            endDatePicker.getDatePicker().updateDate(year, month + 1, dayOfMonth);
+                            end = start;
                             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
                             endDatePicker.getDatePicker().setOnDateChangedListener(null);
-                            if(startDateChange!=null)startDateChange.onItemChange();
-                            if(endDateChange!=null)endDateChange.onItemChange();
+                            if (startDateChange != null) startDateChange.onItemChange();
+                            if (endDateChange != null) endDateChange.onItemChange();
                         }
                     });
-                    changed=true;
-                }else if(changed){
+                    changed = true;
+                } else if (changed) {
                     startDatePicker.getDatePicker().setOnDateChangedListener((view, year12, month12, dayOfMonth) -> {
                         start = LocalDate.of(year12, month12 + 1, dayOfMonth);
                         startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                         endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                        if(startDateChange!=null)startDateChange.onItemChange();
+                        if (startDateChange != null) startDateChange.onItemChange();
                     });
-                    endDatePicker.getDatePicker().setOnDateChangedListener( (view, year1, month1, dayOfMonth) -> {
+                    endDatePicker.getDatePicker().setOnDateChangedListener((view, year1, month1, dayOfMonth) -> {
                         end = LocalDate.of(year1, month1 + 1, dayOfMonth);
                         endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
                         startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-                        if(endDateChange!=null)endDateChange.onItemChange();
+                        if (endDateChange != null) endDateChange.onItemChange();
                     });
-                    if(end!=null)startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-                    if(start!=null)endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                    else endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(LocalDate.now()));
-                    changed=false;
+                    if (end != null)
+                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
+                    if (start != null)
+                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+                    else
+                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(LocalDate.now()));
+                    changed = false;
                 }
             }
         });
