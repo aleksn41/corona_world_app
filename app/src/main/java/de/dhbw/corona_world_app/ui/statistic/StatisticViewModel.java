@@ -90,9 +90,6 @@ public class StatisticViewModel extends ViewModel {
                 }
             }
 
-            chart.setData(barData);
-            setStyle(chart, context);
-
         } else {
 
             List<String> countries = new ArrayList<>();
@@ -119,9 +116,10 @@ public class StatisticViewModel extends ViewModel {
                     return countries.get((int) value);
                 }
             });
-            chart.setData(barData);
-            setStyle(chart, context);
         }
+
+        chart.setData(barData);
+        setStyle(chart, context);
     }
 
     private void formatXAxis(List<TimeframedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
@@ -155,6 +153,8 @@ public class StatisticViewModel extends ViewModel {
 
     public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
         init();
+
+        LineData lineData = new LineData();
         List<TimeframedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
@@ -175,11 +175,43 @@ public class StatisticViewModel extends ViewModel {
             int step = getStep(dayDifference);
 
             formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
-        } else {
 
+            for (TimeframedCountry country : apiGottenList) {
+                for (Criteria criteria : criteriaOrder) {
+                    if (statisticCall.getCriteriaList().contains(criteria)) {
+                        List<Float> data = getDataList(step, dayDifference, country, criteria);
+                        lineData.addDataSet(dataSetGenerator.getLineChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
+                    }
+                }
+            }
+        } else {
+            List<String> countries = new ArrayList<>();
+            for (TimeframedCountry country : apiGottenList) {
+                countries.add(country.getCountry().getISOCode());
+            }
+
+            for (Criteria criteria : criteriaOrder) {
+                List<Float> countriesData = new ArrayList<>();
+                for (TimeframedCountry country : apiGottenList) {
+                    //for constructing x-axis description
+
+                    if (statisticCall.getCriteriaList().contains(criteria)) {
+                        List<Float> data = getDataList(1, 1, country, criteria);
+                        countriesData.add(data.get(0));
+
+                    }
+                }
+                lineData.addDataSet(dataSetGenerator.getLineChartDataSet(countriesData, criteria.getDisplayName(), colors));
+            }
+            chart.getXAxis().setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    return countries.get((int) value);
+                }
+            });
         }
 
-        chart.setData(new LineData(dataSetGenerator.getLineChartDataSet(Arrays.asList(150f, 2123f, 33213f, 31233f), "Test", colors), dataSetGenerator.getLineChartDataSet(Arrays.asList(1503f, 21223f, 3213f, 3233f), "Test2", colors)));
+        chart.setData(lineData);
         setStyle(chart, context);
     }
 
