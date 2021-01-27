@@ -76,17 +76,36 @@ public class StatisticRequestRule {
     }
 
     private void init(){
-        //TODO implement this
         this.rule=new Rule() {
             @Override
             boolean conditionSatisfied(int selectedISOCountriesSize, int selectedCriteriaSize, @Nullable ChartType selectedChartType, @Nullable LocalDate selectedStartDate, @Nullable LocalDate selectedEndDate) {
+                boolean countryList2D = selectedISOCountriesSize > 1;
+                boolean criteriaList2D = selectedCriteriaSize > 1;
+                boolean dates2D = selectedStartDate != null ? selectedEndDate == null || !selectedStartDate.isEqual(selectedEndDate) : selectedEndDate != null;
+                if(countryList2D){
+                    if(criteriaList2D) {
+                        rule.startAndEndDateMustBeSame = true;
+                        return true;
+                    }
+                    if(dates2D){
+                        rule.allowOnlyOneCriteria = true;
+                        return true;
+                    }
+                } else {
+                    if (criteriaList2D) {
+                        if (dates2D) {
+                            rule.allowOnlyOneCountry = true;
+                            return true;
+                        }
+                    }
+                }
                 return false;
             }
         };
-        rule.allowOnlyOneCountry=false;
-        rule.allowOnlyOneCriteria=false;
-        rule.startAndEndDateMustBeSame=false;
-        rule.doNotAllowBarChart=false;
+        rule.startAndEndDateMustBeSame = false;
+        rule.allowOnlyOneCriteria = false;
+        rule.allowOnlyOneCountry = false;
+        rule.doNotAllowBarChart = false;
     }
     private void applyRule(Rule rule){
         isoCountryAdapter.conditionApplies(rule.allowOnlyOneCountry);

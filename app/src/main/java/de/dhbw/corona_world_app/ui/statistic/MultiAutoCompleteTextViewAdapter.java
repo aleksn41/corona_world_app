@@ -149,7 +149,7 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
 
     public void addToBlackList(T item){
         blackListItems.add(item);
-        unSelectItem(item);
+        //unSelectItem(item);
     }
 
     public void removeFromBlackList(T item){

@@ -154,6 +154,7 @@ public class StatisticViewModel extends ViewModel {
 
     public PieChart getPieChart(StatisticCall statisticCall, PieChart chart, Context context){
         init();
+
         chart.setData(new PieData(dataSetGenerator.getPieChart(Arrays.asList(1f,2f,3f,4f,4f,4f,4f,4f,4f,3f,3f,3f,3f,3f,3f,3f,3f,3f), Arrays.asList("White","Green","Blue","","","","","","","","","","","","","","","",""), "Test", getColors(context))));
         setStyle(chart, context);
         return chart;
@@ -197,7 +198,8 @@ public class StatisticViewModel extends ViewModel {
         chart.getLegend().setTextColor(textColor);
         chart.getLegend().setWordWrapEnabled(true);
         chart.setDrawEntryLabels(false);
-        chart.setDrawHoleEnabled(false);
+        //chart.setDrawHoleEnabled(false);
+        chart.setHoleColor(backgroundColor);
         chart.setDrawCenterText(false);
         arr2.recycle();
     }
