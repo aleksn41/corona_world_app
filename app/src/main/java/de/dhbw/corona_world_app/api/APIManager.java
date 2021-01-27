@@ -82,8 +82,6 @@ public class APIManager {
 
         Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
         returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
-
-        Logger.logD(TAG, "Putting live data into Cache...");
         return returnList;
     }
 
