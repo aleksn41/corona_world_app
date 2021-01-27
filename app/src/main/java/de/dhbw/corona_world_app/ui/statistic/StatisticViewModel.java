@@ -59,8 +59,6 @@ public class StatisticViewModel extends ViewModel {
     public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         init();
-        float barSpace = 0.02f;
-        float barWidth = 0.45f;
         List<TimeframedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
