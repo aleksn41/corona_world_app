@@ -144,8 +144,8 @@ public class StatisticViewModel extends ViewModel {
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
-        if (countryList2D && criteriaList2D && dates2D)
-            throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
+        if (dates2D)
+            throw new IllegalArgumentException("Pie chart does not support a date range.");
         //todo implement
         chart.setData(new PieData(dataSetGenerator.getPieChartDataSet(Arrays.asList(1f, 2f, 3f, 4f, 4f, 4f, 4f, 4f, 4f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f), Arrays.asList("White", "Green", "Blue", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""), "Test", colors)));
         setStyle(chart, context);
