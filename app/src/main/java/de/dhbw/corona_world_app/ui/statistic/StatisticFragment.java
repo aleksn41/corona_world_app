@@ -100,8 +100,12 @@ public class StatisticFragment extends Fragment {
                 default:
                     throw new IllegalStateException("A not yet implemented chart type was selected!");
             }
-        } catch (ExecutionException | InterruptedException | JSONException e) {
+        } catch (ExecutionException | InterruptedException e) {
             Log.e(TAG, "An error has occurred while creating the statistic!", e);
+        } catch (JSONException e){
+            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ANSWER, null);
+        } catch (IllegalArgumentException e){
+            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CREATE_STATISTIC_FAILED, null);
         }
         return root;
     }
