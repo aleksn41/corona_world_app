@@ -145,6 +145,7 @@ public class StatisticViewModel extends ViewModel {
         if (countryList2D && criteriaList2D && dates2D)
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
 
+        PieData pieData = new PieData();
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
         LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
@@ -152,11 +153,77 @@ public class StatisticViewModel extends ViewModel {
         if (endDate == null) endDate = LocalDate.now();
 
         if(dates2D){
+            for (TimeFramedCountry country: apiGottenList) {
+                int avgInfected = 0;
+                int avgDeaths = 0;
+                int avgRecovered = 0;
+                double avgPopInfRatio = 0;
+                double avgInfDeathRatio = 0;
 
+                if(country.getDates().length > 1 && country.getInfected().length > 1 && country.getDeaths().length > 1 && country.getRecovered().length > 1) {
+                    for (int i = 0; i < country.getDates().length; i++) {
+                        avgPopInfRatio += country.getPop_inf_ratio(i);
+                    }
+                    avgPopInfRatio = avgPopInfRatio / country.getDates().length;
+
+                    for (int i = 0; i < country.getInfected().length; i++) {
+                        avgInfected += country.getInfected()[i];
+                    }
+                    avgInfected = avgInfected / country.getInfected().length;
+
+                    for (int i = 0; i < country.getDeaths().length; i++) {
+                        avgDeaths += country.getDeaths()[i];
+                    }
+                    avgDeaths = avgDeaths / country.getDeaths().length;
+
+                    for (int i = 0; i < country.getRecovered().length; i++) {
+                        avgRecovered += country.getRecovered()[i];
+                    }
+                    avgRecovered = avgRecovered / country.getRecovered().length;
+
+                    for (int i = 0; i < country.getDates().length; i++) {
+                        avgInfDeathRatio = (double) country.getDeaths()[i] / country.getInfected()[i];
+                    }
+                    avgInfDeathRatio = avgInfDeathRatio / country.getDates().length;
+
+                    List<Float> data = new ArrayList<>();
+                    List<String> names = new ArrayList<>();
+                    for (Criteria criteria: statisticCall.getCriteriaList()) {
+                        switch (criteria) {
+                            case HEALTHY:
+                                data.add((float) country.getPopulation() - avgInfected);
+                                break;
+                            case INFECTED:
+                                data.add((float) avgInfected);
+                                break;
+                            case DEATHS:
+                                data.add((float) avgDeaths);
+                                break;
+                            case RECOVERED:
+                                data.add((float) avgRecovered);
+                                break;
+                            case ID_RATION:
+                                data.add((float) avgInfDeathRatio);
+                                break;
+                            case IH_RATION:
+                                data.add((float) avgPopInfRatio);
+                                break;
+                            case POPULATION:
+                                data.add((float) country.getPopulation());
+                                break;
+                        }
+                        names.add(country.getCountry().getDisplayName()+": "+criteria.getDisplayName());
+                    }
+                    pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "Average between "+ statisticCall.getStartDate() +" and "+statisticCall.getEndDate(), colors));
+                } else {
+                    throw new IllegalStateException("This state should not be reached! There is inconsistency with the size of the arrays in the TimeFramedCountry!");
+                }
+            }
         } else {
 
         }
-        chart.setData(new PieData(dataSetGenerator.getPieChartDataSet(Arrays.asList(1f, 2f, 3f, 4f, 4f, 4f, 4f, 4f, 4f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f), Arrays.asList("White", "Green", "Blue", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""), "Test", colors)));
+
+        chart.setData(pieData);
     }
 
     public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
