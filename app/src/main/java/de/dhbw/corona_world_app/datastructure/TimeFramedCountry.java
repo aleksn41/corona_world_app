@@ -100,24 +100,24 @@ public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCou
         int infectedAvg = 0;
         int deathsAvg = 0;
         int recoveredAvg = 0;
-        if (((TimeFramedCountry) o).getInfected().length == this.infected.length && ((TimeFramedCountry) o).getDeaths().length == this.deaths.length && ((TimeFramedCountry) o).getRecovered().length == this.recovered.length && ((TimeFramedCountry) o).getDates().length == this.dates.length) {
-            if (((TimeFramedCountry) o).getInfected().length > 1) {
-                for (int i = 0; i < ((TimeFramedCountry) o).getInfected().length; i++) {
-                    infectedAvg += ((TimeFramedCountry) o).getInfected()[i] - this.infected[i];
+        if (o.getInfected().length == this.infected.length && o.getDeaths().length == this.deaths.length && o.getRecovered().length == this.recovered.length && o.getDates().length == this.dates.length) {
+            if (o.getInfected().length > 1) {
+                for (int i = 0; i < o.getInfected().length; i++) {
+                    infectedAvg += o.getInfected()[i] - this.infected[i];
                 }
-                infectedAvg = infectedAvg / ((TimeFramedCountry) o).getInfected().length;
+                infectedAvg = infectedAvg / o.getInfected().length;
             }
-            if (((TimeFramedCountry) o).getDeaths().length > 1) {
-                for (int i = 0; i < ((TimeFramedCountry) o).getDeaths().length; i++) {
-                    deathsAvg += ((TimeFramedCountry) o).getDeaths()[i] - this.deaths[i];
+            if (o.getDeaths().length > 1) {
+                for (int i = 0; i < o.getDeaths().length; i++) {
+                    deathsAvg += o.getDeaths()[i] - this.deaths[i];
                 }
-                deathsAvg = deathsAvg / ((TimeFramedCountry) o).getDeaths().length;
+                deathsAvg = deathsAvg / o.getDeaths().length;
             }
-            if (((TimeFramedCountry) o).getRecovered().length > 1) {
-                for (int i = 0; i < ((TimeFramedCountry) o).getRecovered().length; i++) {
-                    recoveredAvg += ((TimeFramedCountry) o).getRecovered()[i] - this.recovered[i];
+            if (o.getRecovered().length > 1) {
+                for (int i = 0; i < o.getRecovered().length; i++) {
+                    recoveredAvg += o.getRecovered()[i] - this.recovered[i];
                 }
-                recoveredAvg = recoveredAvg / ((TimeFramedCountry) o).getRecovered().length;
+                recoveredAvg = recoveredAvg / o.getRecovered().length;
             }
             return infectedAvg * 10 + deathsAvg * 5 + recoveredAvg;
         } else {
