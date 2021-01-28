@@ -121,7 +121,7 @@ public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCou
             }
             return infectedAvg * 10 + deathsAvg * 5 + recoveredAvg;
         } else {
-            throw new IllegalArgumentException("The input TimeframedCountry is of different length than this object!");
+            throw new IllegalArgumentException("The input TimeFramedCountry is of different length than this object!");
         }
     }
 }
