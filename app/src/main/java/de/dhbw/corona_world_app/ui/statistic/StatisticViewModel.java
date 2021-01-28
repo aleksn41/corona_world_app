@@ -101,8 +101,6 @@ public class StatisticViewModel extends ViewModel {
                 List<Float> countriesData = new ArrayList<>();
                 Collections.sort(apiGottenList);
                 for (TimeFramedCountry country : apiGottenList) {
-                    //for constructing x-axis description
-
                     if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(1, 1, country, criteria);
                         countriesData.add(data.get(0));
@@ -120,7 +118,6 @@ public class StatisticViewModel extends ViewModel {
         }
 
         chart.setData(barData);
-        setStyle(chart, context);
     }
 
     private void formatXAxis(List<TimeFramedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
@@ -138,18 +135,28 @@ public class StatisticViewModel extends ViewModel {
         });
     }
 
-    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) {
+    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
         init();
         List<TimeFramedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
-        if (dates2D)
-            throw new IllegalArgumentException("Pie chart does not support a date range.");
-        //todo implement
+        if (countryList2D && criteriaList2D && dates2D)
+            throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
+
+        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+        LocalDate startDate = statisticCall.getStartDate();
+        LocalDate endDate = statisticCall.getEndDate();
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
+
+        if(dates2D){
+
+        } else {
+
+        }
         chart.setData(new PieData(dataSetGenerator.getPieChartDataSet(Arrays.asList(1f, 2f, 3f, 4f, 4f, 4f, 4f, 4f, 4f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f, 3f), Arrays.asList("White", "Green", "Blue", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""), "Test", colors)));
-        setStyle(chart, context);
     }
 
     public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
@@ -213,7 +220,6 @@ public class StatisticViewModel extends ViewModel {
         }
 
         chart.setData(lineData);
-        setStyle(chart, context);
     }
 
     @NotNull
@@ -248,100 +254,6 @@ public class StatisticViewModel extends ViewModel {
             step = 360;
         }
         return step;
-    }
-
-    private void setStyle(LineChart chart, Context context) {
-        //this is just to get the background-color...
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
-        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
-        chart.setBackgroundColor(arr.getColor(0, -1));
-        arr.recycle();
-
-        chart.setDoubleTapToZoomEnabled(false);
-        Description des = new Description();
-        des.setText("");
-        chart.setDescription(des);
-
-        //again, just to get the text-color...
-        TypedValue typedValue2 = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
-        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
-        int textColor = arr2.getColor(0, -1);
-
-        chart.getLegend().setTextColor(textColor);
-        chart.getXAxis().setTextColor(textColor);
-        chart.getAxisLeft().setTextColor(textColor);
-        chart.getAxisRight().setTextColor(textColor);
-        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        chart.getAxisLeft().setAxisMinimum(0f);
-        chart.getAxisRight().setAxisMinimum(0f);
-        chart.getLegend().setWordWrapEnabled(true);
-        chart.getXAxis().setGranularityEnabled(true);
-        chart.getXAxis().setGranularity(1f);
-
-        arr2.recycle();
-    }
-
-    private void setStyle(PieChart chart, Context context) {
-        //this is just to get the background-color...
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
-        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
-        int backgroundColor = arr.getColor(0, -1);
-        chart.setBackgroundColor(backgroundColor);
-        arr.recycle();
-
-        Description des = new Description();
-        des.setText("");
-        chart.setDescription(des);
-
-        //again, just to get the text-color...
-        TypedValue typedValue2 = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
-        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
-        int textColor = arr2.getColor(0, -1);
-
-        chart.getLegend().setTextColor(textColor);
-        chart.getLegend().setWordWrapEnabled(true);
-        chart.setDrawEntryLabels(false);
-        //chart.setDrawHoleEnabled(false);
-        chart.setHoleColor(backgroundColor);
-        chart.setDrawCenterText(false);
-        arr2.recycle();
-    }
-
-    private void setStyle(BarChart chart, Context context) {
-        //this is just to get the background-color...
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
-        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
-        chart.setBackgroundColor(arr.getColor(0, -1));
-        arr.recycle();
-
-        chart.setDoubleTapToZoomEnabled(false);
-        Description des = new Description();
-        des.setText("");
-        chart.setDescription(des);
-
-        //again, just to get the text-color...
-        TypedValue typedValue2 = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
-        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
-        int textColor = arr2.getColor(0, -1);
-
-        chart.getLegend().setTextColor(textColor);
-        chart.getXAxis().setTextColor(textColor);
-        chart.getAxisLeft().setTextColor(textColor);
-        chart.getAxisRight().setTextColor(textColor);
-        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        chart.getAxisLeft().setAxisMinimum(0f);
-        chart.getAxisRight().setAxisMinimum(0f);
-        chart.getLegend().setWordWrapEnabled(true);
-        chart.getXAxis().setGranularityEnabled(true);
-        chart.getXAxis().setGranularity(1f);
-
-        arr2.recycle();
     }
 
     private List<Float> getDataList(int step, int stoppingCondition, TimeFramedCountry country, Criteria criteria) {

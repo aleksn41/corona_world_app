@@ -1,7 +1,10 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Description;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
@@ -82,31 +86,66 @@ public class StatisticFragment extends Fragment {
 
         Bundle bundle = getArguments();
         StatisticCall statisticCall = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
-
-        try {
-            switch (statisticCall.getChartType()) {
-                case BAR:
-                    barChart.setVisibility(View.VISIBLE);
-                    statisticViewModel.getBarChart(statisticCall, barChart, getContext());
-                    break;
-                case PIE:
-                    pieChart.setVisibility(View.VISIBLE);
-                    statisticViewModel.getPieChart(statisticCall, pieChart, getContext());
-                    break;
-                case LINE:
-                    lineChart.setVisibility(View.VISIBLE);
-                    statisticViewModel.getLineChart(statisticCall, lineChart, getContext());
-                    break;
-                default:
-                    throw new IllegalStateException("A not yet implemented chart type was selected!");
+        service.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    switch (statisticCall.getChartType()) {
+                        case BAR:
+                            barChart.setVisibility(View.INVISIBLE);
+                            statisticViewModel.getBarChart(statisticCall, barChart, getContext());
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setStyle(barChart, getContext());
+                                    barChart.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            break;
+                        case PIE:
+                            pieChart.setVisibility(View.INVISIBLE);
+                            statisticViewModel.getPieChart(statisticCall, pieChart, getContext());
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setStyle(pieChart, getContext());
+                                    pieChart.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            break;
+                        case LINE:
+                            lineChart.setVisibility(View.INVISIBLE);
+                            statisticViewModel.getLineChart(statisticCall, lineChart, getContext());
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setStyle(lineChart, getContext());
+                                    lineChart.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            break;
+                        default:
+                            throw new IllegalStateException("A not yet implemented chart type was selected!");
+                    }
+                } catch (ExecutionException | InterruptedException | IllegalArgumentException e) {
+                    Log.e(TAG, "An error has occurred while creating the statistic!", e);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CREATE_STATISTIC_FAILED, null);
+                        }
+                    });
+                } catch (JSONException e){
+                    Log.e(TAG, "An error has occurred while creating the statistic!", e);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ANSWER, null);
+                        }
+                    });
+                }
             }
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e(TAG, "An error has occurred while creating the statistic!", e);
-        } catch (JSONException e){
-            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ANSWER, null);
-        } catch (IllegalArgumentException e){
-            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CREATE_STATISTIC_FAILED, null);
-        }
+        });
         return root;
     }
 
@@ -137,6 +176,100 @@ public class StatisticFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void setStyle(LineChart chart, Context context) {
+        //this is just to get the background-color...
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
+        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
+        chart.setBackgroundColor(arr.getColor(0, -1));
+        arr.recycle();
+
+        chart.setDoubleTapToZoomEnabled(false);
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
+
+        //again, just to get the text-color...
+        TypedValue typedValue2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
+        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
+        int textColor = arr2.getColor(0, -1);
+
+        chart.getLegend().setTextColor(textColor);
+        chart.getXAxis().setTextColor(textColor);
+        chart.getAxisLeft().setTextColor(textColor);
+        chart.getAxisRight().setTextColor(textColor);
+        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisRight().setAxisMinimum(0f);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.getXAxis().setGranularityEnabled(true);
+        chart.getXAxis().setGranularity(1f);
+
+        arr2.recycle();
+    }
+
+    private void setStyle(PieChart chart, Context context) {
+        //this is just to get the background-color...
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
+        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
+        int backgroundColor = arr.getColor(0, -1);
+        chart.setBackgroundColor(backgroundColor);
+        arr.recycle();
+
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
+
+        //again, just to get the text-color...
+        TypedValue typedValue2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
+        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
+        int textColor = arr2.getColor(0, -1);
+
+        chart.getLegend().setTextColor(textColor);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.setDrawEntryLabels(false);
+        //chart.setDrawHoleEnabled(false);
+        chart.setHoleColor(backgroundColor);
+        chart.setDrawCenterText(false);
+        arr2.recycle();
+    }
+
+    private void setStyle(BarChart chart, Context context) {
+        //this is just to get the background-color...
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
+        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
+        chart.setBackgroundColor(arr.getColor(0, -1));
+        arr.recycle();
+
+        chart.setDoubleTapToZoomEnabled(false);
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
+
+        //again, just to get the text-color...
+        TypedValue typedValue2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
+        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
+        int textColor = arr2.getColor(0, -1);
+
+        chart.getLegend().setTextColor(textColor);
+        chart.getXAxis().setTextColor(textColor);
+        chart.getAxisLeft().setTextColor(textColor);
+        chart.getAxisRight().setTextColor(textColor);
+        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisRight().setAxisMinimum(0f);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.getXAxis().setGranularityEnabled(true);
+        chart.getXAxis().setGranularity(1f);
+
+        arr2.recycle();
     }
 
     //will be removed once Statistic is finished
