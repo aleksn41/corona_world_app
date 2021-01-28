@@ -136,7 +136,7 @@ public class StatisticFragment extends Fragment {
                         }
                     });
                 } catch (JSONException e){
-                    Log.e(TAG, "An error has occurred while creating the statistic!", e);
+                    Log.e(TAG, "An error has occurred while parsing api answer!", e);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
