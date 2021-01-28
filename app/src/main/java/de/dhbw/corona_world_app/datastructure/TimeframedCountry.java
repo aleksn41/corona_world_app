@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Arrays;
 
-public class TimeframedCountry implements Serializable {
+public class TimeframedCountry implements Serializable, Comparable<TimeframedCountry> {
 
     private ISOCountry country;
 
@@ -20,7 +20,7 @@ public class TimeframedCountry implements Serializable {
 
     private double[] pop_inf_ratio;
 
-    public TimeframedCountry(){
+    public TimeframedCountry() {
     }
 
     public ISOCountry getCountry() {
@@ -75,7 +75,7 @@ public class TimeframedCountry implements Serializable {
     }
 
     public double getPop_inf_ratio(int i) {
-        return (double) getInfected()[i]/getPopulation();
+        return (double) getInfected()[i] / getPopulation();
     }
 
     public void setPop_inf_ratio(double[] pop_inf_ratio) {
@@ -93,5 +93,35 @@ public class TimeframedCountry implements Serializable {
                 ", population=" + population +
                 ", pop_inf_ratio=" + Arrays.toString(pop_inf_ratio) +
                 '}';
+    }
+
+    @Override
+    public int compareTo(TimeframedCountry o) {
+        int infectedAvg = 0;
+        int deathsAvg = 0;
+        int recoveredAvg = 0;
+        if (((TimeframedCountry) o).getInfected().length == this.infected.length && ((TimeframedCountry) o).getDeaths().length == this.deaths.length && ((TimeframedCountry) o).getRecovered().length == this.recovered.length && ((TimeframedCountry) o).getDates().length == this.dates.length) {
+            if (((TimeframedCountry) o).getInfected().length > 1) {
+                for (int i = 0; i < ((TimeframedCountry) o).getInfected().length; i++) {
+                    infectedAvg += ((TimeframedCountry) o).getInfected()[i] - this.infected[i];
+                }
+                infectedAvg = infectedAvg / ((TimeframedCountry) o).getInfected().length;
+            }
+            if (((TimeframedCountry) o).getDeaths().length > 1) {
+                for (int i = 0; i < ((TimeframedCountry) o).getDeaths().length; i++) {
+                    deathsAvg += ((TimeframedCountry) o).getDeaths()[i] - this.deaths[i];
+                }
+                deathsAvg = deathsAvg / ((TimeframedCountry) o).getDeaths().length;
+            }
+            if (((TimeframedCountry) o).getRecovered().length > 1) {
+                for (int i = 0; i < ((TimeframedCountry) o).getRecovered().length; i++) {
+                    recoveredAvg += ((TimeframedCountry) o).getRecovered()[i] - this.recovered[i];
+                }
+                recoveredAvg = recoveredAvg / ((TimeframedCountry) o).getRecovered().length;
+            }
+            return infectedAvg * 10 + deathsAvg * 5 + recoveredAvg;
+        } else {
+            throw new IllegalArgumentException("The input TimeframedCountry is of different length than this object!");
+        }
     }
 }

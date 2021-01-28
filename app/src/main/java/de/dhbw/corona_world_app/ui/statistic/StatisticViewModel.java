@@ -23,6 +23,7 @@ import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -80,7 +81,6 @@ public class StatisticViewModel extends ViewModel {
 
             formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
 
-            //todo when multiple countries are selected the country with the bigger numbers should be in the background (implement compareTo and sort list)
             for (TimeframedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
@@ -99,6 +99,7 @@ public class StatisticViewModel extends ViewModel {
 
             for (Criteria criteria : criteriaOrder) {
                 List<Float> countriesData = new ArrayList<>();
+                Collections.sort(apiGottenList);
                 for (TimeframedCountry country : apiGottenList) {
                     //for constructing x-axis description
 
