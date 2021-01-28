@@ -2,14 +2,12 @@ package de.dhbw.corona_world_app.ui.statistic;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.util.TypedValue;
 
 import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.LineData;
@@ -22,7 +20,6 @@ import org.json.JSONException;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -153,77 +150,64 @@ public class StatisticViewModel extends ViewModel {
         if (endDate == null) endDate = LocalDate.now();
 
         if(dates2D){
-            for (TimeFramedCountry country: apiGottenList) {
-                int avgInfected = 0;
-                int avgDeaths = 0;
-                int avgRecovered = 0;
-                double avgPopInfRatio = 0;
-                double avgInfDeathRatio = 0;
-
-                if(country.getDates().length > 1 && country.getInfected().length > 1 && country.getDeaths().length > 1 && country.getRecovered().length > 1) {
-                    for (int i = 0; i < country.getDates().length; i++) {
-                        avgPopInfRatio += country.getPop_inf_ratio(i);
-                    }
-                    avgPopInfRatio = avgPopInfRatio / country.getDates().length;
-
-                    for (int i = 0; i < country.getInfected().length; i++) {
-                        avgInfected += country.getInfected()[i];
-                    }
-                    avgInfected = avgInfected / country.getInfected().length;
-
-                    for (int i = 0; i < country.getDeaths().length; i++) {
-                        avgDeaths += country.getDeaths()[i];
-                    }
-                    avgDeaths = avgDeaths / country.getDeaths().length;
-
-                    for (int i = 0; i < country.getRecovered().length; i++) {
-                        avgRecovered += country.getRecovered()[i];
-                    }
-                    avgRecovered = avgRecovered / country.getRecovered().length;
-
-                    for (int i = 0; i < country.getDates().length; i++) {
-                        avgInfDeathRatio = (double) country.getDeaths()[i] / country.getInfected()[i];
-                    }
-                    avgInfDeathRatio = avgInfDeathRatio / country.getDates().length;
-
+            if(countryList2D){
+                for (Criteria criteria: statisticCall.getCriteriaList()) {
                     List<Float> data = new ArrayList<>();
                     List<String> names = new ArrayList<>();
-                    for (Criteria criteria: statisticCall.getCriteriaList()) {
-                        switch (criteria) {
-                            case HEALTHY:
-                                data.add((float) country.getPopulation() - avgInfected);
-                                break;
-                            case INFECTED:
-                                data.add((float) avgInfected);
-                                break;
-                            case DEATHS:
-                                data.add((float) avgDeaths);
-                                break;
-                            case RECOVERED:
-                                data.add((float) avgRecovered);
-                                break;
-                            case ID_RATION:
-                                data.add((float) avgInfDeathRatio);
-                                break;
-                            case IH_RATION:
-                                data.add((float) avgPopInfRatio);
-                                break;
-                            case POPULATION:
-                                data.add((float) country.getPopulation());
-                                break;
-                        }
-                        names.add(country.getCountry().getDisplayName()+": "+criteria.getDisplayName());
+                    for (TimeFramedCountry country: apiGottenList) {
+                        AverageValues averageValues = new AverageValues(country).invoke();
+                        addDataToList(country, averageValues, data, criteria);
+                        names.add(country.getCountry().getDisplayName()+ ": "+criteria.getDisplayName());
                     }
-                    pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "Average between "+ statisticCall.getStartDate() +" and "+statisticCall.getEndDate(), colors));
-                } else {
-                    throw new IllegalStateException("This state should not be reached! There is inconsistency with the size of the arrays in the TimeFramedCountry!");
+                    pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "" , colors));
+                }
+            } else {
+                for (TimeFramedCountry country : apiGottenList) {
+                    if (country.getDates().length > 1 && country.getInfected().length > 1 && country.getDeaths().length > 1 && country.getRecovered().length > 1) {
+                        AverageValues averageValues = new AverageValues(country).invoke();
+
+                        List<Float> data = new ArrayList<>();
+                        List<String> names = new ArrayList<>();
+                        for (Criteria criteria : statisticCall.getCriteriaList()) {
+                            addDataToList(country, averageValues, data, criteria);
+                            names.add(country.getCountry().getDisplayName() + ": " + criteria.getDisplayName());
+                        }
+                        pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "", colors));
+                    } else {
+                        throw new IllegalStateException("This state should not be reached! There is inconsistency with the size of the arrays in the TimeFramedCountry!");
+                    }
                 }
             }
         } else {
 
         }
-
         chart.setData(pieData);
+    }
+
+    private void addDataToList(TimeFramedCountry country, AverageValues averageValues, List<Float> data, Criteria criteria) {
+        switch (criteria) {
+            case HEALTHY:
+                data.add((float) country.getPopulation() - averageValues.getAvgInfected());
+                break;
+            case INFECTED:
+                data.add((float) averageValues.getAvgInfected());
+                break;
+            case DEATHS:
+                data.add((float) averageValues.getAvgDeaths());
+                break;
+            case RECOVERED:
+                data.add((float) averageValues.getAvgRecovered());
+                break;
+            case ID_RATION:
+                data.add((float) averageValues.getAvgInfDeathRatio());
+                break;
+            case IH_RATION:
+                data.add((float) averageValues.getAvgPopInfRatio());
+                break;
+            case POPULATION:
+                data.add((float) country.getPopulation());
+                break;
+        }
     }
 
     public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
@@ -300,7 +284,7 @@ public class StatisticViewModel extends ViewModel {
         return colors;
     }
 
-    private String getDateFormatted(LocalDate date) {
+    protected static String getDateFormatted(LocalDate date) {
         String year = Integer.toString(date.getYear());
         return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
     }
@@ -355,5 +339,71 @@ public class StatisticViewModel extends ViewModel {
 
     public void setPathToCacheDir(File pathToCacheDir) {
         this.pathToCacheDir = pathToCacheDir;
+    }
+
+    private static class AverageValues {
+        private final TimeFramedCountry country;
+        private int avgInfected;
+        private int avgDeaths;
+        private int avgRecovered;
+        private double avgPopInfRatio;
+        private double avgInfDeathRatio;
+
+        public AverageValues(TimeFramedCountry country) {
+            this.country = country;
+            this.avgInfected = 0;
+            this.avgDeaths = 0;
+            this.avgRecovered = 0;
+            this.avgPopInfRatio = 0;
+            this.avgInfDeathRatio = 0;
+        }
+
+        public int getAvgInfected() {
+            return avgInfected;
+        }
+
+        public int getAvgDeaths() {
+            return avgDeaths;
+        }
+
+        public int getAvgRecovered() {
+            return avgRecovered;
+        }
+
+        public double getAvgPopInfRatio() {
+            return avgPopInfRatio;
+        }
+
+        public double getAvgInfDeathRatio() {
+            return avgInfDeathRatio;
+        }
+
+        public AverageValues invoke() {
+            for (int i = 0; i < country.getDates().length; i++) {
+                avgPopInfRatio += country.getPop_inf_ratio(i);
+            }
+            avgPopInfRatio = avgPopInfRatio / country.getDates().length;
+
+            for (int i = 0; i < country.getInfected().length; i++) {
+                avgInfected += country.getInfected()[i];
+            }
+            avgInfected = avgInfected / country.getInfected().length;
+
+            for (int i = 0; i < country.getDeaths().length; i++) {
+                avgDeaths += country.getDeaths()[i];
+            }
+            avgDeaths = avgDeaths / country.getDeaths().length;
+
+            for (int i = 0; i < country.getRecovered().length; i++) {
+                avgRecovered += country.getRecovered()[i];
+            }
+            avgRecovered = avgRecovered / country.getRecovered().length;
+
+            for (int i = 0; i < country.getDates().length; i++) {
+                avgInfDeathRatio = (double) country.getDeaths()[i] / country.getInfected()[i];
+            }
+            avgInfDeathRatio = avgInfDeathRatio / country.getDates().length;
+            return this;
+        }
     }
 }

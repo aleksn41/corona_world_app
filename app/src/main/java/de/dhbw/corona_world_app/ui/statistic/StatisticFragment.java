@@ -19,12 +19,14 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -108,7 +110,7 @@ public class StatisticFragment extends Fragment {
                             requireActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setStyle(pieChart, getContext());
+                                    setStyle(pieChart, statisticCall ,getContext());
                                     pieChart.setVisibility(View.VISIBLE);
                                 }
                             });
@@ -211,7 +213,10 @@ public class StatisticFragment extends Fragment {
         arr2.recycle();
     }
 
-    private void setStyle(PieChart chart, Context context) {
+    private void setStyle(PieChart chart, StatisticCall statisticCall,Context context) {
+        boolean countryList2D = statisticCall.getCountryList().size() > 1;
+        boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
+        boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
         //this is just to get the background-color...
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
@@ -235,7 +240,13 @@ public class StatisticFragment extends Fragment {
         chart.setDrawEntryLabels(false);
         //chart.setDrawHoleEnabled(false);
         chart.setHoleColor(backgroundColor);
-        chart.setDrawCenterText(false);
+        chart.setDrawCenterText(true);
+        chart.setCenterTextColor(textColor);
+        String title = "";
+        LocalDate startDate = statisticCall.getStartDate() != null ? statisticCall.getStartDate() : LocalDate.now();
+        LocalDate endDate = statisticCall.getEndDate() != null ? statisticCall.getEndDate() : LocalDate.now();
+        if(dates2D) title = "Average between the "+StatisticViewModel.getDateFormatted(startDate)+ " and the "+StatisticViewModel.getDateFormatted(endDate);
+        chart.setCenterText(title);
         arr2.recycle();
     }
 
