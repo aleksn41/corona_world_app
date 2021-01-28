@@ -32,7 +32,7 @@ import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
+import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -60,7 +60,7 @@ public class StatisticViewModel extends ViewModel {
     public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         init();
-        List<TimeframedCountry> apiGottenList;
+        List<TimeFramedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
@@ -81,7 +81,7 @@ public class StatisticViewModel extends ViewModel {
 
             formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
 
-            for (TimeframedCountry country : apiGottenList) {
+            for (TimeFramedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(step, dayDifference, country, criteria);
@@ -93,14 +93,14 @@ public class StatisticViewModel extends ViewModel {
         } else {
 
             List<String> countries = new ArrayList<>();
-            for (TimeframedCountry country : apiGottenList) {
+            for (TimeFramedCountry country : apiGottenList) {
                 countries.add(country.getCountry().getISOCode());
             }
 
             for (Criteria criteria : criteriaOrder) {
                 List<Float> countriesData = new ArrayList<>();
                 Collections.sort(apiGottenList);
-                for (TimeframedCountry country : apiGottenList) {
+                for (TimeFramedCountry country : apiGottenList) {
                     //for constructing x-axis description
 
                     if (statisticCall.getCriteriaList().contains(criteria)) {
@@ -123,7 +123,7 @@ public class StatisticViewModel extends ViewModel {
         setStyle(chart, context);
     }
 
-    private void formatXAxis(List<TimeframedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
+    private void formatXAxis(List<TimeFramedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
         List<String> dates = new ArrayList<>();
         for (int i = 0; i < dayDifference; i += step) {
             String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
@@ -140,7 +140,7 @@ public class StatisticViewModel extends ViewModel {
 
     public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) {
         init();
-        List<TimeframedCountry> apiGottenList;
+        List<TimeFramedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
@@ -156,7 +156,7 @@ public class StatisticViewModel extends ViewModel {
         init();
 
         LineData lineData = new LineData();
-        List<TimeframedCountry> apiGottenList;
+        List<TimeFramedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
@@ -177,7 +177,7 @@ public class StatisticViewModel extends ViewModel {
 
             formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
 
-            for (TimeframedCountry country : apiGottenList) {
+            for (TimeFramedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(step, dayDifference, country, criteria);
@@ -187,13 +187,13 @@ public class StatisticViewModel extends ViewModel {
             }
         } else {
             List<String> countries = new ArrayList<>();
-            for (TimeframedCountry country : apiGottenList) {
+            for (TimeFramedCountry country : apiGottenList) {
                 countries.add(country.getCountry().getISOCode());
             }
 
             for (Criteria criteria : criteriaOrder) {
                 List<Float> countriesData = new ArrayList<>();
-                for (TimeframedCountry country : apiGottenList) {
+                for (TimeFramedCountry country : apiGottenList) {
                     //for constructing x-axis description
 
                     if (statisticCall.getCriteriaList().contains(criteria)) {
@@ -344,7 +344,7 @@ public class StatisticViewModel extends ViewModel {
         arr2.recycle();
     }
 
-    private List<Float> getDataList(int step, int stoppingCondition, TimeframedCountry country, Criteria criteria) {
+    private List<Float> getDataList(int step, int stoppingCondition, TimeFramedCountry country, Criteria criteria) {
         List<Float> data = new ArrayList<>();
         for (int i = 0; i < stoppingCondition; i += step) {
             switch (criteria) {
