@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.tools;
 
 import android.graphics.Color;
-import androidx.core.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
