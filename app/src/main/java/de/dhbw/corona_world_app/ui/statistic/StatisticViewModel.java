@@ -133,6 +133,7 @@ public class StatisticViewModel extends ViewModel {
     }
 
     public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+        Logger.logV(TAG, "Getting pie chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
         List<Integer> colors = getColors(context);
@@ -193,33 +194,8 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(pieData);
     }
 
-    private void addAverageDataToList(TimeFramedCountry country, AverageValues averageValues, List<Float> data, Criteria criteria) {
-        switch (criteria) {
-            case HEALTHY:
-                data.add((float) country.getPopulation() - averageValues.getAvgInfected());
-                break;
-            case INFECTED:
-                data.add((float) averageValues.getAvgInfected());
-                break;
-            case DEATHS:
-                data.add((float) averageValues.getAvgDeaths());
-                break;
-            case RECOVERED:
-                data.add((float) averageValues.getAvgRecovered());
-                break;
-            case ID_RATION:
-                data.add((float) averageValues.getAvgInfDeathRatio());
-                break;
-            case IH_RATION:
-                data.add((float) averageValues.getAvgPopInfRatio());
-                break;
-            case POPULATION:
-                data.add((float) country.getPopulation());
-                break;
-        }
-    }
-
     public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+        Logger.logV(TAG, "Getting line chart for " + statisticCall);
         init();
 
         LineData lineData = new LineData();
@@ -293,9 +269,35 @@ public class StatisticViewModel extends ViewModel {
         return colors;
     }
 
-    protected static String getDateFormatted(LocalDate date) {
+    protected static String getDateFormatted(@NotNull LocalDate date) {
         String year = Integer.toString(date.getYear());
         return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
+    }
+
+    private void addAverageDataToList(TimeFramedCountry country, AverageValues averageValues, List<Float> data, Criteria criteria) {
+        switch (criteria) {
+            case HEALTHY:
+                data.add((float) country.getPopulation() - averageValues.getAvgInfected());
+                break;
+            case INFECTED:
+                data.add((float) averageValues.getAvgInfected());
+                break;
+            case DEATHS:
+                data.add((float) averageValues.getAvgDeaths());
+                break;
+            case RECOVERED:
+                data.add((float) averageValues.getAvgRecovered());
+                break;
+            case ID_RATION:
+                data.add((float) averageValues.getAvgInfDeathRatio());
+                break;
+            case IH_RATION:
+                data.add((float) averageValues.getAvgPopInfRatio());
+                break;
+            case POPULATION:
+                data.add((float) country.getPopulation());
+                break;
+        }
     }
 
     private int getStep(int dayDifference) {
