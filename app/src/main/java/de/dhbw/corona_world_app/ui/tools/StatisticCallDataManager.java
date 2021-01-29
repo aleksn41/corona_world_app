@@ -359,6 +359,7 @@ public class StatisticCallDataManager {
             int indexOfFavData = dataType == DataType.FAVOURITE_DATA ? index : Collections.binarySearch(indicesOfFavouriteEntriesInAllData, indexOfAllData);
             //check if item is favourite
             if (statisticCallData.get(indexOfAllData).second) {
+                //TODO use Binary search to make this more efficient
                 deletedIndicesFavData.add(indexOfFavData);
                 Collections.sort(deletedIndicesFavData);
             } else {
@@ -430,9 +431,9 @@ public class StatisticCallDataManager {
             try {
                 //deleteMarkedIndicesNotCreatedInSession();
                 //saveNewSessionData();
+                resetSession();
                 saveSessionData();
                 updateFavIndicesFile();
-                resetSession();
             } catch (IOException e) {
                 throw new CompletionException(e);
             } finally {
@@ -448,8 +449,6 @@ public class StatisticCallDataManager {
             List<String> temp;
             String now = new String(new char[]{ITEM_SEPARATOR, ITEM_SEPARATOR, ITEM_SEPARATOR});
             for (int i = statisticCallData.size()-1; i >= 0; i--) {
-                //if item was deleted skip
-                if(deletedIndicesAllData.contains(i))continue;
                 temp = isoCountryEnum64BitEncoder.encodeListOfEnums(statisticCallData.get(i).first.getCountryList());
                 stringToWrite.append(listOfStringToString(temp));
                 stringToWrite.append(CATEGORY_SEPARATOR);
@@ -543,7 +542,7 @@ public class StatisticCallDataManager {
             }
             if (indicesOfFavouriteEntriesInAllData.size() != 0)
                 //write list in reverse order
-                Files.write(temp.toPath(), listOfStringToString(IntStream.range(0, indicesOfFavouriteEntriesInAllData.size()).filter(i->!deletedIndicesFavData.contains(i)).map(i -> indicesOfFavouriteEntriesInAllData.size() - i - 1).mapToObj(indicesOfFavouriteEntriesInAllData::get).map(Object::toString).collect(Collectors.toList())).getBytes(), StandardOpenOption.WRITE);
+                Files.write(temp.toPath(), listOfStringToString(IntStream.range(0, indicesOfFavouriteEntriesInAllData.size()).map(i -> indicesOfFavouriteEntriesInAllData.size() - i - 1).mapToObj(indicesOfFavouriteEntriesInAllData::get).map(Object::toString).collect(Collectors.toList())).getBytes(), StandardOpenOption.WRITE);
             if (!fileWhereFavIndicesAreToBeSaved.delete()) {
                 temp.delete();
                 throw new IOException("could not delete old File");
