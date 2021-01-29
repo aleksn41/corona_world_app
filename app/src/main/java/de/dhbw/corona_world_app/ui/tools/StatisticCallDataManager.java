@@ -1,13 +1,13 @@
 package de.dhbw.corona_world_app.ui.tools;
 
-import androidx.core.util.Pair;
-
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,7 +31,6 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
@@ -57,6 +56,7 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
  * @author Aleksandr Stankoski
  */
 //TODO if time is left, implement a backup file
+//TODO Catch if favourite Data is corrupted
 public class StatisticCallDataManager {
     private static final char ITEM_SEPARATOR = ',';
     private static final char CATEGORY_SEPARATOR = '|';
@@ -73,22 +73,38 @@ public class StatisticCallDataManager {
     private static final int AMOUNT_OF_CATEGORIES = 6;
     private static final int AMOUNT_OF_METHODS_ACCESSING_FILE = 5;
 
-    public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallData;
+    //List where all Data exists (includes deleted items)
+    private final List<Pair<StatisticCall, Boolean>> statisticCallData;
+
+    //List where Data deleted entries are filtered out (all items are from statisticCallData)
+    public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallAllData;
     public MutableLiveData<List<Pair<StatisticCall, Boolean>>> statisticCallFavouriteData;
 
-    //saving Session Data in order to save in File Later
-    private final List<Integer> indicesToDeleteOfEntriesNotCreatedInThisSession = new ArrayList<>();
-    private List<Integer> indicesOfFavouriteChangedNotCreatedThisSession = new ArrayList<>();
-    private int amountOfNewItemsAddedInSession = 0;
+    //save which indices have been deleted in a sorted List (contain method is overwritten to use a binary search)
+    private List<Integer> deletedIndicesAllData = new ArrayList<Integer>(){
+        @Override
+        public int indexOf(@Nullable Object o) {
+            int index=Collections.binarySearch(this,(Integer)o);
+            return index<0?-1:index;
+        }
+    };
+    private List<Integer> deletedIndicesFavData = new ArrayList<Integer>(){
+        @Override
+        public int indexOf(@Nullable Object o) {
+            int index=Collections.binarySearch(this,(Integer)o);
+            return index<0?-1:index;
+        }
+    };
+    int amountOfNewItemsAddedInSession = 0;
 
-    private List<Integer> indicesOfFavouriteEntries;
+    private List<Integer> indicesOfFavouriteEntriesInAllData;
     private Enum64BitEncoder<ISOCountry> isoCountryEnum64BitEncoder;
     private Enum64BitEncoder<Criteria> criteriaEnum64BitEncoder;
     private Enum64BitEncoder<ChartType> chartTypeEnum64BitEncoder;
     private final File fileWhereAllDataIsToBeSaved;
     private final File fileWhereFavIndicesAreToBeSaved;
     private final ExecutorService executorService;
-    private long currentPositionOnFile;
+    private int currentPositionOnData;
     private int currentPositionOnFavIndices;
     public boolean readAllAvailableData = false;
     public boolean readAllAvailableFavData = false;
@@ -106,94 +122,13 @@ public class StatisticCallDataManager {
         ALL_DATA
     }
 
-    //used to differentiate between contexts when reading files
-    interface readDataInterface {
-
-        File getFileToReadFrom();
-
-        int getFilePosition();
-
-        boolean atTheEndOfFile();
-
-        void setAllDataIsRead();
-
-        void increasePosition();
-
-        MutableLiveData<List<Pair<StatisticCall, Boolean>>> getMutableLiveDataToAddDataTo();
-    }
-
-    readDataInterface allData = new readDataInterface() {
-
-        @Override
-        public File getFileToReadFrom() {
-            return fileWhereAllDataIsToBeSaved;
-        }
-
-        @Override
-        public int getFilePosition() {
-            return (int) (currentPositionOnFile * (MAX_SIZE_ITEM + System.lineSeparator().length()));
-        }
-
-        @Override
-        public boolean atTheEndOfFile() {
-            return currentPositionOnFile < 0;
-        }
-
-        @Override
-        public void setAllDataIsRead() {
-            readAllAvailableData = true;
-        }
-
-        @Override
-        public void increasePosition() {
-            currentPositionOnFile -= 1;
-        }
-
-        @Override
-        public MutableLiveData<List<Pair<StatisticCall, Boolean>>> getMutableLiveDataToAddDataTo() {
-            return statisticCallData;
-        }
-    };
-
-    readDataInterface favData = new readDataInterface() {
-
-        @Override
-        public File getFileToReadFrom() {
-            return fileWhereAllDataIsToBeSaved;
-        }
-
-        @Override
-        public int getFilePosition() {
-            return indicesOfFavouriteEntries.get(currentPositionOnFavIndices) * (MAX_SIZE_ITEM + System.lineSeparator().length());
-        }
-
-        @Override
-        public boolean atTheEndOfFile() {
-            return currentPositionOnFavIndices == indicesOfFavouriteEntries.size();
-        }
-
-        @Override
-        public void setAllDataIsRead() {
-            readAllAvailableFavData = true;
-        }
-
-        @Override
-        public void increasePosition() {
-            currentPositionOnFavIndices += 1;
-        }
-
-        @Override
-        public MutableLiveData<List<Pair<StatisticCall, Boolean>>> getMutableLiveDataToAddDataTo() {
-            return statisticCallFavouriteData;
-        }
-    };
-
     //TODO check if (fav) Data is corrupted
     public StatisticCallDataManager(@NonNull ExecutorService executorService, @NonNull File directoryOfSavedFile) throws IOException, DataException {
         if (!directoryOfSavedFile.isDirectory())
             throw new IllegalArgumentException("directoryOfSavedFile is not a directory");
-        this.statisticCallData = new MutableLiveData<>();
-        this.statisticCallData.setValue(new ArrayList<>(LINES_READ_PER_REQUEST));
+        this.statisticCallData = new ArrayList<>(LINES_READ_PER_REQUEST);
+        this.statisticCallAllData = new MutableLiveData<>();
+        this.statisticCallAllData.setValue(new ArrayList<>(LINES_READ_PER_REQUEST));
         this.statisticCallFavouriteData = new MutableLiveData<>();
         this.statisticCallFavouriteData.setValue(new ArrayList<>(LINES_READ_PER_REQUEST));
         this.executorService = executorService;
@@ -214,8 +149,8 @@ public class StatisticCallDataManager {
         if (fileWhereAllDataIsToBeSaved.length() % (MAX_SIZE_ITEM + System.lineSeparator().length()) != 0)
             throw new DataException("File does not have expected Format");
         //TODO check if fav File has expected Format
-        indicesOfFavouriteEntries = getIndicesFromFavFile();
-        currentPositionOnFile = readAllAvailableData ? 0 : fileWhereAllDataIsToBeSaved.length() / (MAX_SIZE_ITEM + System.lineSeparator().length()) - 1;
+        indicesOfFavouriteEntriesInAllData = getIndicesFromFavFile();
+        currentPositionOnData = 0;
         currentPositionOnFavIndices = 0;
         linesInCurrentFile = getLinesInFile();
     }
@@ -240,7 +175,7 @@ public class StatisticCallDataManager {
      * @param dataType describes the data that is supposed to be loaded
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> requestMoreData(@NonNull DataType dataType) throws ExecutionException, InterruptedException {
+    public Future<Void> requestMoreData(@NonNull DataType dataType) {
         Log.i(this.getClass().getName() + "|" + dataType, "loading more Data of " + dataType);
         return executorService.submit(new Callable<Void>() {
             @Override
@@ -248,42 +183,41 @@ public class StatisticCallDataManager {
                 readLock.lock();
                 saveLock.acquire();
                 try {
-                    readDataInterface request;
                     switch (dataType) {
                         case ALL_DATA:
-                            request = allData;
+                            if(readAllAvailableData)return null;
+                            int readLines = LINES_READ_PER_REQUEST;
+                            //check if data is already loaded
+                            if(currentPositionOnData!=statisticCallData.size())currentPositionOnData=statisticCallData.size();
+                            //restrict to as much lines the file has
+                            if(readLines+currentPositionOnData-amountOfNewItemsAddedInSession>linesInCurrentFile)readLines=linesInCurrentFile-currentPositionOnData+amountOfNewItemsAddedInSession;
+                            readFromFileIntoAllData(readLines);
+                            currentPositionOnData+=readLines;
+                            if(currentPositionOnData-amountOfNewItemsAddedInSession==linesInCurrentFile)readAllAvailableData=true;
                             break;
                         case FAVOURITE_DATA:
-                            request = favData;
+                            if(readAllAvailableFavData)return null;
+                            readLines = LINES_READ_PER_REQUEST;
+                            //find how many items have already been loaded
+                            int indexOfLastLoadedItem=Collections.binarySearch(indicesOfFavouriteEntriesInAllData,statisticCallData.size()-1);
+                            //get upper bound index
+                            indexOfLastLoadedItem=indexOfLastLoadedItem<0?-indexOfLastLoadedItem-1:indexOfLastLoadedItem+1;
+                            if(currentPositionOnFavIndices!=indexOfLastLoadedItem)currentPositionOnFavIndices=indexOfLastLoadedItem;
+                            if(currentPositionOnFavIndices!=indicesOfFavouriteEntriesInAllData.size()){
+                                if(readLines+currentPositionOnFavIndices>=indicesOfFavouriteEntriesInAllData.size())readLines=indicesOfFavouriteEntriesInAllData.size()-currentPositionOnFavIndices;
+                                //calculate how many lines of AllData need to be read
+                                int linesOfAllData=indicesOfFavouriteEntriesInAllData.get(readLines+currentPositionOnFavIndices-1);
+                                readFromFileIntoAllData(linesOfAllData);
+                                currentPositionOnFavIndices+=readLines;
+                                if(currentPositionOnFavIndices==indicesOfFavouriteEntriesInAllData.size())readAllAvailableFavData=true;
+                            }else readAllAvailableFavData=true;
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + dataType);
                     }
-                    if (!hasMoreData(dataType)) {
-                        Log.v(this.getClass().getName() + "|" + dataType, dataType + " Data has been successfully loaded");
-                        return null;
-                    }
-                    List<Pair<StatisticCall, Boolean>> itemsToAddToData = new ArrayList<>(LINES_READ_PER_REQUEST);
-                    byte[] buffer = new byte[MAX_SIZE_ITEM + System.lineSeparator().length()];
-                    try (RandomAccessFile r = new RandomAccessFile(request.getFileToReadFrom(), "r")) {
-                        for (int i = 0; i < LINES_READ_PER_REQUEST; i++) {
-                            if (request.atTheEndOfFile()) {
-                                request.setAllDataIsRead();
-                                break;
-                            }
-                            r.seek(request.getFilePosition());
-                            int success = r.read(buffer);
-                            Log.d(this.getClass().getName() + "|" + dataType, "amount of bytes read: " + success);
-                            int positionOfStringWithoutPadding = getStartingPositionOfPadding(buffer, 0, MAX_SIZE_ITEM);
-                            if (positionOfStringWithoutPadding == 0)
-                                throw new DataException("Line in Data consists only of Padding");
-                            itemsToAddToData.add(parseData(new String(buffer, 0, positionOfStringWithoutPadding, StandardCharsets.UTF_8)));
-                            request.increasePosition();
-                        }
-                    }
-                    Objects.requireNonNull(request.getMutableLiveDataToAddDataTo().getValue()).addAll(itemsToAddToData);
-                    request.getMutableLiveDataToAddDataTo().postValue(request.getMutableLiveDataToAddDataTo().getValue());
-                    Log.i(this.getClass().getName() + "|" + dataType, dataType + " Data has been successfully loaded");
+                    Log.v(this.getClass().getName() + "|" + dataType, "successfully read more "+dataType);
+                    notifyChangeInFavData(false);
+                    notifyChangeInData(false);
                     return null;
                 } finally {
                     saveLock.release();
@@ -293,10 +227,28 @@ public class StatisticCallDataManager {
         });
     }
 
+    private void readFromFileIntoAllData(int readLines) throws IOException {
+        List<Pair<StatisticCall, Boolean>> itemsToAddToData = new ArrayList<>(readLines);
+        byte[] buffer = new byte[(MAX_SIZE_ITEM + System.lineSeparator().length()) * readLines];
+        int success;
+        try (RandomAccessFile r = new RandomAccessFile(fileWhereAllDataIsToBeSaved, "r")) {
+            r.seek((linesInCurrentFile-(currentPositionOnData-amountOfNewItemsAddedInSession)-readLines) * (MAX_SIZE_ITEM + System.lineSeparator().length()));
+            success = r.read(buffer);
+            Log.d(this.getClass().getName(), "amount of bytes read: " + success);
+        }
+        if(success!=readLines*(MAX_SIZE_ITEM+System.lineSeparator().length()))throw new DataException("Read Lines do not have expected Format");
+        for (int i = readLines-1; i >= 0; i--) {
+            int positionOfStringWithoutPadding = getStartingPositionOfPadding(buffer, i*(MAX_SIZE_ITEM+System.lineSeparator().length()), MAX_SIZE_ITEM);
+            if (positionOfStringWithoutPadding == 0)
+                throw new DataException("Line in Data consists only of Padding");
+            itemsToAddToData.add(parseData(new String(buffer, i*(MAX_SIZE_ITEM+System.lineSeparator().length()), positionOfStringWithoutPadding-i*(MAX_SIZE_ITEM+System.lineSeparator().length()), StandardCharsets.UTF_8)));
+        }
+        statisticCallData.addAll(itemsToAddToData);
+    }
+
     //TODO if an error occurs, undo everything
     //TODO check if space is available before and request if necessary
     //TODO only a maximum Number of MAX_SIZE entries (optional)
-
     /**
      * add new StatisticCalls to All Data.
      * To save the Data permanently use {@link StatisticCallDataManager#saveAllData()}
@@ -306,15 +258,19 @@ public class StatisticCallDataManager {
     public void addData(List<StatisticCall> calls) {
         try {
             saveLock.acquireUninterruptibly();
-            Objects.requireNonNull(statisticCallData.getValue()).addAll(0, calls.parallelStream().map(x -> new Pair<>(x, false)).collect(Collector.of(
+            statisticCallData.addAll(0, calls.parallelStream().map(x -> new Pair<>(x, false)).collect(Collector.of(
                     ArrayDeque::new,
-                    ArrayDeque::addFirst,
-                    (d1, d2) -> {
+                    ArrayDeque::addFirst,(d1, d2) -> {
                         d2.addAll(d1);
                         return d2;
                     })));
-            statisticCallData.postValue(statisticCallData.getValue());
             amountOfNewItemsAddedInSession += calls.size();
+            currentPositionOnData+=calls.size();
+            for (int i = 0; i < indicesOfFavouriteEntriesInAllData.size(); i++) {
+                indicesOfFavouriteEntriesInAllData.set(i,indicesOfFavouriteEntriesInAllData.get(i)+calls.size());
+            }
+            notifyChangeInData(true);
+            notifyChangeInFavData(true);
         } finally {
             saveLock.release();
         }
@@ -344,33 +300,14 @@ public class StatisticCallDataManager {
                 default:
                     throw new IllegalStateException("Unexpected value: " + dataType);
             }
-            //delete data from All Data
-            statisticCallData.postValue(IntStream.range(0, Objects.requireNonNull(statisticCallData.getValue()).size()).parallel().boxed().filter(i -> !indicesOfAllDataToRemove.contains(i)).map(i -> statisticCallData.getValue().get(i)).collect(Collectors.toList()));
-            //delete fav entries
-            statisticCallFavouriteData.postValue(IntStream.range(0, statisticCallFavouriteData.getValue().size()).parallel().boxed().filter(i -> !favouriteIndicesToDelete.contains(i)).map(i -> statisticCallFavouriteData.getValue().get(i)).collect(Collectors.toList()));
-            //update fav indices
-            int deleted = favouriteIndicesToDelete.size();
-            ArrayList<Integer> newList = new ArrayList<>(indicesOfFavouriteEntries.size());
-            for (int i = 0; i < indicesOfFavouriteEntries.size(); i++) {
-                if (favouriteIndicesToDelete.contains(i)) {
-                    deleted -= 1;
-                } else newList.add(indicesOfFavouriteEntries.get(i) - deleted);
-            }
-            indicesOfFavouriteEntries = newList;
-            //remember items that are supposed to be deleted from storage to delete them later in saveData()
-            indicesToDeleteOfEntriesNotCreatedInThisSession.addAll(indicesOfAllDataToRemove.parallelStream().filter(i -> i >= amountOfNewItemsAddedInSession).collect(Collectors.toList()));
-            //update count of newly created Items
-            long amountOfNewItemsDeleted = indicesOfAllDataToRemove.parallelStream().filter(i -> i < amountOfNewItemsAddedInSession).count();
-            amountOfNewItemsAddedInSession -= amountOfNewItemsDeleted;
-            deleted = 0;
-            ArrayList<Integer> newList2 = new ArrayList<>(indicesOfFavouriteChangedNotCreatedThisSession.size());
-            for (int i = 0; i < indicesOfFavouriteChangedNotCreatedThisSession.size(); i++) {
-                if (indicesOfAllDataToRemove.contains(indicesOfFavouriteChangedNotCreatedThisSession.get(i))) {
-                    deleted += 1;
-                } else
-                    newList2.add(indicesOfFavouriteChangedNotCreatedThisSession.get(i) - deleted);
-            }
-            indicesOfFavouriteChangedNotCreatedThisSession = newList2;
+            //mark indices as deleted
+            deletedIndicesAllData.addAll(indicesOfAllDataToRemove);
+            deletedIndicesFavData.addAll(favouriteIndicesToDelete);
+            //sort List
+            Collections.sort(deletedIndicesAllData);
+            Collections.sort(deletedIndicesFavData);
+            notifyChangeInData(true);
+            notifyChangeInFavData(true);
         } finally {
             saveLock.release();
         }
@@ -391,17 +328,22 @@ public class StatisticCallDataManager {
                 channel.truncate(0);
             }
             //delete Live Data
-            statisticCallData.postValue(new ArrayList<>());
+            statisticCallData.clear();
+            statisticCallAllData.postValue(new ArrayList<>());
             statisticCallFavouriteData.postValue(new ArrayList<>());
-            indicesOfFavouriteEntries.clear();
+            indicesOfFavouriteEntriesInAllData.clear();
             readAllAvailableData = true;
             readAllAvailableFavData = true;
-            currentPositionOnFile = 0;
+            currentPositionOnData = 0;
             currentPositionOnFavIndices = 0;
             resetSession();
         } finally {
             saveLock.release();
         }
+    }
+
+    public List<Integer> getBlackListedIndices(DataType dataType){
+        return dataType==DataType.ALL_DATA?deletedIndicesAllData:deletedIndicesFavData;
     }
 
     /**
@@ -413,73 +355,62 @@ public class StatisticCallDataManager {
     public void toggleFav(int index, @NonNull DataType dataType) {
         try {
             saveLock.acquireUninterruptibly();
-            int indexOfAllData;
-            //positive if index exists in fav negative if it does not exist
-            //if it is negative, it indicates the position where the item is to be inserted
-            int potentialIndexOfFavData;
-            boolean itemAlreadyLoadedInAllData;
-            boolean itemAlreadyLoadedInFavData;
-            int lineInFile;
-
-            switch (dataType) {
-                case ALL_DATA:
-                    indexOfAllData = index;
-                    lineInFile = linesInCurrentFile + amountOfNewItemsAddedInSession - index - 1;
-                    potentialIndexOfFavData = Collections.binarySearch(indicesOfFavouriteEntries, lineInFile, Collections.reverseOrder());
-                    itemAlreadyLoadedInAllData = true;
-                    itemAlreadyLoadedInFavData = potentialIndexOfFavData >= 0 && potentialIndexOfFavData < currentPositionOnFavIndices;
-                    break;
-                case FAVOURITE_DATA:
-                    lineInFile = indicesOfFavouriteEntries.get(index);
-                    indexOfAllData = linesInCurrentFile + amountOfNewItemsAddedInSession - lineInFile - 1;
-                    potentialIndexOfFavData = index;
-                    itemAlreadyLoadedInAllData = indexOfAllData < statisticCallData.getValue().size();
-                    itemAlreadyLoadedInFavData = true;
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + dataType);
-            }
-
-            //only need to save this information for items not added this session
-            if (indexOfAllData >= amountOfNewItemsAddedInSession) {
-                //if index<0 the item does not exist in List
-                int indexInFavouriteChanged = Collections.binarySearch(indicesOfFavouriteChangedNotCreatedThisSession, indexOfAllData);
-                if (indexInFavouriteChanged >= 0) {
-                    indicesOfFavouriteChangedNotCreatedThisSession.remove(indexInFavouriteChanged);
-                } else
-                    indicesOfFavouriteChangedNotCreatedThisSession.add(-indexInFavouriteChanged - 1, indexOfAllData);
-            }
-            //toggle favourite Flag
-            if (itemAlreadyLoadedInAllData) {
-                Pair<StatisticCall, Boolean> currentItem = Objects.requireNonNull(statisticCallData.getValue()).get(indexOfAllData);
-                currentItem = Pair.create(currentItem.first, !currentItem.second);
-                statisticCallData.getValue().set(index, currentItem);
-                statisticCallData.setValue(statisticCallData.getValue());
-            }
-            //item has been switched off of Favourite
-            if (potentialIndexOfFavData >= 0) {
-                //check if item has already been loaded into favList
-                if (itemAlreadyLoadedInFavData) {
-                    statisticCallFavouriteData.getValue().remove(potentialIndexOfFavData);
-                    statisticCallFavouriteData.setValue(statisticCallFavouriteData.getValue());
+            int indexOfAllData = dataType == DataType.FAVOURITE_DATA ? indicesOfFavouriteEntriesInAllData.get(index) : index;
+            int indexOfFavData = dataType == DataType.FAVOURITE_DATA ? index : Collections.binarySearch(indicesOfFavouriteEntriesInAllData, indexOfAllData);
+            //check if item is favourite
+            if (statisticCallData.get(indexOfAllData).second) {
+                //TODO use Binary search to make this more efficient
+                deletedIndicesFavData.add(indexOfFavData);
+                Collections.sort(deletedIndicesFavData);
+            } else {
+                //check if this item is already in FavList
+                if (indexOfFavData >= 0) {
+                    deletedIndicesFavData.remove(Collections.binarySearch(deletedIndicesFavData,indexOfFavData));
                 }
-                currentPositionOnFavIndices -= potentialIndexOfFavData < currentPositionOnFavIndices ? 1 : 0;
-                indicesOfFavouriteEntries.remove(potentialIndexOfFavData);
-            }
-            //item has been switched to Favourite
-            else {
-                //negate number to get insertion point (read function description of binarySearch)
-                potentialIndexOfFavData = -potentialIndexOfFavData - 1;
-                indicesOfFavouriteEntries.add(potentialIndexOfFavData, lineInFile);
-                //if this entry is in between the already loaded data, insert it into list
-                if (potentialIndexOfFavData <= currentPositionOnFavIndices) {
-                    statisticCallFavouriteData.getValue().add(potentialIndexOfFavData, statisticCallData.getValue().get(indexOfAllData));
-                    currentPositionOnFavIndices += 1;
+                //else add new item to list
+                else {
+                    int indexToInsert = -indexOfFavData - 1;
+                    indicesOfFavouriteEntriesInAllData.add(indexToInsert, indexOfAllData);
+                    //increase index by one for all indices above inserted Index
+                    int indexInDeletedIndices=Collections.binarySearch(deletedIndicesFavData,indexToInsert);
+                    indexInDeletedIndices=indexInDeletedIndices<0?-indexInDeletedIndices-1:indexInDeletedIndices;
+                    for (int i = indexInDeletedIndices; i < deletedIndicesFavData.size(); i++) {
+                        deletedIndicesFavData.set(i,deletedIndicesFavData.get(i)+1);
+                    }
+                    if(indexToInsert<=currentPositionOnFavIndices)currentPositionOnFavIndices+=1;
                 }
             }
+            //toggle fav mark
+            statisticCallData.get(indexOfAllData).setSecond(!statisticCallData.get(indexOfAllData).second);
+            updateAllData(true);
+            notifyChangeInFavData(true);
         } finally {
             saveLock.release();
         }
+    }
+
+    private void updateAllData(boolean inUIThread) {
+        if(inUIThread)statisticCallAllData.setValue(statisticCallAllData.getValue());
+        else statisticCallAllData.postValue(statisticCallAllData.getValue());
+    }
+
+    private void notifyChangeInFavData(boolean inUIThread){
+        ArrayList<Pair<StatisticCall,Boolean>> temp=new ArrayList<>(indicesOfFavouriteEntriesInAllData.size());
+        for (int i = 0; i < indicesOfFavouriteEntriesInAllData.size(); i++) {
+            temp.add(statisticCallData.get(indicesOfFavouriteEntriesInAllData.get(i)));
+        }
+        if(inUIThread)statisticCallFavouriteData.setValue(temp);
+        else statisticCallFavouriteData.postValue(temp);
+    }
+
+    private  void notifyChangeInData(boolean inUIThread){
+        if(inUIThread)statisticCallAllData.setValue(statisticCallData);
+        else statisticCallAllData.postValue(statisticCallData);
+    }
+
+    private void updateFavData(boolean inUIThread) {
+        if(inUIThread)statisticCallFavouriteData.setValue(statisticCallFavouriteData.getValue());
+        else statisticCallFavouriteData.postValue(statisticCallFavouriteData.getValue());
     }
 
     /**
@@ -498,10 +429,11 @@ public class StatisticCallDataManager {
             //only save when no other method accesses any relevant Data
             saveLock.acquireUninterruptibly(AMOUNT_OF_METHODS_ACCESSING_FILE);
             try {
-                deleteMarkedIndicesNotCreatedInSession();
-                saveNewSessionData();
-                updateFavIndicesFile();
+                //deleteMarkedIndicesNotCreatedInSession();
+                //saveNewSessionData();
                 resetSession();
+                saveSessionData();
+                updateFavIndicesFile();
             } catch (IOException e) {
                 throw new CompletionException(e);
             } finally {
@@ -511,12 +443,45 @@ public class StatisticCallDataManager {
         }, executorService);
     }
 
+    private void saveSessionData() throws IOException {
+        try (FileWriter writer = new FileWriter(fileWhereAllDataIsToBeSaved)) {
+            StringBuilder stringToWrite = new StringBuilder(MAX_SIZE_ITEM + System.lineSeparator().length());
+            List<String> temp;
+            String now = new String(new char[]{ITEM_SEPARATOR, ITEM_SEPARATOR, ITEM_SEPARATOR});
+            for (int i = statisticCallData.size()-1; i >= 0; i--) {
+                temp = isoCountryEnum64BitEncoder.encodeListOfEnums(statisticCallData.get(i).first.getCountryList());
+                stringToWrite.append(listOfStringToString(temp));
+                stringToWrite.append(CATEGORY_SEPARATOR);
+
+                temp = criteriaEnum64BitEncoder.encodeListOfEnums(statisticCallData.get(i).first.getCriteriaList());
+                stringToWrite.append(listOfStringToString(temp));
+                stringToWrite.append(CATEGORY_SEPARATOR);
+
+                stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(statisticCallData.get(i).first.getChartType())).get(0));
+                stringToWrite.append(CATEGORY_SEPARATOR);
+
+                stringToWrite.append(statisticCallData.get(i).second ? '1' : '0');
+                stringToWrite.append(CATEGORY_SEPARATOR);
+
+                stringToWrite.append(statisticCallData.get(i).first.getStartDate() == StatisticCall.NOW ? now : statisticCallData.get(i).first.getStartDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
+                stringToWrite.append(CATEGORY_SEPARATOR);
+
+                stringToWrite.append(statisticCallData.get(i).first.getEndDate() == StatisticCall.NOW ? now : statisticCallData.get(i).first.getEndDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
+
+                stringToWrite.append(createPaddingString(MAX_SIZE_ITEM - stringToWrite.length()));
+                stringToWrite.append(System.lineSeparator());
+                writer.write(stringToWrite.toString());
+                stringToWrite.setLength(0);
+            }
+        }
+    }
+    /*
     private void deleteMarkedIndicesNotCreatedInSession() throws IOException {
 
-        /*if (indicesToDeleteOfEntriesNotCreatedInThisSession.size() == linesInCurrentFile){
+        if (indicesToDeleteOfEntriesNotCreatedInThisSession.size() == linesInCurrentFile){
             deleteAllData().get();
             return;
-        }*/
+        }
         File temp = new File(fileWhereAllDataIsToBeSaved + NAME_OF_TEMP_FILE);
         if (!temp.createNewFile()) {
             if (!temp.delete()) throw new IOException("could not create nor delete Temp File");
@@ -562,7 +527,7 @@ public class StatisticCallDataManager {
             //changes byte from '0' to '1' and '1' to '0'
             newFile[positionOfFavouriteByte] ^= 1;
         }
-    }
+    }*/
 
     //TODO no need to remove old file if only new data is added
     private void updateFavIndicesFile() throws IOException {
@@ -575,9 +540,9 @@ public class StatisticCallDataManager {
                 if (!temp.delete()) throw new IOException("could not create nor delete Temp File");
                 if (!temp.createNewFile()) throw new IOException("this should not be possible");
             }
-            if (indicesOfFavouriteEntries.size() != 0)
+            if (indicesOfFavouriteEntriesInAllData.size() != 0)
                 //write list in reverse order
-                Files.write(temp.toPath(), listOfStringToString(IntStream.range(0, indicesOfFavouriteEntries.size()).map(i -> indicesOfFavouriteEntries.size() - i - 1).mapToObj(indicesOfFavouriteEntries::get).map(Object::toString).collect(Collectors.toList())).getBytes(), StandardOpenOption.WRITE);
+                Files.write(temp.toPath(), listOfStringToString(IntStream.range(0, indicesOfFavouriteEntriesInAllData.size()).map(i -> indicesOfFavouriteEntriesInAllData.size() - i - 1).mapToObj(indicesOfFavouriteEntriesInAllData::get).map(Object::toString).collect(Collectors.toList())).getBytes(), StandardOpenOption.WRITE);
             if (!fileWhereFavIndicesAreToBeSaved.delete()) {
                 temp.delete();
                 throw new IOException("could not delete old File");
@@ -594,32 +559,32 @@ public class StatisticCallDataManager {
             Files.write(fileWhereFavIndicesAreToBeSaved.toPath(),listOfStringToString(indicesOfFavouriteEntries.parallelStream().filter(i->i<amountOfNewItemsAddedInSession).map(Object::toString).collect(Collectors.toList())).getBytes(),StandardOpenOption.APPEND);
         }*/
     }
-
+    /*
     private void saveNewSessionData() throws IOException {
         try (FileWriter writer = new FileWriter(fileWhereAllDataIsToBeSaved, true)) {
             StringBuilder stringToWrite = new StringBuilder(MAX_SIZE_ITEM + System.lineSeparator().length());
             List<String> temp;
-            String now=new String(new char[]{ITEM_SEPARATOR, ITEM_SEPARATOR, ITEM_SEPARATOR});
+            String now = new String(new char[]{ITEM_SEPARATOR, ITEM_SEPARATOR, ITEM_SEPARATOR});
             for (int i = amountOfNewItemsAddedInSession - 1; i >= 0; i--) {
 
-                temp = isoCountryEnum64BitEncoder.encodeListOfEnums(statisticCallData.getValue().get(i).first.getCountryList());
+                temp = isoCountryEnum64BitEncoder.encodeListOfEnums(statisticCallData.get(i).first.getCountryList());
                 stringToWrite.append(listOfStringToString(temp));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                temp = criteriaEnum64BitEncoder.encodeListOfEnums(statisticCallData.getValue().get(i).first.getCriteriaList());
+                temp = criteriaEnum64BitEncoder.encodeListOfEnums(statisticCallData.get(i).first.getCriteriaList());
                 stringToWrite.append(listOfStringToString(temp));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(statisticCallData.getValue().get(i).first.getChartType())).get(0));
+                stringToWrite.append(chartTypeEnum64BitEncoder.encodeListOfEnums(Collections.singletonList(statisticCallData.get(i).first.getChartType())).get(0));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                stringToWrite.append(statisticCallData.getValue().get(i).second ? '1' : '0');
+                stringToWrite.append(statisticCallData.get(i).second ? '1' : '0');
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                stringToWrite.append(statisticCallData.getValue().get(i).first.getStartDate() == StatisticCall.NOW? now:statisticCallData.getValue().get(i).first.getStartDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
+                stringToWrite.append(statisticCallData.get(i).first.getStartDate() == StatisticCall.NOW ? now : statisticCallData.get(i).first.getStartDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
                 stringToWrite.append(CATEGORY_SEPARATOR);
 
-                stringToWrite.append(statisticCallData.getValue().get(i).first.getEndDate() == StatisticCall.NOW ? now : statisticCallData.getValue().get(i).first.getEndDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
+                stringToWrite.append(statisticCallData.get(i).first.getEndDate() == StatisticCall.NOW ? now : statisticCallData.getValue().get(i).first.getEndDate().format(StatisticCall.DATE_FORMAT).replace('-', ITEM_SEPARATOR));
 
                 stringToWrite.append(createPaddingString(MAX_SIZE_ITEM - stringToWrite.length()));
                 stringToWrite.append(System.lineSeparator());
@@ -628,7 +593,7 @@ public class StatisticCallDataManager {
             }
         }
     }
-
+    */
 
     private Pair<StatisticCall, Boolean> parseData(@NonNull String s) throws DataException {
         String[] categories = s.split(Pattern.quote(String.valueOf(CATEGORY_SEPARATOR)));
@@ -671,19 +636,53 @@ public class StatisticCallDataManager {
     }
 
     private void resetSession() {
-        indicesToDeleteOfEntriesNotCreatedInThisSession.clear();
-        indicesOfFavouriteChangedNotCreatedThisSession.clear();
+        if(!deletedIndicesAllData.isEmpty()) {
+            //delete indices marked as deleted
+            final Iterator<Pair<StatisticCall,Boolean>> each = statisticCallData.iterator();
+            int currentIteratorPosition=0;
+            for (int i = 0; i < deletedIndicesAllData.size(); i++,currentIteratorPosition++) {
+                while(currentIteratorPosition!=deletedIndicesAllData.get(i)){
+                    currentIteratorPosition+=1;
+                    each.next();
+                }
+                each.next();
+                each.remove();
+            }
+            //decrease index for each deleted index
+            int deleted = 0;
+            for (int i = 0; i < indicesOfFavouriteEntriesInAllData.size(); i++) {
+                if (deletedIndicesAllData.contains(i)) deleted += 1;
+                else if (deleted > 0)
+                    indicesOfFavouriteEntriesInAllData.set(i, indicesOfFavouriteEntriesInAllData.get(i) - deleted);
+            }
+        }
+        if(!deletedIndicesFavData.isEmpty()) {
+            final Iterator<Integer> each2 = indicesOfFavouriteEntriesInAllData.iterator();
+            int currentIteratorPosition = 0;
+            for (int i = 0; i < deletedIndicesFavData.size(); i++, currentIteratorPosition++) {
+                while (currentIteratorPosition != deletedIndicesFavData.get(i)) {
+                    currentIteratorPosition += 1;
+                    each2.next();
+                }
+                each2.next();
+                each2.remove();
+            }
+        }
+        deletedIndicesAllData.clear();
+        deletedIndicesFavData.clear();
         amountOfNewItemsAddedInSession = 0;
         linesInCurrentFile = getLinesInFile();
+        notifyChangeInFavData(false);
+        notifyChangeInData(false);
     }
 
     private int favIndexToHistoryIndex(int favIndex) {
-        return linesInCurrentFile + amountOfNewItemsAddedInSession - indicesOfFavouriteEntries.get(favIndex) - 1;
+        return indicesOfFavouriteEntriesInAllData.get(favIndex);
     }
 
     //returns where the index is or where it should be if it is not in the favourite list
     private int historyIndexToFavIndex(int historyIndex) {
-        return Collections.binarySearch(indicesOfFavouriteEntries, linesInCurrentFile + amountOfNewItemsAddedInSession - historyIndex - 1, Collections.reverseOrder());
+        return Collections.binarySearch(indicesOfFavouriteEntriesInAllData, historyIndex);
     }
 
     //returns the maximum size a String representing an Item can have (excludes lineSeparator)

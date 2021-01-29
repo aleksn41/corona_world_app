@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.tools;
 
 import android.util.Log;
-import androidx.core.util.Pair;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,14 +12,19 @@ import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
+
+import static android.view.View.GONE;
 
 //TODO instead of Pairs use an extra Hashset for the selected Items
 public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean>, StatisticCallViewHolder> {
@@ -31,6 +35,9 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
     //need to hold a reference to the ActionMode in order to manually close it if 0 items are selected
     private ActionMode mActionMode;
+
+    //blacklist set by DataManager
+    private List<Integer> blackListedIndices=new ArrayList<>();
 
     //used to load new Actionbar if item is selected for deleting
     private final ActionMode.Callback actionMode= new ActionMode.Callback() {
@@ -106,6 +113,14 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
     @Override
     public void onBindViewHolder(@NonNull StatisticCallViewHolder holder, int position) {
+        //if this index is blacklisted, do not show it (List contain method is overridden such that it uses binary search)
+        if(blackListedIndices.contains(holder.getAdapterPosition())){
+            holder.itemView.setVisibility(GONE);
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+        }else if(holder.itemView.getVisibility()!=View.VISIBLE){
+            holder.itemView.setVisibility(View.VISIBLE);
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
         //give the itemOnActionCallback Interface to the Item, such that it can implement its own logic
         holder.setItem(getItem(holder.getAdapterPosition()));
         //setActionCallback if available
@@ -159,6 +174,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
     private void goToStatistic(StatisticCall request){
         showStatisticInterface.showStatisticCall(request);
+    }
+
+    public void setBlackListedIndices(List<Integer> blackListedIndices) {
+        this.blackListedIndices = blackListedIndices;
     }
 }
 
