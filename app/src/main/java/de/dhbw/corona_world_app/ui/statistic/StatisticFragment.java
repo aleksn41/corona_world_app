@@ -1,9 +1,10 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
+import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,24 +16,21 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.components.Legend;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
@@ -41,19 +39,25 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 
-import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
-
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticFragment extends Fragment {
 
     private StatisticCallViewModel statisticCallViewModel;
 
+    private StatisticViewModel statisticViewModel;
+
     private static final String TAG = StatisticFragment.class.getSimpleName();
+
+    private ExecutorService service = ThreadPoolHandler.getInstance();
 
     LinearProgressIndicator progressBar;
 
-    BarChart chart;
+    BarChart barChart;
+
+    PieChart pieChart;
+
+    LineChart lineChart;
 
     TextView testDisplay;
 
@@ -71,54 +75,81 @@ public class StatisticFragment extends Fragment {
             }
         }
 
-        ChartValueSetGenerator provider = new ChartValueSetGenerator();
+        // ChartValueSetGenerator provider = new ChartValueSetGenerator();
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
         progressBar = root.findViewById(R.id.progressBar);
-        testDisplay = root.findViewById(R.id.statisticCallItemTextView);
-        chart = (BarChart) root.findViewById(R.id.chart);
-        final String[] dates = new String[] { "01.10.", "02.10.", "03.10.", "04.10.", "05.10.", "06.10." };
-        XAxis xaxis = chart.getXAxis();
-        ValueFormatter vf = new ValueFormatter() {
+        statisticViewModel = new ViewModelProvider(requireActivity()).get(StatisticViewModel.class);
+        barChart = (BarChart) root.findViewById(R.id.bar_chart);
+        pieChart = (PieChart) root.findViewById(R.id.pie_chart);
+        lineChart = (LineChart) root.findViewById(R.id.line_chart);
+        barChart.setVisibility(View.GONE);
+        pieChart.setVisibility(View.GONE);
+        lineChart.setVisibility(View.GONE);
+
+        Bundle bundle = getArguments();
+        StatisticCall statisticCall = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
+
+        setStyle(barChart, getContext());
+        setStyle(pieChart, statisticCall, getContext());
+        setStyle(lineChart, getContext());
+
+        service.execute(new Runnable() {
             @Override
-            public String getFormattedValue(float value) {
-                return dates[(int) value];
+            public void run() {
+                try {
+                    switch (statisticCall.getChartType()) {
+                        case BAR:
+                            barChart.setVisibility(View.INVISIBLE);
+                            statisticViewModel.getBarChart(statisticCall, barChart, getContext());
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    barChart.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            break;
+                        case PIE:
+                            pieChart.setVisibility(View.INVISIBLE);
+                            statisticViewModel.getPieChart(statisticCall, pieChart, getContext());
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pieChart.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            break;
+                        case LINE:
+                            lineChart.setVisibility(View.INVISIBLE);
+                            statisticViewModel.getLineChart(statisticCall, lineChart, getContext());
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    lineChart.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            break;
+                        default:
+                            throw new IllegalStateException("A not yet implemented chart type was selected!");
+                    }
+                } catch (ExecutionException | InterruptedException | IllegalArgumentException e) {
+                    Log.e(TAG, "An error has occurred while creating the statistic!", e);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CREATE_STATISTIC_FAILED, null);
+                        }
+                    });
+                } catch (JSONException e){
+                    Log.e(TAG, "An error has occurred while parsing api answer!", e);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ANSWER, null);
+                        }
+                    });
+                }
             }
-        };
-        xaxis.setValueFormatter(vf);
-        YAxis yaxisleft = chart.getAxisLeft();
-        YAxis yaxisright = chart.getAxisRight();
-        ValueFormatter vf2 = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return Integer.toString((int) value);
-            }
-        };
-        yaxisleft.setValueFormatter(vf2);
-        yaxisright.setValueFormatter(vf2);
-        try {
-            testProgressBar();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        Description des = new Description();
-        des.setText("");
-        chart.setDescription(des);
-        chart.getLegend().setTextColor(Color.WHITE);
-        chart.getXAxis().setTextColor(Color.WHITE);
-        chart.getAxisLeft().setTextColor(Color.WHITE);
-        chart.getAxisRight().setTextColor(Color.WHITE);
-        List<Float> fl = Arrays.asList(20f, 20f, 30f, 40f, 10f, 80f);
-        List<Float> f2 = Arrays.asList(10f, 10f, 25f, 35f, 5f, 67f);
-        List<Float> f = Arrays.asList(30f, 80f, 60f, 50f, 70f, 60f);
-        TypedArray colorsTyped = getActivity().getTheme().getResources().obtainTypedArray(R.array.chartColors);
-        List<Integer> colors = new ArrayList<>();
-        for (int i = 0; i < colorsTyped.length(); i++) {
-            colors.add(colorsTyped.getColor(i, 0));
-        }
-        colorsTyped.recycle();
-        chart.setBackgroundColor(getResources().getColor(R.color.dark_grey));
-        chart.setDoubleTapToZoomEnabled(false);
-        chart.setData(new BarData(provider.getBarChartDataSet(f, "Belize: Deaths", colors), provider.getBarChartDataSet(fl, "Belize: Recovered", colors), provider.getBarChartDataSet(f2, "Belize: Infected", colors)));
+        });
         return root;
     }
 
@@ -128,7 +159,6 @@ public class StatisticFragment extends Fragment {
         if (bundle != null) {
             StatisticCall request = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
             boolean isNewRequest = StatisticFragmentArgs.fromBundle(bundle).getIsNewRequest();
-            testDisplay.setText(request.toString());
             if (isNewRequest) addToHistory(request);
         }
     }
@@ -152,14 +182,116 @@ public class StatisticFragment extends Fragment {
         });
     }
 
-    //will be removed once Statistic is finished
+    private void setStyle(LineChart chart, Context context) {
+        //this is just to get the background-color...
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
+        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
+        chart.setBackgroundColor(arr.getColor(0, -1));
+        arr.recycle();
 
+        chart.setDoubleTapToZoomEnabled(false);
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
+
+        //again, just to get the text-color...
+        TypedValue typedValue2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
+        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
+        int textColor = arr2.getColor(0, -1);
+
+        chart.getLegend().setTextColor(textColor);
+        chart.getXAxis().setTextColor(textColor);
+        chart.getAxisLeft().setTextColor(textColor);
+        chart.getAxisRight().setTextColor(textColor);
+        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisRight().setAxisMinimum(0f);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.getXAxis().setGranularityEnabled(true);
+        chart.getXAxis().setGranularity(1f);
+
+        arr2.recycle();
+    }
+
+    private void setStyle(PieChart chart, StatisticCall statisticCall,Context context) {
+        boolean countryList2D = statisticCall.getCountryList().size() > 1;
+        boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
+        boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
+        //this is just to get the background-color...
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
+        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
+        int backgroundColor = arr.getColor(0, -1);
+        chart.setBackgroundColor(backgroundColor);
+        arr.recycle();
+
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
+
+        //again, just to get the text-color...
+        TypedValue typedValue2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
+        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
+        int textColor = arr2.getColor(0, -1);
+
+        chart.getLegend().setTextColor(textColor);
+        chart.setDrawEntryLabels(false);
+        //chart.setDrawHoleEnabled(false);
+        chart.setHoleColor(backgroundColor);
+        chart.setDrawCenterText(true);
+        chart.setCenterTextColor(textColor);
+        String title = "";
+        LocalDate startDate = statisticCall.getStartDate() != null ? statisticCall.getStartDate() : LocalDate.now();
+        LocalDate endDate = statisticCall.getEndDate() != null ? statisticCall.getEndDate() : LocalDate.now();
+        if(dates2D) title = "Average between the "+StatisticViewModel.getDateFormatted(startDate)+ " and the "+StatisticViewModel.getDateFormatted(endDate);
+        chart.setCenterText(title);
+        chart.getLegend().setWordWrapEnabled(true);
+
+        arr2.recycle();
+    }
+
+    private void setStyle(BarChart chart, Context context) {
+        //this is just to get the background-color...
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
+        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
+        chart.setBackgroundColor(arr.getColor(0, -1));
+        arr.recycle();
+
+        chart.setDoubleTapToZoomEnabled(false);
+        Description des = new Description();
+        des.setText("");
+        chart.setDescription(des);
+
+        //again, just to get the text-color...
+        TypedValue typedValue2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
+        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
+        int textColor = arr2.getColor(0, -1);
+
+        chart.getLegend().setTextColor(textColor);
+        chart.getXAxis().setTextColor(textColor);
+        chart.getAxisLeft().setTextColor(textColor);
+        chart.getAxisRight().setTextColor(textColor);
+        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisRight().setAxisMinimum(0f);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.getXAxis().setGranularityEnabled(true);
+        chart.getXAxis().setGranularity(1f);
+
+        arr2.recycle();
+    }
+
+    //will be removed once Statistic is finished
     private void testProgressBar() throws ExecutionException, InterruptedException {
         int milliSecondsToLoad = 10;
         ThreadPoolHandler.getInstance().submit(new Callable<Void>() {
             @Override
             public Void call() throws InterruptedException {
-                chart.setVisibility(View.GONE);
                 testDisplay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 Thread.sleep(milliSecondsToLoad);
@@ -190,7 +322,8 @@ public class StatisticFragment extends Fragment {
                         progressBar.setProgress(100);
                         progressBar.setVisibility(View.GONE);
                         progressBar.setProgress(0);
-                        chart.setVisibility(View.VISIBLE);
+                        testDisplay.setVisibility(View.GONE);
+                        //barChart.setVisibility(View.VISIBLE);
                         //testDisplay.setVisibility(View.VISIBLE);
                     }
                 });

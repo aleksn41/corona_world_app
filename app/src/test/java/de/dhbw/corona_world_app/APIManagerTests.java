@@ -14,7 +14,7 @@ import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
-import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
+import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 
 import static org.junit.Assert.*;
 
@@ -56,12 +56,13 @@ public class APIManagerTests {
         APIManager.createAPICall("https://google.de");
         List<ISOCountry> clist = new ArrayList<>();
         clist.add(ISOCountry.Germany);
+        clist.add(ISOCountry.Democratic_Republic_Congo);
         List<Criteria> criteriaList = new ArrayList<>();
         criteriaList.add(Criteria.DEATHS);
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<TimeframedCountry> returnList = APIManager.getData(clist,criteriaList, LocalDate.of(2020,6,1), LocalDate.of(2020,6,3));
+        List<TimeFramedCountry> returnList = APIManager.getData(clist,criteriaList, LocalDate.of(2020,6,3), LocalDate.of(2020,6,3));
         assertNotNull(returnList);
         System.out.println(returnList);
     }
