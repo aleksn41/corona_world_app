@@ -8,13 +8,22 @@
 
 
     <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/chart"
+        android:id="@+id/bar_chart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="98dp" >
-
+        android:layout_height="match_parent">
     </com.github.mikephil.charting.charts.BarChart>
+
+    <com.github.mikephil.charting.charts.PieChart
+        android:id="@+id/pie_chart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.github.mikephil.charting.charts.PieChart>
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.github.mikephil.charting.charts.LineChart>
 
 
     <com.google.android.material.progressindicator.LinearProgressIndicator

@@ -25,11 +25,9 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
-import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
+import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-
-import static java.time.temporal.ChronoUnit.DAYS;
 
 public class APIManager {
 
@@ -82,8 +80,6 @@ public class APIManager {
 
         Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
         returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
-
-        Logger.logD(TAG, "Putting live data into Cache...");
         return returnList;
     }
 
@@ -137,11 +133,11 @@ public class APIManager {
         return returnList;
     }
 
-    public static List<TimeframedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
+    public static List<TimeFramedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         if (endDate != null && (startDate == null || endDate.isBefore(startDate)))
             throw new IllegalArgumentException("Ending date is before starting date!");
-        List<TimeframedCountry> returnList = new ArrayList<>();
+        List<TimeFramedCountry> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
         List<Future<Country>> futurePopData = new ArrayList<>();
         if (startDate == null) startDate = LocalDate.now();
@@ -161,9 +157,9 @@ public class APIManager {
         boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
         if(startAndEndEqual && startDate.equals(LocalDate.now())){
             List<Country> countries = getData(countryList, criteriaList);
-            List<TimeframedCountry> timeframedCountries = new ArrayList<>();
+            List<TimeFramedCountry> timeframedCountries = new ArrayList<>();
             for (Country country: countries) {
-                TimeframedCountry countryToAdd = new TimeframedCountry();
+                TimeFramedCountry countryToAdd = new TimeFramedCountry();
                 countryToAdd.setInfected(new int[]{country.getInfected()});
                 countryToAdd.setDates(new LocalDate[]{startDate});
                 countryToAdd.setDeaths(new int[]{country.getDeaths()});
@@ -200,7 +196,7 @@ public class APIManager {
                 Logger.logV(TAG, "All requests have been sent...");
                 for (int i = 0; i < futureCoronaData.size(); i++) {
                     String currentString = futureCoronaData.get(i).get();
-                    TimeframedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString, countryList.get(i), startAndEndEqual);
+                    TimeFramedCountry country = StringToCountryParser.parseFromPostmanOneCountryWithTimeFrame(currentString, countryList.get(i), startAndEndEqual);
                     if (popNeeded)
                         country.setPopulation(futurePopData.get(i).get().getPopulation());
                     returnList.add(country);

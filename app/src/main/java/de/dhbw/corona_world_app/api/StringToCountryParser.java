@@ -14,15 +14,15 @@ import java.util.Map;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
-import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
+import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 
 public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();
 
-    public static TimeframedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException {
+    public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException {
         JSONArray jsonArray = new JSONArray(toParse);
-        TimeframedCountry country = new TimeframedCountry();
+        TimeFramedCountry country = new TimeFramedCountry();
 
         int dateRange = jsonArray.length();
         if(skipFirstDate) dateRange--;
