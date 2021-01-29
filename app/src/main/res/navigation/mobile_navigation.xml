@@ -26,7 +26,7 @@
     <fragment
         android:id="@+id/navigation_statistic"
         android:name="de.dhbw.corona_world_app.ui.statistic.StatisticFragment"
-        android:label="Statistic">
+        android:label="@string/title_statistic">
         <argument
             android:name="statisticCall"
             app:argType="de.dhbw.corona_world_app.datastructure.StatisticCall" />
