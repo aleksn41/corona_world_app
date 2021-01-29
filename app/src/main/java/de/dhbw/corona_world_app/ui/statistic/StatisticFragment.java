@@ -88,6 +88,11 @@ public class StatisticFragment extends Fragment {
 
         Bundle bundle = getArguments();
         StatisticCall statisticCall = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
+
+        setStyle(barChart, getContext());
+        setStyle(pieChart, statisticCall, getContext());
+        setStyle(lineChart, getContext());
+
         service.execute(new Runnable() {
             @Override
             public void run() {
@@ -99,7 +104,6 @@ public class StatisticFragment extends Fragment {
                             requireActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setStyle(barChart, getContext());
                                     barChart.setVisibility(View.VISIBLE);
                                 }
                             });
@@ -110,7 +114,6 @@ public class StatisticFragment extends Fragment {
                             requireActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setStyle(pieChart, statisticCall ,getContext());
                                     pieChart.setVisibility(View.VISIBLE);
                                 }
                             });
@@ -121,7 +124,6 @@ public class StatisticFragment extends Fragment {
                             requireActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setStyle(lineChart, getContext());
                                     lineChart.setVisibility(View.VISIBLE);
                                 }
                             });
@@ -236,7 +238,6 @@ public class StatisticFragment extends Fragment {
         int textColor = arr2.getColor(0, -1);
 
         chart.getLegend().setTextColor(textColor);
-        chart.getLegend().setWordWrapEnabled(true);
         chart.setDrawEntryLabels(false);
         //chart.setDrawHoleEnabled(false);
         chart.setHoleColor(backgroundColor);
@@ -247,6 +248,8 @@ public class StatisticFragment extends Fragment {
         LocalDate endDate = statisticCall.getEndDate() != null ? statisticCall.getEndDate() : LocalDate.now();
         if(dates2D) title = "Average between the "+StatisticViewModel.getDateFormatted(startDate)+ " and the "+StatisticViewModel.getDateFormatted(endDate);
         chart.setCenterText(title);
+        chart.getLegend().setWordWrapEnabled(true);
+
         arr2.recycle();
     }
 

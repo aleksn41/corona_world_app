@@ -77,7 +77,7 @@ public class StatisticViewModel extends ViewModel {
             int step = getStep(dayDifference);
 
             formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
-
+            Collections.sort(apiGottenList);
             for (TimeFramedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
@@ -144,10 +144,6 @@ public class StatisticViewModel extends ViewModel {
 
         PieData pieData = new PieData();
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-        LocalDate startDate = statisticCall.getStartDate();
-        LocalDate endDate = statisticCall.getEndDate();
-        if (startDate == null) startDate = LocalDate.now();
-        if (endDate == null) endDate = LocalDate.now();
 
         if(dates2D){
             if(countryList2D){
@@ -155,9 +151,14 @@ public class StatisticViewModel extends ViewModel {
                     List<Float> data = new ArrayList<>();
                     List<String> names = new ArrayList<>();
                     for (TimeFramedCountry country: apiGottenList) {
+                        if (country.getDates().length > 1 && country.getInfected().length > 1 && country.getDeaths().length > 1 && country.getRecovered().length > 1) {
                         AverageValues averageValues = new AverageValues(country).invoke();
-                        addDataToList(country, averageValues, data, criteria);
+
+                        addAverageDataToList(country, averageValues, data, criteria);
                         names.add(country.getCountry().getDisplayName()+ ": "+criteria.getDisplayName());
+                        } else {
+                            throw new IllegalStateException("This state should not be reached! There is inconsistency with the size of the arrays in the TimeFramedCountry!");
+                        }
                     }
                     pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "" , colors));
                 }
@@ -169,7 +170,7 @@ public class StatisticViewModel extends ViewModel {
                         List<Float> data = new ArrayList<>();
                         List<String> names = new ArrayList<>();
                         for (Criteria criteria : statisticCall.getCriteriaList()) {
-                            addDataToList(country, averageValues, data, criteria);
+                            addAverageDataToList(country, averageValues, data, criteria);
                             names.add(country.getCountry().getDisplayName() + ": " + criteria.getDisplayName());
                         }
                         pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "", colors));
@@ -179,12 +180,20 @@ public class StatisticViewModel extends ViewModel {
                 }
             }
         } else {
-
+            List<Float> data = new ArrayList<>();
+            List<String> names = new ArrayList<>();
+            for (Criteria criteria: statisticCall.getCriteriaList()) {
+                for (TimeFramedCountry country: apiGottenList) {
+                    data.addAll(getDataList(1, 1, country, criteria));
+                    names.add(country.getCountry().getDisplayName()+ ": "+criteria.getDisplayName());
+                }
+            }
+            pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "" , colors));
         }
         chart.setData(pieData);
     }
 
-    private void addDataToList(TimeFramedCountry country, AverageValues averageValues, List<Float> data, Criteria criteria) {
+    private void addAverageDataToList(TimeFramedCountry country, AverageValues averageValues, List<Float> data, Criteria criteria) {
         switch (criteria) {
             case HEALTHY:
                 data.add((float) country.getPopulation() - averageValues.getAvgInfected());
