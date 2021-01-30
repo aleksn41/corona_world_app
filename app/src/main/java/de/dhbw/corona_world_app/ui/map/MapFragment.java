@@ -14,6 +14,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -47,6 +48,8 @@ public class MapFragment extends Fragment {
 
     LinearProgressIndicator progressBar;
 
+    TextView textView;
+
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
         public void startLoadingScreen() {
@@ -78,6 +81,7 @@ public class MapFragment extends Fragment {
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         progressBar = root.findViewById(R.id.progressBar);
+        textView = root.findViewById(R.id.bottomSheetTextView);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
@@ -87,21 +91,23 @@ public class MapFragment extends Fragment {
         LinearLayout bottomSheet = root.findViewById(R.id.bottomSheet);
         BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        bottomSheetBehavior.setPeekHeight(50);
+        bottomSheetBehavior.setPeekHeight(75);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
+        bottomSheetBehavior.setFitToContents(true);
         //listeners for bottom sheet
-        // click event for show-dismiss bottom sheet
+        //click event for show-dismiss bottom sheet
         bottomSheet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HALF_EXPANDED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
                 } else {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
-        boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated",false);
-        boolean storageDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("storage_deactivated",false);
+            }
+        });
+        boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated", false);
+        boolean storageDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("storage_deactivated", false);
         Log.d(TAG, "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + " and storage " + (storageDisabled ? "disabled" : "enabled") + "...");
         mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
@@ -136,8 +142,6 @@ public class MapFragment extends Fragment {
             }
         });
 
-        WebView myWebView = root.findViewById(R.id.map_web_view);
-        WebSettings webSettings = myWebView.getSettings();
         myWebView.setWebViewClient(new
 
                                            WebViewClient() {
@@ -154,27 +158,23 @@ public class MapFragment extends Fragment {
         JavaScriptInterface jsInterface = new JavaScriptInterface();
         myWebView.addJavascriptInterface(jsInterface, "jsinterface");
         jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
-            System.out.println(isoCountry);
+            textView.setText(isoCountry.toString());
         });
         ExecutorService service = ThreadPoolHandler.getInstance();
         Log.v(TAG, "Requesting all countries...");
         loadingScreen.setProgressBar(25);
-        service.execute(new
-
-                                Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            mapViewModel.initCountryList();
-                                        } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
-                                            Logger.logE(TAG, "Exception during initiation of country list!", e);
-                                        }
-                                    }
-                                });
+        service.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mapViewModel.initCountryList();
+                } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
+                    Logger.logE(TAG, "Exception during initiation of country list!", e);
+                }
+            }
+        });
         mapViewModel.mCountryList.observe(
-
                 getViewLifecycleOwner(), countries ->
-
                 {
                     loadingScreen.setProgressBar(50);
                     Log.v(TAG, "Requested countries have arrived");
@@ -184,7 +184,6 @@ public class MapFragment extends Fragment {
                     loadingScreen.setProgressBar(100);
                     myWebView.loadData(webViewString.getValue(), "text/html", "base64");
                 });
-
         return root;
     }
 }
