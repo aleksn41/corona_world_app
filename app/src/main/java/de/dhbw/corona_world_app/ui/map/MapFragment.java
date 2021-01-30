@@ -36,8 +36,11 @@ import java.util.concurrent.ExecutorService;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
+import de.dhbw.corona_world_app.ui.tools.ErrorCode;
+import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 public class MapFragment extends Fragment {
@@ -160,7 +163,6 @@ public class MapFragment extends Fragment {
         myWebView.addJavascriptInterface(jsInterface, "jsinterface");
         ExecutorService service = ThreadPoolHandler.getInstance();
 
-
         jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
             if(isoCountry != null){
                 List<Country> countryList = mapViewModel.mCountryList.getValue();
@@ -182,6 +184,7 @@ public class MapFragment extends Fragment {
                 if(textView.getText().length()==0){
                     Log.e(TAG, "No data was found for country "+isoCountry+"!");
                     textView.setText("No data available!");
+                    ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_DATA_FOUND, null);
                 }
             } else {
                 textView.setText("");
@@ -195,8 +198,44 @@ public class MapFragment extends Fragment {
             public void run() {
                 try {
                     mapViewModel.initCountryList();
-                } catch (InterruptedException | ExecutionException | JSONException | IOException | ClassNotFoundException e) {
-                    Logger.logE(TAG, "Exception during initiation of country list!", e);
+                } catch (InterruptedException | ExecutionException e) {
+                    Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
+                    requireActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
+                        }
+                    });
+                } catch (ClassNotFoundException e){
+                    Logger.logE(TAG, "Exception during loading cache!", e);
+                    requireActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null);
+                        }
+                    });
+                    //todo call a method that kills cache
+                } catch (JSONException e){
+                    Logger.logE(TAG, "Exception while parsing data!", e);
+                } catch (IOException e){
+                    Logger.logE(TAG, "Exception during request!", e);
+                    try{
+                        APIManager.createAPICall("8.8.8.8");
+                        requireActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null);
+                            }
+                        });
+                    } catch (IOException e1){
+                        requireActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null);
+                            }
+                        });
+                    }
+
                 }
             }
         });
