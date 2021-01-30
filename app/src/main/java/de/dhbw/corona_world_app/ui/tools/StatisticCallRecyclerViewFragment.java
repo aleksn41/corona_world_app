@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -80,6 +79,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel.observeData(getViewLifecycleOwner(), new Observer<List<Pair<StatisticCall, Boolean>>>() {
             @Override
             public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
+                statisticCallAdapter.setBlackListedIndices(statisticCallViewModel.getBlackListedIndices(getDataType()));
                 statisticCallAdapter.submitList(pairs);
                 statisticCallAdapter.notifyDataSetChanged();
                 Log.v(this.getClass().getName(), "updated List");
@@ -114,10 +114,10 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                     Throwable e = throwable.getCause();
                     if (e instanceof IOException) {
                         Log.e(this.getClass().getName(),ErrorCode.CANNOT_SAVE_FILE.toString(),throwable);
-                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.CANNOT_SAVE_FILE,null);
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(requireContext(),ErrorCode.CANNOT_SAVE_FILE,null));
                     } else{
                         Log.wtf(this.getClass().getName(),ErrorCode.UNEXPECTED_ERROR.toString(),throwable);
-                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.UNEXPECTED_ERROR,null);
+                        requireActivity().runOnUiThread(()->ErrorDialog.showBasicErrorDialog(requireContext(),ErrorCode.UNEXPECTED_ERROR,null));
                     }
                 }
             }

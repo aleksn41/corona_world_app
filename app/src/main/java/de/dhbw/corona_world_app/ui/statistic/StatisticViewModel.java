@@ -2,22 +2,25 @@ package de.dhbw.corona_world_app.ui.statistic;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.util.TypedValue;
 
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -26,7 +29,7 @@ import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.datastructure.TimeframedCountry;
+import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -45,22 +48,17 @@ public class StatisticViewModel extends ViewModel {
 
     }
 
-    //TODO once api-branch is merged this can be implemented properly
-    public BarChart getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
-        Logger.logV(TAG, "Getting bar chart for " + statisticCall);
+    public void init() {
         if (dataSetGenerator == null) {
             dataSetGenerator = new ChartValueSetGenerator();
         }
-        float barSpace = 0.02f;
-        float barWidth = 0.45f;
-        APIManager.enableCache();
-        List<TimeframedCountry> apiGottenList;
-        TypedArray colorsTyped = context.getTheme().getResources().obtainTypedArray(R.array.chartColors);
-        List<Integer> colors = new ArrayList<>();
-        for (int i = 0; i < colorsTyped.length(); i++) {
-            colors.add(colorsTyped.getColor(i, 0));
-        }
-        colorsTyped.recycle();
+    }
+
+    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
+        Logger.logV(TAG, "Getting bar chart for " + statisticCall);
+        init();
+        List<TimeFramedCountry> apiGottenList;
+        List<Integer> colors = getColors(context);
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
@@ -71,41 +69,16 @@ public class StatisticViewModel extends ViewModel {
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
         LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
-        if(startDate==null) startDate = LocalDate.now();
-        if(endDate==null) endDate = LocalDate.now();
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
-            int step = 0;
             int dayDifference = (int) DAYS.between(startDate, endDate) + (endDate.equals(LocalDate.now()) ? 0 : 1);
-            if (dayDifference <= 7) {
-                step = 1;
-            } else if (dayDifference <= 21) {
-                step = 2;
-            } else if (dayDifference <= 90) {
-                step = 7;
-            } else if (dayDifference <= 360) {
-                step = 30;
-            } else if (dayDifference <= 720) {
-                step = 60;
-            } else {
-                step = 360;
-            }
+            int step = getStep(dayDifference);
 
-            List<String> dates = new ArrayList<>();
-            for (int i = 0; i < dayDifference; i += step) {
-                String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
-                dates.add(dateFormatted);
-            }
-
-            chart.getXAxis().setValueFormatter(new ValueFormatter() {
-                @Override
-                public String getFormattedValue(float value) {
-                    return dates.get((int) value);
-                }
-            });
-
-            //todo when multiple countries are selected the country with the bigger numbers should be in the background
-            for (TimeframedCountry country : apiGottenList) {
+            formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
+            Collections.sort(apiGottenList);
+            for (TimeFramedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(step, dayDifference, country, criteria);
@@ -114,21 +87,17 @@ public class StatisticViewModel extends ViewModel {
                 }
             }
 
-            chart.setData(barData);
-            setStyle(chart, context);
-            return chart;
         } else {
 
             List<String> countries = new ArrayList<>();
-            for (TimeframedCountry country: apiGottenList) {
+            for (TimeFramedCountry country : apiGottenList) {
                 countries.add(country.getCountry().getISOCode());
             }
 
             for (Criteria criteria : criteriaOrder) {
                 List<Float> countriesData = new ArrayList<>();
-                for (TimeframedCountry country : apiGottenList) {
-                    //for constructing x-axis description
-
+                Collections.sort(apiGottenList);
+                for (TimeFramedCountry country : apiGottenList) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(1, 1, country, criteria);
                         countriesData.add(data.get(0));
@@ -143,51 +112,213 @@ public class StatisticViewModel extends ViewModel {
                     return countries.get((int) value);
                 }
             });
-            chart.setData(barData);
-            setStyle(chart, context);
-            return chart;
         }
+
+        chart.setData(barData);
     }
 
-    private String getDateFormatted(LocalDate date) {
+    private void formatXAxis(List<TimeFramedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
+        List<String> dates = new ArrayList<>();
+        for (int i = 0; i < dayDifference; i += step) {
+            String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
+            dates.add(dateFormatted);
+        }
+
+        xAxis.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return dates.get((int) value);
+            }
+        });
+    }
+
+    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+        Logger.logV(TAG, "Getting pie chart for " + statisticCall);
+        init();
+        List<TimeFramedCountry> apiGottenList;
+        List<Integer> colors = getColors(context);
+        boolean countryList2D = statisticCall.getCountryList().size() > 1;
+        boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
+        boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
+        if (countryList2D && criteriaList2D && dates2D)
+            throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
+
+        PieData pieData = new PieData();
+        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+
+        if(dates2D){
+            if(countryList2D){
+                for (Criteria criteria: statisticCall.getCriteriaList()) {
+                    List<Float> data = new ArrayList<>();
+                    List<String> names = new ArrayList<>();
+                    for (TimeFramedCountry country: apiGottenList) {
+                        if (country.getDates().length > 1 && country.getInfected().length > 1 && country.getDeaths().length > 1 && country.getRecovered().length > 1) {
+                        AverageValues averageValues = new AverageValues(country).invoke();
+
+                        addAverageDataToList(country, averageValues, data, criteria);
+                        names.add(country.getCountry().getDisplayName()+ ": "+criteria.getDisplayName());
+                        } else {
+                            throw new IllegalStateException("This state should not be reached! There is inconsistency with the size of the arrays in the TimeFramedCountry!");
+                        }
+                    }
+                    pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "" , colors));
+                }
+            } else {
+                for (TimeFramedCountry country : apiGottenList) {
+                    if (country.getDates().length > 1 && country.getInfected().length > 1 && country.getDeaths().length > 1 && country.getRecovered().length > 1) {
+                        AverageValues averageValues = new AverageValues(country).invoke();
+
+                        List<Float> data = new ArrayList<>();
+                        List<String> names = new ArrayList<>();
+                        for (Criteria criteria : statisticCall.getCriteriaList()) {
+                            addAverageDataToList(country, averageValues, data, criteria);
+                            names.add(country.getCountry().getDisplayName() + ": " + criteria.getDisplayName());
+                        }
+                        pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "", colors));
+                    } else {
+                        throw new IllegalStateException("This state should not be reached! There is inconsistency with the size of the arrays in the TimeFramedCountry!");
+                    }
+                }
+            }
+        } else {
+            List<Float> data = new ArrayList<>();
+            List<String> names = new ArrayList<>();
+            for (Criteria criteria: statisticCall.getCriteriaList()) {
+                for (TimeFramedCountry country: apiGottenList) {
+                    data.addAll(getDataList(1, 1, country, criteria));
+                    names.add(country.getCountry().getDisplayName()+ ": "+criteria.getDisplayName());
+                }
+            }
+            pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "" , colors));
+        }
+        chart.setData(pieData);
+    }
+
+    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+        Logger.logV(TAG, "Getting line chart for " + statisticCall);
+        init();
+
+        LineData lineData = new LineData();
+        List<TimeFramedCountry> apiGottenList;
+        List<Integer> colors = getColors(context);
+        boolean countryList2D = statisticCall.getCountryList().size() > 1;
+        boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
+        boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
+        if (countryList2D && criteriaList2D && dates2D)
+            throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
+
+        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+        LocalDate startDate = statisticCall.getStartDate();
+        LocalDate endDate = statisticCall.getEndDate();
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
+
+        if (dates2D) {
+            //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
+            int dayDifference = (int) DAYS.between(startDate, endDate) + (endDate.equals(LocalDate.now()) ? 0 : 1);
+            int step = getStep(dayDifference);
+
+            formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
+
+            for (TimeFramedCountry country : apiGottenList) {
+                for (Criteria criteria : criteriaOrder) {
+                    if (statisticCall.getCriteriaList().contains(criteria)) {
+                        List<Float> data = getDataList(step, dayDifference, country, criteria);
+                        lineData.addDataSet(dataSetGenerator.getLineChartDataSet(data, country.getCountry().getDisplayName() + ": " + criteria.getDisplayName(), colors));
+                    }
+                }
+            }
+        } else {
+            List<String> countries = new ArrayList<>();
+            for (TimeFramedCountry country : apiGottenList) {
+                countries.add(country.getCountry().getISOCode());
+            }
+
+            for (Criteria criteria : criteriaOrder) {
+                List<Float> countriesData = new ArrayList<>();
+                for (TimeFramedCountry country : apiGottenList) {
+                    //for constructing x-axis description
+
+                    if (statisticCall.getCriteriaList().contains(criteria)) {
+                        List<Float> data = getDataList(1, 1, country, criteria);
+                        countriesData.add(data.get(0));
+
+                    }
+                }
+                lineData.addDataSet(dataSetGenerator.getLineChartDataSet(countriesData, criteria.getDisplayName(), colors));
+            }
+            chart.getXAxis().setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    return countries.get((int) value);
+                }
+            });
+        }
+
+        chart.setData(lineData);
+    }
+
+    @NotNull
+    private List<Integer> getColors(Context context) {
+        TypedArray colorsTyped = context.getTheme().getResources().obtainTypedArray(R.array.chartColors);
+        List<Integer> colors = new ArrayList<>();
+        for (int i = 0; i < colorsTyped.length(); i++) {
+            colors.add(colorsTyped.getColor(i, 0));
+        }
+        colorsTyped.recycle();
+        return colors;
+    }
+
+    protected static String getDateFormatted(@NotNull LocalDate date) {
         String year = Integer.toString(date.getYear());
         return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
     }
 
-    private void setStyle(BarChart chart, Context context) {
-        //this is just to get the background-color...
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.background_color, typedValue, true);
-        TypedArray arr = context.obtainStyledAttributes(typedValue.data, new int[]{R.attr.background_color});
-        chart.setBackgroundColor(arr.getColor(0, -1));
-        arr.recycle();
-
-        chart.setDoubleTapToZoomEnabled(false);
-        Description des = new Description();
-        des.setText("");
-        chart.setDescription(des);
-
-        //again, just to get the text-color...
-        TypedValue typedValue2 = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue2, true);
-        TypedArray arr2 = context.obtainStyledAttributes(typedValue2.data, new int[]{android.R.attr.textColorPrimary});
-        int textColor = arr2.getColor(0, -1);
-
-        chart.getLegend().setTextColor(textColor);
-        chart.getXAxis().setTextColor(textColor);
-        chart.getAxisLeft().setTextColor(textColor);
-        chart.getAxisRight().setTextColor(textColor);
-        //chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        chart.getAxisLeft().setAxisMinimum(0f);
-        chart.getAxisRight().setAxisMinimum(0f);
-        chart.getLegend().setWordWrapEnabled(true);
-        chart.getXAxis().setGranularityEnabled(true);
-        chart.getXAxis().setGranularity(1f);
-
-        arr2.recycle();
+    private void addAverageDataToList(TimeFramedCountry country, AverageValues averageValues, List<Float> data, Criteria criteria) {
+        switch (criteria) {
+            case HEALTHY:
+                data.add((float) country.getPopulation() - averageValues.getAvgInfected());
+                break;
+            case INFECTED:
+                data.add((float) averageValues.getAvgInfected());
+                break;
+            case DEATHS:
+                data.add((float) averageValues.getAvgDeaths());
+                break;
+            case RECOVERED:
+                data.add((float) averageValues.getAvgRecovered());
+                break;
+            case ID_RATION:
+                data.add((float) averageValues.getAvgInfDeathRatio());
+                break;
+            case IH_RATION:
+                data.add((float) averageValues.getAvgPopInfRatio());
+                break;
+            case POPULATION:
+                data.add((float) country.getPopulation());
+                break;
+        }
     }
 
-    private List<Float> getDataList(int step, int stoppingCondition, TimeframedCountry country, Criteria criteria) {
+    private int getStep(int dayDifference) {
+        int step;
+        if (dayDifference <= 7) {
+            step = 1;
+        } else if (dayDifference <= 21) {
+            step = 2;
+        } else if (dayDifference <= 90) {
+            step = 7;
+        } else if (dayDifference <= 360) {
+            step = 30;
+        } else if (dayDifference <= 720) {
+            step = 60;
+        } else {
+            step = 360;
+        }
+        return step;
+    }
+
+    private List<Float> getDataList(int step, int stoppingCondition, TimeFramedCountry country, Criteria criteria) {
         List<Float> data = new ArrayList<>();
         for (int i = 0; i < stoppingCondition; i += step) {
             switch (criteria) {
@@ -219,5 +350,71 @@ public class StatisticViewModel extends ViewModel {
 
     public void setPathToCacheDir(File pathToCacheDir) {
         this.pathToCacheDir = pathToCacheDir;
+    }
+
+    private static class AverageValues {
+        private final TimeFramedCountry country;
+        private int avgInfected;
+        private int avgDeaths;
+        private int avgRecovered;
+        private double avgPopInfRatio;
+        private double avgInfDeathRatio;
+
+        public AverageValues(TimeFramedCountry country) {
+            this.country = country;
+            this.avgInfected = 0;
+            this.avgDeaths = 0;
+            this.avgRecovered = 0;
+            this.avgPopInfRatio = 0;
+            this.avgInfDeathRatio = 0;
+        }
+
+        public int getAvgInfected() {
+            return avgInfected;
+        }
+
+        public int getAvgDeaths() {
+            return avgDeaths;
+        }
+
+        public int getAvgRecovered() {
+            return avgRecovered;
+        }
+
+        public double getAvgPopInfRatio() {
+            return avgPopInfRatio;
+        }
+
+        public double getAvgInfDeathRatio() {
+            return avgInfDeathRatio;
+        }
+
+        public AverageValues invoke() {
+            for (int i = 0; i < country.getDates().length; i++) {
+                avgPopInfRatio += country.getPop_inf_ratio(i);
+            }
+            avgPopInfRatio = avgPopInfRatio / country.getDates().length;
+
+            for (int i = 0; i < country.getInfected().length; i++) {
+                avgInfected += country.getInfected()[i];
+            }
+            avgInfected = avgInfected / country.getInfected().length;
+
+            for (int i = 0; i < country.getDeaths().length; i++) {
+                avgDeaths += country.getDeaths()[i];
+            }
+            avgDeaths = avgDeaths / country.getDeaths().length;
+
+            for (int i = 0; i < country.getRecovered().length; i++) {
+                avgRecovered += country.getRecovered()[i];
+            }
+            avgRecovered = avgRecovered / country.getRecovered().length;
+
+            for (int i = 0; i < country.getDates().length; i++) {
+                avgInfDeathRatio = (double) country.getDeaths()[i] / country.getInfected()[i];
+            }
+            avgInfDeathRatio = avgInfDeathRatio / country.getDates().length;
+            return this;
+        }
     }
 }
