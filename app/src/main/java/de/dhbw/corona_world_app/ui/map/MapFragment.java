@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -18,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -32,6 +34,7 @@ import java.util.concurrent.ExecutorService;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 public class MapFragment extends Fragment {
@@ -79,7 +82,6 @@ public class MapFragment extends Fragment {
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
-        boolean cacheDisabled = requireActivity().getPreferences(Context.MODE_PRIVATE).getBoolean("cache_deactivated", false);
 
         //setup bottomsheet
         LinearLayout bottomSheet = root.findViewById(R.id.bottomSheet);
@@ -98,6 +100,16 @@ public class MapFragment extends Fragment {
                 } else {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
+        boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated",false);
+        boolean storageDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("storage_deactivated",false);
+        Log.d(TAG, "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + " and storage " + (storageDisabled ? "disabled" : "enabled") + "...");
+        mapViewModel.init(cacheDisabled, storageDisabled);
+        WebView myWebView = root.findViewById(R.id.map_web_view);
+        WebSettings webSettings = myWebView.getSettings();
+        myWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                loadingScreen.endLoadingScreen();
+
             }
         });
 // callback for do something
@@ -139,7 +151,11 @@ public class MapFragment extends Fragment {
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
         webSettings.setSupportZoom(true);
-
+        JavaScriptInterface jsInterface = new JavaScriptInterface();
+        myWebView.addJavascriptInterface(jsInterface, "jsinterface");
+        jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
+            System.out.println(isoCountry);
+        });
         ExecutorService service = ThreadPoolHandler.getInstance();
         Log.v(TAG, "Requesting all countries...");
         loadingScreen.setProgressBar(25);
@@ -168,6 +184,7 @@ public class MapFragment extends Fragment {
                     loadingScreen.setProgressBar(100);
                     myWebView.loadData(webViewString.getValue(), "text/html", "base64");
                 });
+
         return root;
     }
 }
