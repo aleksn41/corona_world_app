@@ -149,10 +149,10 @@ public class MapFragment extends Fragment {
         });
 
         myWebView.setWebViewClient(new WebViewClient() {
-                                               public void onPageFinished(WebView view, String url) {
-                                                   loadingScreen.endLoadingScreen();
-                                               }
-                                           });
+            public void onPageFinished(WebView view, String url) {
+                loadingScreen.endLoadingScreen();
+            }
+        });
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(false);
@@ -164,25 +164,26 @@ public class MapFragment extends Fragment {
         ExecutorService service = ThreadPoolHandler.getInstance();
 
         jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
-            if(isoCountry != null){
+            if (isoCountry != null) {
                 List<Country> countryList = mapViewModel.mCountryList.getValue();
-                if(countryList == null) throw new IllegalStateException("Country list was not initialized correctly!");
+                if (countryList == null)
+                    throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
-                    if(countryList.get(i).getISOCountry().equals(isoCountry)){
+                    if (countryList.get(i).getISOCountry().equals(isoCountry)) {
                         Country country = countryList.get(i);
                         textView.setText(" " + isoCountry.toString() +
-                                "\n Population: "+ country.getPopulation() +
+                                "\n Population: " + country.getPopulation() +
                                 "\n Healthy: " + country.getHealthy() +
                                 "\n Infected: " + country.getInfected() +
                                 "\n Recovered: " + country.getRecovered() +
                                 "\n Deaths: " + country.getDeaths() +
-                                "\n Population-Infected Ratio: "+ country.getPop_inf_ratio() +
-                                "\n Infected-Deaths Ratio: "+ (double) country.getDeaths()/country.getInfected()
-                                );
+                                "\n Population-Infected Ratio: " + country.getPop_inf_ratio() +
+                                "\n Infected-Deaths Ratio: " + (double) country.getDeaths() / country.getInfected()
+                        );
                     }
                 }
-                if(textView.getText().length()==0){
-                    Log.e(TAG, "No data was found for country "+isoCountry+"!");
+                if (textView.getText().length() == 0) {
+                    Log.e(TAG, "No data was found for country " + isoCountry + "!");
                     textView.setText("No data available!");
                     ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_DATA_FOUND, null);
                 }
@@ -206,7 +207,7 @@ public class MapFragment extends Fragment {
                             ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
                         }
                     });
-                } catch (ClassNotFoundException e){
+                } catch (ClassNotFoundException e) {
                     Logger.logE(TAG, "Exception during loading cache!", e);
                     requireActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -215,11 +216,11 @@ public class MapFragment extends Fragment {
                         }
                     });
                     //todo call a method that kills cache
-                } catch (JSONException e){
+                } catch (JSONException e) {
                     Logger.logE(TAG, "Exception while parsing data!", e);
-                } catch (IOException e){
+                } catch (IOException e) {
                     Logger.logE(TAG, "Exception during request!", e);
-                    try{
+                    try {
                         APIManager.createAPICall("8.8.8.8");
                         requireActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -227,7 +228,7 @@ public class MapFragment extends Fragment {
                                 ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null);
                             }
                         });
-                    } catch (IOException e1){
+                    } catch (IOException e1) {
                         requireActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

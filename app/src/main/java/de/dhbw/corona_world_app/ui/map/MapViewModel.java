@@ -37,7 +37,7 @@ public class MapViewModel extends ViewModel {
 
     public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
 
-    public void init(boolean cacheDisabled, boolean longTermDisabled){
+    public void init(boolean cacheDisabled, boolean longTermDisabled) {
         APIManager.setSettings(!cacheDisabled, !longTermDisabled);
     }
 
@@ -64,12 +64,12 @@ public class MapViewModel extends ViewModel {
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         List<Country> apiGottenList;
         Log.v(TAG, "Initiating country list...");
-        if(!APIManager.isCacheEnabled() || worldCacheAge==null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+        if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
             apiGottenList = APIManager.getDataWorld(API.HEROKU);
             if (apiGottenList == null || !(apiGottenList.size() > 0)) {
                 throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
             }
-            if(APIManager.isCacheEnabled()) {
+            if (APIManager.isCacheEnabled()) {
                 cacheDataWorld(apiGottenList);
                 worldCacheAge = LocalDateTime.now();
             }
@@ -79,11 +79,11 @@ public class MapViewModel extends ViewModel {
         mCountryList.postValue(apiGottenList);
     }
 
-    public String getWebViewStringCustom(List<Country> countryList){
+    public String getWebViewStringCustom(List<Country> countryList) {
         return services.putEntries(countryList);
     }
 
-    public void setPathToCacheDir(File pathToCacheDir){
+    public void setPathToCacheDir(File pathToCacheDir) {
         this.pathToCacheDir = pathToCacheDir;
     }
 }
