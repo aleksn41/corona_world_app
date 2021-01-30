@@ -22,11 +22,11 @@ public class MapData {
             "  google.charts.load('current', {" +
             "  'packages':['geochart']," +
             "  'mapsApiKey': '" + MapsKey.apiKey + "'});" +
-            "  google.charts.setOnLoadCallback(drawWorldMap);" +
-            "  function drawWorldMap() {" +
+            "  google.charts.setOnLoadCallback(drawMap);" +
+            "  function drawMap() {" +
             "  var dataTable = new google.visualization.DataTable();" +
             "  dataTable.addColumn('string', 'Country');" +
-            "  dataTable.addColumn('number', 'Infected Population');" +
+            "  dataTable.addColumn('number', 'Infected-Healthy Ratio');" +
             "  dataTable.addRows([";
 
     String WebViewEnd = "  ]);" +
@@ -41,7 +41,7 @@ public class MapData {
             "     }" +
             "  });" +
             "  var options = {" +
-            "    colorAxis: {colors: ['#3bff35', '#e31b23']}," +
+            "    colorAxis: {colors: ['#3bff35', '#ddaf3d', '#dd7a3d', '#dd583d', '#cb2626'], values:[0.1, 1, 3, 5, 7]}," +
             "    backgroundColor: '#22748f'," +
             "    datalessRegionColor: '#ffffff'," +
             "    defaultColor: '#f5f5f5'," +

@@ -29,12 +29,14 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
@@ -75,7 +77,7 @@ public class MapFragment extends Fragment {
 
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "SetTextI18n"})
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
@@ -91,7 +93,7 @@ public class MapFragment extends Fragment {
         LinearLayout bottomSheet = root.findViewById(R.id.bottomSheet);
         BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        bottomSheetBehavior.setPeekHeight(75);
+        bottomSheetBehavior.setPeekHeight(190);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setFitToContents(true);
         //listeners for bottom sheet
@@ -118,7 +120,8 @@ public class MapFragment extends Fragment {
 
             }
         });
-// callback for do something
+
+        // callback for do something
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View view, int newState) {
@@ -142,9 +145,7 @@ public class MapFragment extends Fragment {
             }
         });
 
-        myWebView.setWebViewClient(new
-
-                                           WebViewClient() {
+        myWebView.setWebViewClient(new WebViewClient() {
                                                public void onPageFinished(WebView view, String url) {
                                                    loadingScreen.endLoadingScreen();
                                                }
@@ -157,10 +158,36 @@ public class MapFragment extends Fragment {
         webSettings.setSupportZoom(true);
         JavaScriptInterface jsInterface = new JavaScriptInterface();
         myWebView.addJavascriptInterface(jsInterface, "jsinterface");
-        jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
-            textView.setText(isoCountry.toString());
-        });
         ExecutorService service = ThreadPoolHandler.getInstance();
+
+
+        jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
+            if(isoCountry != null){
+                List<Country> countryList = mapViewModel.mCountryList.getValue();
+                if(countryList == null) throw new IllegalStateException("Country list was not initialized correctly!");
+                for (int i = 0; i < countryList.size(); i++) {
+                    if(countryList.get(i).getISOCountry().equals(isoCountry)){
+                        Country country = countryList.get(i);
+                        textView.setText(" " + isoCountry.toString() +
+                                "\n Population: "+ country.getPopulation() +
+                                "\n Healthy: " + country.getHealthy() +
+                                "\n Infected: " + country.getInfected() +
+                                "\n Recovered: " + country.getRecovered() +
+                                "\n Deaths: " + country.getDeaths() +
+                                "\n Population-Infected Ratio: "+ country.getPop_inf_ratio() +
+                                "\n Infected-Deaths Ratio: "+ (double) country.getDeaths()/country.getInfected()
+                                );
+                    }
+                }
+                if(textView.getText().length()==0){
+                    Log.e(TAG, "No data was found for country "+isoCountry+"!");
+                    textView.setText("No data available!");
+                }
+            } else {
+                textView.setText("");
+            }
+        });
+
         Log.v(TAG, "Requesting all countries...");
         loadingScreen.setProgressBar(25);
         service.execute(new Runnable() {
