@@ -55,13 +55,12 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
                 if (limit != -1 && selectedItems.size() == limit) {
                     results.values = new ArrayList<>();
                     if (limitListener != null) limitListener.onLimitReached(limit);
-                    return results;
                 }
-                if (constraint == null || constraint.length() == 0) {
-                    results.values = originalItems;
-                    results.count = originalItems.size();
-                } else {
-                    List<T> tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p) && containsIgnoreCase(p.toString(), String.valueOf(constraint)) && !blackListItems.contains(p)).collect(Collectors.toList());
+                else {
+                    List<T> tempFilteredItems;
+                    if (constraint == null || constraint.length() == 0) {
+                        tempFilteredItems=originalItems.parallelStream().filter(p -> !selectedItems.contains(p)  && !blackListItems.contains(p)).collect(Collectors.toList());
+                    }else tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p) && containsIgnoreCase(p.toString(), String.valueOf(constraint)) && !blackListItems.contains(p)).collect(Collectors.toList());
                     results.values = tempFilteredItems;
                     results.count = tempFilteredItems.size();
                 }
@@ -142,15 +141,23 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
         return new ArrayList<>(selectedItems);
     }
 
+    public int getSelectedItemsSize(){
+        return selectedItems.size();
+    }
     @Override
     public void conditionApplies(boolean allowOnlyOneItem) {
         if (allowOnlyOneItem) limit = 1;
         else limit = originalLimit;
     }
 
+    @Override
+    public void conditionDoesNotApply() {
+        conditionApplies(false);
+        blackListItems.clear();
+    }
+
     public void addToBlackList(T item) {
         blackListItems.add(item);
-        //unSelectItem(item);
     }
 
     public void removeFromBlackList(T item) {
