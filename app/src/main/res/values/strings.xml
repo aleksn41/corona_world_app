@@ -24,4 +24,6 @@
     <string name="pick_end_date">End Date</string>
     <string name="fab_content_desc">Create Statistic</string>
     <string name="error_title">Error Code: %1$d (%2$s)</string>
+    <string name="map_box_title">World:</string>
+    <string name="map_box_content">World:\nPopulation:&#160;%1$d (%2$s)\nInfected:&#160;&#160;&#160;&#160;&#160;%3$d (%4$s)\nRecovered:&#160;%5$d (%6$s)\nDeaths:&#160;&#160;&#160;&#160;&#160;&#160;&#160;%7$d (%8$s)</string>
 </resources>

@@ -29,6 +29,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -117,12 +118,6 @@ public class MapFragment extends Fragment {
         mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
-        myWebView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                loadingScreen.endLoadingScreen();
-
-            }
-        });
 
         // callback for do something
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -151,6 +146,11 @@ public class MapFragment extends Fragment {
         myWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 loadingScreen.endLoadingScreen();
+                loadingScreen.endLoadingScreen();
+                TextView mapBox=root.findViewById(R.id.mapBox);
+                mapBox.setVisibility(View.VISIBLE);
+                setDataOfBox(mapBox,7000000000L,1000000L,100000L,10000L);
+                bottomSheet.setVisibility(View.VISIBLE);
             }
         });
         webSettings.setJavaScriptEnabled(true);
@@ -252,5 +252,10 @@ public class MapFragment extends Fragment {
                     myWebView.loadData(webViewString.getValue(), "text/html", "base64");
                 });
         return root;
+    }
+    private void setDataOfBox(TextView textView,long populationWorld,long infectedWorld,long recoveredWorld,long deathsWorld){
+        NumberFormat percentFormat=NumberFormat.getPercentInstance();
+        percentFormat.setMaximumFractionDigits(3);
+        textView.setText(getString(R.string.map_box_content,populationWorld,"100%",infectedWorld, percentFormat.format((double)infectedWorld*100/populationWorld),recoveredWorld,percentFormat.format((double)recoveredWorld*100/populationWorld),deathsWorld,percentFormat.format((double)deathsWorld*100/populationWorld)));
     }
 }
