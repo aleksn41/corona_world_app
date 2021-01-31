@@ -2,7 +2,7 @@ package de.dhbw.corona_world_app.datastructure;
 
 import androidx.annotation.NonNull;
 
-public enum ISOCountry implements State {
+public enum ISOCountry {
 
     Afghanistan("AF","Afghanistan"),
     Aland_Islands("AX","Åland Islands"),
