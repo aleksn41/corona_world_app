@@ -16,6 +16,8 @@ public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCou
 
     private int[] recovered;
 
+    private int[] active;
+
     private long population;
 
     private double[] pop_inf_ratio;
@@ -80,6 +82,14 @@ public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCou
 
     public void setPop_inf_ratio(double[] pop_inf_ratio) {
         this.pop_inf_ratio = pop_inf_ratio;
+    }
+
+    public int[] getActive() {
+        return active;
+    }
+
+    public void setActive(int[] active) {
+        this.active = active;
     }
 
     @Override
