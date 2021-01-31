@@ -7,6 +7,7 @@ public enum Criteria {
     RECOVERED("Recovered"),
     INFECTED("Infected"),
     HEALTHY("Healthy"),
+    ACTIVE("Active"),
     POPULATION("Population"),
     ID_RATION("Infected Deaths Ratio"),
     IH_RATION("Infected Health Ratio");
