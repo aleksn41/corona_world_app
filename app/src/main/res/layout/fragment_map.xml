@@ -19,26 +19,16 @@
     <LinearLayout
         android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="250dp"
         android:orientation="horizontal"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        android:background="?attr/background_color"
         app:behavior_hideable="false"
-        android:background="@color/white">
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <TextView
+            android:id="@+id/bottomSheetTextView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="sample Text"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="sample Text"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="sample Text"/>
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
