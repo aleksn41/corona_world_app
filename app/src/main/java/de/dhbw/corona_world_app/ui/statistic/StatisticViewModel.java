@@ -146,22 +146,22 @@ public class StatisticViewModel extends ViewModel {
         PieData pieData = new PieData();
         apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
 
-        if(dates2D){
-            if(countryList2D){
-                for (Criteria criteria: statisticCall.getCriteriaList()) {
+        if (dates2D) {
+            if (countryList2D) {
+                for (Criteria criteria : statisticCall.getCriteriaList()) {
                     List<Float> data = new ArrayList<>();
                     List<String> names = new ArrayList<>();
-                    for (TimeFramedCountry country: apiGottenList) {
+                    for (TimeFramedCountry country : apiGottenList) {
                         if (country.getDates().length > 1 && country.getInfected().length > 1 && country.getDeaths().length > 1 && country.getRecovered().length > 1) {
-                        AverageValues averageValues = new AverageValues(country).invoke();
+                            AverageValues averageValues = new AverageValues(country).invoke();
 
-                        addAverageDataToList(country, averageValues, data, criteria);
-                        names.add(country.getCountry().getDisplayName()+ ": "+criteria.getDisplayName());
+                            addAverageDataToList(country, averageValues, data, criteria);
+                            names.add(country.getCountry().getDisplayName() + ": " + criteria.getDisplayName());
                         } else {
                             throw new IllegalStateException("This state should not be reached! There is inconsistency with the size of the arrays in the TimeFramedCountry!");
                         }
                     }
-                    pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "" , colors));
+                    pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "", colors));
                 }
             } else {
                 for (TimeFramedCountry country : apiGottenList) {
@@ -183,13 +183,13 @@ public class StatisticViewModel extends ViewModel {
         } else {
             List<Float> data = new ArrayList<>();
             List<String> names = new ArrayList<>();
-            for (Criteria criteria: statisticCall.getCriteriaList()) {
-                for (TimeFramedCountry country: apiGottenList) {
+            for (Criteria criteria : statisticCall.getCriteriaList()) {
+                for (TimeFramedCountry country : apiGottenList) {
                     data.addAll(getDataList(1, 1, country, criteria));
-                    names.add(country.getCountry().getDisplayName()+ ": "+criteria.getDisplayName());
+                    names.add(country.getCountry().getDisplayName() + ": " + criteria.getDisplayName());
                 }
             }
-            pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "" , colors));
+            pieData.addDataSet(dataSetGenerator.getPieChartDataSet(data, names, "", colors));
         }
         chart.setData(pieData);
     }
@@ -234,23 +234,25 @@ public class StatisticViewModel extends ViewModel {
                 countries.add(country.getCountry().getISOCode());
             }
 
-            for (Criteria criteria : criteriaOrder) {
+            for (Criteria criteria : statisticCall.getCriteriaList()) {
                 List<Float> countriesData = new ArrayList<>();
                 for (TimeFramedCountry country : apiGottenList) {
                     //for constructing x-axis description
-
-                    if (statisticCall.getCriteriaList().contains(criteria)) {
-                        List<Float> data = getDataList(1, 1, country, criteria);
-                        countriesData.add(data.get(0));
-
-                    }
+                    List<Float> data = getDataList(1, 1, country, criteria);
+                    countriesData.add(data.get(0));
                 }
                 lineData.addDataSet(dataSetGenerator.getLineChartDataSet(countriesData, criteria.getDisplayName(), colors));
             }
             chart.getXAxis().setValueFormatter(new ValueFormatter() {
                 @Override
                 public String getFormattedValue(float value) {
-                    return countries.get((int) value);
+                    if (value >= 0) {
+                        if (countries.size() > (int) value) {
+                            return countries.get((int) value);
+                        } else return "";
+                    } else {
+                        return "";
+                    }
                 }
             });
         }

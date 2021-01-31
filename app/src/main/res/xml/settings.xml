@@ -10,7 +10,7 @@
     <SwitchPreferenceCompat
         app:defaultValue="false"
         app:key="storage_deactivated"
-        app:title="Disable Storage of frequently used Statistics"
+        app:title="Disable Storage of frequently used Statistics and the map data"
         app:iconSpaceReserved="false"
         app:singleLineTitle="false"/>
 
