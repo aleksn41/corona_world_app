@@ -188,7 +188,7 @@ public class MapFragment extends Fragment {
                         ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
                         Country country = countryList.get(i);
                         bottomSheetTitle.setText(isoCountry.toString());
-                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description, country.getPopulation(), country.getHealthy(), country.getInfected(), country.getRecovered(), country.getDeaths(), percentageFormat.format(country.getPop_inf_ratio()), percentageFormat.format((double) country.getDeaths() / country.getInfected())));
+                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description, country.getPopulation(),"100%", country.getHealthy(),percentageFormat.format((double)country.getHealthy()/country.getPopulation()), country.getInfected(),percentageFormat.format((double)country.getInfected()/country.getPopulation()), country.getRecovered(),percentageFormat.format((double)country.getRecovered()/country.getPopulation()), country.getDeaths(),percentageFormat.format((double)country.getDeaths()/country.getPopulation()), percentageFormat.format(country.getPop_inf_ratio()), percentageFormat.format((double) country.getDeaths() / country.getInfected())));
                     }
                 }
                 if (bottomSheetTitle.getText().length() == 0) {

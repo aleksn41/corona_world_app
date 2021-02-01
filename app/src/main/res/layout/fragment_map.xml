@@ -74,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textAlignment="center"
-            android:textSize="32sp"
+            android:textSize="24sp"
             android:layout_below="@+id/map_box_flag"/>
     </RelativeLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
