@@ -1,22 +1,21 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.ConsoleMessage;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -26,9 +25,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.json.JSONException;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -55,6 +54,8 @@ public class MapFragment extends Fragment {
     LinearProgressIndicator progressBar;
 
     TextView textView;
+
+    NumberFormat percentageFormat=NumberFormat.getPercentInstance();
 
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
@@ -87,19 +88,17 @@ public class MapFragment extends Fragment {
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         progressBar = root.findViewById(R.id.progressBar);
-        textView = root.findViewById(R.id.bottomSheetTextView);
+        textView = root.findViewById(R.id.bottomSheetTitle);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
-
+        percentageFormat.setMaximumFractionDigits(3);
         //setup bottomsheet
-        LinearLayout bottomSheet = root.findViewById(R.id.bottomSheet);
-        BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        RelativeLayout bottomSheet = root.findViewById(R.id.bottomSheet);
+        BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        bottomSheetBehavior.setPeekHeight(190);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        bottomSheetBehavior.setFitToContents(true);
         //listeners for bottom sheet
         //click event for show-dismiss bottom sheet
         bottomSheet.setOnClickListener(new View.OnClickListener() {
@@ -170,16 +169,10 @@ public class MapFragment extends Fragment {
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
                     if (countryList.get(i).getISOCountry().equals(isoCountry)) {
+                        ((ImageView)root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(),isoCountry.getFlagDrawableID()));
                         Country country = countryList.get(i);
-                        textView.setText(" " + isoCountry.toString() +
-                                "\n Population: " + country.getPopulation() +
-                                "\n Healthy: " + country.getHealthy() +
-                                "\n Infected: " + country.getInfected() +
-                                "\n Recovered: " + country.getRecovered() +
-                                "\n Deaths: " + country.getDeaths() +
-                                "\n Population-Infected Ratio: " + country.getPop_inf_ratio() +
-                                "\n Infected-Deaths Ratio: " + (double) country.getDeaths() / country.getInfected()
-                        );
+                        textView.setText(isoCountry.toString());
+                        ((TextView)root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description,country.getPopulation(),country.getHealthy(),country.getInfected(),country.getRecovered(),country.getDeaths(),percentageFormat.format(country.getPop_inf_ratio()),percentageFormat.format((double)country.getDeaths()/country.getInfected())));
                     }
                 }
                 if (textView.getText().length() == 0) {
@@ -187,8 +180,6 @@ public class MapFragment extends Fragment {
                     textView.setText("No data available!");
                     ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_DATA_FOUND, null);
                 }
-            } else {
-                textView.setText("");
             }
         });
 

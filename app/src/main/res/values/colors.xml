@@ -14,4 +14,5 @@
     <color name="yellow">#FFFF00</color>
     <color name="stroke_border">#D7D7D7</color>
     <color name="red">#F44336</color>
+    <color name="light_grey">#CAC2C2</color>
 </resources>
