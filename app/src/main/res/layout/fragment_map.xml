@@ -33,11 +33,11 @@
     <RelativeLayout
         android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="gone"
         app:behavior_hideable="false"
-        app:behavior_peekHeight="152dp"
+        app:behavior_peekHeight="24dp"
         android:background="?attr/bottom_sheet_background"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         tools:visibility="visible">
@@ -56,7 +56,7 @@
             android:layout_height="60dp"
             android:layout_below="@id/bottom_sheet_expand"
             android:gravity="center"
-            android:text="No Country"
+            android:text="No Country Selected"
             android:textAlignment="center"
             android:textSize="44sp" />
 
