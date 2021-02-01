@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -28,6 +30,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -36,8 +40,12 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
+import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
+import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
@@ -55,6 +63,8 @@ public class MapFragment extends Fragment {
     TextView bottomSheetTitle;
 
     ImageView bottomSheetExpandImage;
+
+    Country selectedCountry;
 
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
 
@@ -83,7 +93,7 @@ public class MapFragment extends Fragment {
 
     //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
     //todo establish order
-    @SuppressLint({"SetJavaScriptEnabled", "SetTextI18n"})
+    @SuppressLint("SetJavaScriptEnabled")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
@@ -95,6 +105,7 @@ public class MapFragment extends Fragment {
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
         percentageFormat.setMaximumFractionDigits(3);
+        ((Button)root.findViewById(R.id.bottomSheetButton)).setOnClickListener((View.OnClickListener) this::goToStatistic);
         //setup bottomsheet
         RelativeLayout bottomSheet = root.findViewById(R.id.bottomSheet);
         BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -143,6 +154,7 @@ public class MapFragment extends Fragment {
                     case BottomSheetBehavior.STATE_SETTLING:
                         break;
                 }
+                if(selectedCountry!=null)root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -159,7 +171,6 @@ public class MapFragment extends Fragment {
 
         myWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                loadingScreen.endLoadingScreen();
                 loadingScreen.endLoadingScreen();
                 TextView mapBox = root.findViewById(R.id.mapBox);
                 setDataOfBox(mapBox, 7000000000L, 1000000L, 100000L, 10000L);
@@ -186,9 +197,9 @@ public class MapFragment extends Fragment {
                 for (int i = 0; i < countryList.size(); i++) {
                     if (countryList.get(i).getISOCountry().equals(isoCountry)) {
                         ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
-                        Country country = countryList.get(i);
+                        selectedCountry = countryList.get(i);
                         bottomSheetTitle.setText(isoCountry.toString());
-                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description, country.getPopulation(),"100%", country.getHealthy(),percentageFormat.format((double)country.getHealthy()/country.getPopulation()), country.getInfected(),percentageFormat.format((double)country.getInfected()/country.getPopulation()), country.getRecovered(),percentageFormat.format((double)country.getRecovered()/country.getPopulation()), country.getDeaths(),percentageFormat.format((double)country.getDeaths()/country.getPopulation()), percentageFormat.format(country.getPop_inf_ratio()), percentageFormat.format((double) country.getDeaths() / country.getInfected())));
+                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description, selectedCountry.getPopulation(),"100%", selectedCountry.getHealthy(),percentageFormat.format((double)selectedCountry.getHealthy()/selectedCountry.getPopulation()), selectedCountry.getInfected(),percentageFormat.format((double)selectedCountry.getInfected()/selectedCountry.getPopulation()), selectedCountry.getRecovered(),percentageFormat.format((double)selectedCountry.getRecovered()/selectedCountry.getPopulation()), selectedCountry.getDeaths(),percentageFormat.format((double)selectedCountry.getDeaths()/selectedCountry.getPopulation()), percentageFormat.format(selectedCountry.getPop_inf_ratio()), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getInfected())));
                     }
                 }
                 if (bottomSheetTitle.getText().length() == 0) {
@@ -259,6 +270,15 @@ public class MapFragment extends Fragment {
                     myWebView.loadData(webViewString.getValue(), "text/html", "base64");
                 });
         return root;
+    }
+
+    public void goToStatistic(final View view){
+        StatisticCall request=new StatisticCall(Collections.singletonList(selectedCountry.getISOCountry()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
+        MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
+        NavHostFragment navHostFragment =
+                (NavHostFragment) requireActivity().getSupportFragmentManager()
+                        .findFragmentById(R.id.nav_host_fragment);
+        navHostFragment.getNavController().navigate(action);
     }
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
