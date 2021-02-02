@@ -9,17 +9,17 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class CustomMultiAutoCompleteTextView extends androidx.appcompat.widget.AppCompatAutoCompleteTextView {
+public class CustomAutoCompleteTextView extends androidx.appcompat.widget.AppCompatAutoCompleteTextView {
 
-    public CustomMultiAutoCompleteTextView(@NonNull Context context) {
+    public CustomAutoCompleteTextView(@NonNull Context context) {
         super(context);
     }
 
-    public CustomMultiAutoCompleteTextView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public CustomAutoCompleteTextView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public CustomMultiAutoCompleteTextView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public CustomAutoCompleteTextView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
