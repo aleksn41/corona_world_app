@@ -103,21 +103,21 @@ public class StatisticFragment extends Fragment {
                     try {
                         switch (statisticCall.getChartType()) {
                             case BAR:
-                                barChart.setVisibility(View.INVISIBLE);
+                                requireActivity().runOnUiThread(() -> barChart.setVisibility(View.INVISIBLE));
                                 statisticViewModel.getBarChart(statisticCall, barChart, getContext());
                                 if (getActivity() != null) {
                                     requireActivity().runOnUiThread(() -> barChart.setVisibility(View.VISIBLE));
                                 }
                                 break;
                             case PIE:
-                                pieChart.setVisibility(View.INVISIBLE);
+                                requireActivity().runOnUiThread(() -> pieChart.setVisibility(View.INVISIBLE));
                                 statisticViewModel.getPieChart(statisticCall, pieChart, getContext());
                                 if (getActivity() != null) {
                                     requireActivity().runOnUiThread(() -> pieChart.setVisibility(View.VISIBLE));
                                 }
                                 break;
                             case LINE:
-                                lineChart.setVisibility(View.INVISIBLE);
+                                requireActivity().runOnUiThread(() -> lineChart.setVisibility(View.INVISIBLE));
                                 statisticViewModel.getLineChart(statisticCall, lineChart, getContext());
                                 if (getActivity() != null) {
                                     requireActivity().runOnUiThread(() -> lineChart.setVisibility(View.VISIBLE));
