@@ -9,7 +9,6 @@ public enum API {
 
     private final String name;
 
-
     private final String getAllCountries;
 
     private final String getOneCountry;

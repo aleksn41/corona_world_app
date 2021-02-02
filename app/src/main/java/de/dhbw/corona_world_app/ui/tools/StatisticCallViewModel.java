@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.tools;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
@@ -9,6 +8,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -56,6 +56,10 @@ public class StatisticCallViewModel extends ViewModel {
         dataManager.toggleFav(position,dataType);
     }
 
+    public List<Integer> getBlackListedIndices(StatisticCallDataManager.DataType dataType){
+        return dataManager.getBlackListedIndices(dataType);
+    }
+
     public CompletableFuture<Void> saveAllData() {
         return dataManager.saveAllData();
     }
@@ -63,7 +67,7 @@ public class StatisticCallViewModel extends ViewModel {
     public void observeData(LifecycleOwner owner, Observer<List<Pair<StatisticCall, Boolean>>> observer, StatisticCallDataManager.DataType dataType) {
         switch (dataType){
             case ALL_DATA:
-                dataManager.statisticCallData.observe(owner,observer);
+                dataManager.statisticCallAllData.observe(owner,observer);
                 break;
             case FAVOURITE_DATA:
                 dataManager.statisticCallFavouriteData.observe(owner, observer);

@@ -160,6 +160,7 @@ public class APIManager {
                 countryToAdd.setDeaths(new int[]{country.getDeaths()});
                 countryToAdd.setRecovered(new int[]{country.getRecovered()});
                 countryToAdd.setPop_inf_ratio(new double[1]);
+                countryToAdd.setActive(new int[]{country.getActive()});
                 countryToAdd.setPopulation(country.getPopulation());
                 countryToAdd.setCountry(country.getISOCountry());
                 timeframedCountries.add(countryToAdd);
@@ -204,9 +205,7 @@ public class APIManager {
     public static Map<ISOCountry, Long> getAllCountriesPopData() throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting population data...");
         Future<String> future = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getAllCountries()));
-        Map<ISOCountry, Long> returnMap;
-        returnMap = StringToCountryParser.parseMultiPopCount(future.get());
-        return returnMap;
+        return StringToCountryParser.parseMultiPopCount(future.get());
     }
 
     //creates a GET-Call to an url and returns the {@code String} body

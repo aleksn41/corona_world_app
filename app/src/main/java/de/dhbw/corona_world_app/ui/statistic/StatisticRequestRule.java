@@ -19,12 +19,20 @@ public class StatisticRequestRule {
     RuleEnumAdapter<ChartType> chartTypeAdapter;
     RuleEnumAdapter<Criteria> criteriaAdapter;
     RuleDateRangeInterface ruleDateRangeInterface;
-
+    boolean ruleApplied=false;
     OnItemsChangeListener checkCondition = new OnItemsChangeListener() {
         @Override
         public void onItemChange() {
-            if (rule.conditionSatisfied(isoCountryAdapter.getSelectedItems().size(), criteriaAdapter.getSelectedItems().size(), chartTypeAdapter.getSelectedItems().size() == 0 ? null : chartTypeAdapter.getSelectedItems().get(0), ruleDateRangeInterface.getStartDate(), ruleDateRangeInterface.getEndDate())) {
+            if (rule.conditionSatisfied(isoCountryAdapter.getSelectedItemsSize(), criteriaAdapter.getSelectedItemsSize(), chartTypeAdapter.getSelectedItemsSize() == 0 ? null : chartTypeAdapter.getSelectedItems().get(0), ruleDateRangeInterface.getStartDate(), ruleDateRangeInterface.getEndDate())) {
                 applyRule(rule);
+                ruleApplied=true;
+            }else if(ruleApplied){
+                doNotApplyRule();
+                ruleApplied=false;
+                rule.startAndEndDateMustBeSame = false;
+                rule.allowOnlyOneCriteria = false;
+                rule.allowOnlyOneCountry = false;
+                rule.doNotAllowBarChart = false;
             }
         }
     };
@@ -51,9 +59,13 @@ public class StatisticRequestRule {
     public interface RuleEnumAdapter<T extends Enum<T>> {
         void setOnItemsChangeListener(OnItemsChangeListener listener);
 
+        int getSelectedItemsSize();
+
         List<T> getSelectedItems();
 
         void conditionApplies(boolean allowOnlyOneItem);
+
+        void conditionDoesNotApply();
     }
 
     public interface RuleDateRangeInterface {
@@ -66,6 +78,8 @@ public class StatisticRequestRule {
         void setOnEndDateChangeListener(OnItemsChangeListener listener);
 
         void conditionApplies(boolean startAndEndDateMustBeSame);
+
+        void conditionDoesNotApply();
     }
 
     StatisticRequestRule(@NonNull RuleEnumAdapter<ISOCountry> isoCountryAdapter, @NonNull RuleEnumAdapter<Criteria> criteriaAdapter, @NonNull RuleEnumAdapter<ChartType> chartTypeAdapter, @NonNull RuleDateRangeInterface ruleDateRangeInterface) {
@@ -120,5 +134,12 @@ public class StatisticRequestRule {
         criteriaAdapter.conditionApplies(rule.allowOnlyOneCriteria);
         chartTypeAdapter.conditionApplies(rule.doNotAllowBarChart);
         ruleDateRangeInterface.conditionApplies(rule.startAndEndDateMustBeSame);
+    }
+
+    private void doNotApplyRule() {
+        isoCountryAdapter.conditionDoesNotApply();
+        criteriaAdapter.conditionDoesNotApply();
+        chartTypeAdapter.conditionDoesNotApply();
+        ruleDateRangeInterface.conditionDoesNotApply();
     }
 }

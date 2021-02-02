@@ -1,5 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -27,8 +29,6 @@ public class MapViewModel extends ViewModel {
 
     private static final String TAG = MapViewModel.class.getSimpleName();
 
-    private APIManager manager;
-
     private final MapData services = new MapData();
 
     private File pathToCacheDir;
@@ -37,7 +37,12 @@ public class MapViewModel extends ViewModel {
 
     public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
 
+    public void init(boolean cacheDisabled, boolean longTermDisabled) {
+        APIManager.setSettings(!cacheDisabled, !longTermDisabled);
+    }
+
     public void cacheDataWorld(@NonNull List<Country> worldData) throws IOException {
+        Log.v(TAG, "Caching world data...");
         FileOutputStream fileOut = new FileOutputStream(pathToCacheDir + "/world_cache.ser");
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
         out.writeObject(worldData);
@@ -47,6 +52,7 @@ public class MapViewModel extends ViewModel {
 
     @SuppressWarnings("unchecked")
     public List<Country> getCachedDataWorld() throws IOException, ClassNotFoundException {
+        Log.v(TAG, "Getting cached world data...");
         FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/world_cache.ser");
         ObjectInputStream in = new ObjectInputStream(fileIn);
         List<Country> returnList = (List<Country>) in.readObject();
@@ -57,13 +63,13 @@ public class MapViewModel extends ViewModel {
 
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         List<Country> apiGottenList;
-        APIManager.enableCache();
-        if(!APIManager.isCacheEnabled() || worldCacheAge==null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+        Log.v(TAG, "Initiating country list...");
+        if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
             apiGottenList = APIManager.getDataWorld(API.HEROKU);
             if (apiGottenList == null || !(apiGottenList.size() > 0)) {
                 throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
             }
-            if(APIManager.isCacheEnabled()) {
+            if (APIManager.isCacheEnabled()) {
                 cacheDataWorld(apiGottenList);
                 worldCacheAge = LocalDateTime.now();
             }
@@ -73,11 +79,11 @@ public class MapViewModel extends ViewModel {
         mCountryList.postValue(apiGottenList);
     }
 
-    public String getWebViewStringCustom(List<Country> countryList){
+    public String getWebViewStringCustom(List<Country> countryList) {
         return services.putEntries(countryList);
     }
 
-    public void setPathToCacheDir(File pathToCacheDir){
+    public void setPathToCacheDir(File pathToCacheDir) {
         this.pathToCacheDir = pathToCacheDir;
     }
 }
