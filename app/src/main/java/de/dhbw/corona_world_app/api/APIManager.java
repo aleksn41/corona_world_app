@@ -24,6 +24,8 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.Displayable;
+import de.dhbw.corona_world_app.datastructure.GermanyState;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import okhttp3.OkHttpClient;
@@ -54,7 +56,7 @@ public class APIManager {
 
     //gets the data of the whole world through the specified api -> throws the cause of the ExecutionException
     public static List<Country> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
-        Logger.logV(TAG, "Getting Data for every Country from api " + api.getName());
+        Logger.logV(TAG, "Getting data for every Country from api " + api.getName() + "...");
 
         List<Country> returnList;
 
@@ -68,18 +70,42 @@ public class APIManager {
         Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
         for (Country country : returnList) {
-            if (country.getISOCountry() != null && !Mapper.isInBlacklist(country.getISOCountry().name())) {
-                if (popMap.containsKey(country.getISOCountry())) {
-                    country.setPopulation(popMap.get(country.getISOCountry()));
+            ISOCountry isoCountry = (ISOCountry) country.getISOCountry();
+            if (country.getISOCountry() != null && !Mapper.isInBlacklist(isoCountry.name())) {
+                if (popMap.containsKey(isoCountry)) {
+                    country.setPopulation(popMap.get(isoCountry));
                 } else {
                     cnt += 1;
-                    Logger.logD("APIManager.getDataWorld", "country \"" + country.getISOCountry().name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                    Logger.logD("APIManager.getDataWorld", "country \"" + isoCountry.name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
                 }
             }
         }
 
         Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
         returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
+        Logger.logV(TAG, "Returning data list...");
+        return returnList;
+    }
+
+    public static List<Country> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException {
+        Logger.logV(TAG, "Getting data for every state of germany...");
+
+        List<Country> returnList;
+
+        Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
+
+        String apiReturn = future.get();
+        //todo implement parsing method
+        returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
+
+        //todo implement population getting of the states
+        Map<Displayable, Long> popMap = null;
+
+        for (Country country : returnList){
+            country.setPopulation(popMap.get(country.getISOCountry()));
+        }
+
+        Logger.logV(TAG, "Returning data list...");
         return returnList;
     }
 

@@ -3,7 +3,8 @@ package de.dhbw.corona_world_app.api;
 public enum API {
     HEROKU("https://coronavirus-19-api.herokuapp.com", "/countries", "/countries/", false, false, "Heroku"),
     RESTCOUNTRIES("https://restcountries.eu/rest/v2", "/all", "/alpha/", true, false, "RestCountries"),
-    POSTMANAPI("https://api.covid19api.com", "/world/total", "/total/country/", true, true, "api.covid19api.com");
+    POSTMANAPI("https://api.covid19api.com", "/world/total", "/total/country/", true, true, "api.covid19api.com"),
+    ARCGIS("https://opendata.arcgis.com", "/datasets/ef4b445a53c1406892257fe63129a8ea_0.geojson", null, false, false, "opendata.arcgis.com");
 
     private final String url;
 

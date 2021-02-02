@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Country implements Serializable {
 
-    private ISOCountry country;
+    private Displayable country;
 
     private int deaths;
 
@@ -78,7 +78,7 @@ public class Country implements Serializable {
         this.active = active;
     }
 
-    public ISOCountry getISOCountry() {
+    public Displayable getISOCountry() {
         return country;
     }
 

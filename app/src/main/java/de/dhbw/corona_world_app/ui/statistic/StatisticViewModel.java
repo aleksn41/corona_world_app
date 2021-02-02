@@ -28,6 +28,7 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
@@ -91,7 +92,8 @@ public class StatisticViewModel extends ViewModel {
 
             List<String> countries = new ArrayList<>();
             for (TimeFramedCountry country : apiGottenList) {
-                countries.add(country.getCountry().getISOCode());
+                ISOCountry isoCountry = (ISOCountry) country.getCountry();
+                countries.add(isoCountry.getISOCode());
             }
 
             for (Criteria criteria : criteriaOrder) {
@@ -231,7 +233,8 @@ public class StatisticViewModel extends ViewModel {
         } else {
             List<String> countries = new ArrayList<>();
             for (TimeFramedCountry country : apiGottenList) {
-                countries.add(country.getCountry().getISOCode());
+                ISOCountry isoCountry = (ISOCountry) country.getCountry();
+                countries.add(isoCountry.getISOCode());
             }
 
             for (Criteria criteria : statisticCall.getCriteriaList()) {

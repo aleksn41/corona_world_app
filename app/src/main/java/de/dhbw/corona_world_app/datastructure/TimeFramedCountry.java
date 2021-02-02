@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCountry> {
 
-    private ISOCountry country;
+    private Displayable country;
 
     private LocalDate[] dates;
 
@@ -25,11 +25,11 @@ public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCou
     public TimeFramedCountry() {
     }
 
-    public ISOCountry getCountry() {
+    public Displayable getCountry() {
         return country;
     }
 
-    public void setCountry(ISOCountry country) {
+    public void setCountry(Displayable country) {
         this.country = country;
     }
 
