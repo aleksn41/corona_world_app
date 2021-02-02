@@ -58,11 +58,11 @@ public class MapData {
         Logger.logV(TAG,"Putting entries into StringBuilder...");
         if(entryList.size() > 0) {
             Country country = entryList.get(0);
-            ISOCountry isoCountry = (ISOCountry) country.getISOCountry();
+            ISOCountry isoCountry = (ISOCountry) country.getName();
             builder.append("['").append(isoCountry.getISOCode()).append("',").append(getPercentValueOfDouble(country.getPop_inf_ratio())).append("]");
             for (int i = 1; i < entryList.size(); i++) {
                 Country country1 = entryList.get(i);
-                ISOCountry isoCountry1 = (ISOCountry) country1.getISOCountry();
+                ISOCountry isoCountry1 = (ISOCountry) country1.getName();
                 builder.append(",['").append(isoCountry1.getISOCode()).append("',").append(getPercentValueOfDouble(country1.getPop_inf_ratio())).append("]");
             }
             Logger.logV(TAG, "Encoding and returning finished WebString...");

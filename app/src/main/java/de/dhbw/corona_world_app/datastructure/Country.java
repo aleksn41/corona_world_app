@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Country implements Serializable {
 
-    private Displayable country;
+    private Displayable name;
 
     private int deaths;
 
@@ -33,8 +33,8 @@ public class Country implements Serializable {
         this.pop_inf_ratio = pop_inf_ratio;
     }
 
-    public Country(ISOCountry country) {
-        this.country = country;
+    public Country(Displayable name) {
+        this.name = name;
     }
 
     public int getDeaths() {
@@ -78,18 +78,18 @@ public class Country implements Serializable {
         this.active = active;
     }
 
-    public Displayable getISOCountry() {
-        return country;
+    public Displayable getName() {
+        return name;
     }
 
-    public void setISOCountry(ISOCountry country) {
-        this.country = country;
+    public void setName(Displayable name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
         return "Country{" +
-                "name='" + country + '\'' +
+                "name='" + name.toString() + '\'' +
                 ", deaths=" + deaths +
                 ", infected=" + infected +
                 ", recovered=" + recovered +

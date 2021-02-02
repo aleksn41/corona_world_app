@@ -70,8 +70,8 @@ public class APIManager {
         Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
         for (Country country : returnList) {
-            ISOCountry isoCountry = (ISOCountry) country.getISOCountry();
-            if (country.getISOCountry() != null && !Mapper.isInBlacklist(isoCountry.name())) {
+            ISOCountry isoCountry = (ISOCountry) country.getName();
+            if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
                 if (popMap.containsKey(isoCountry)) {
                     country.setPopulation(popMap.get(isoCountry));
                 } else {
@@ -82,12 +82,12 @@ public class APIManager {
         }
 
         Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
-        returnList = returnList.stream().filter(c -> c.getISOCountry() != null).collect(Collectors.toList());
+        returnList = returnList.stream().filter(c -> c.getName() != null).collect(Collectors.toList());
         Logger.logV(TAG, "Returning data list...");
         return returnList;
     }
 
-    public static List<Country> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException {
+    public static List<Country> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting data for every state of germany...");
 
         List<Country> returnList;
@@ -95,15 +95,7 @@ public class APIManager {
         Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
         String apiReturn = future.get();
-        //todo implement parsing method
-        returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
-
-        //todo implement population getting of the states
-        Map<Displayable, Long> popMap = null;
-
-        for (Country country : returnList){
-            country.setPopulation(popMap.get(country.getISOCountry()));
-        }
+        returnList = StringToCountryParser.parseFromArcgisMultiCountry(apiReturn);
 
         Logger.logV(TAG, "Returning data list...");
         return returnList;
@@ -188,7 +180,7 @@ public class APIManager {
                 countryToAdd.setPop_inf_ratio(new double[1]);
                 countryToAdd.setActive(new int[]{country.getActive()});
                 countryToAdd.setPopulation(country.getPopulation());
-                countryToAdd.setCountry(country.getISOCountry());
+                countryToAdd.setCountry((ISOCountry) country.getName());
                 timeframedCountries.add(countryToAdd);
             }
             return timeframedCountries;

@@ -4,8 +4,10 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,12 +15,30 @@ import java.util.Map;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
+import de.dhbw.corona_world_app.datastructure.GermanyState;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 
 public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();
+
+    public static List<Country> parseFromArcgisMultiCountry(String toParse) throws JSONException {
+        List<Country> countries = new ArrayList<>();
+        JSONObject object = new JSONObject(toParse);
+        JSONArray jsonArray = object.getJSONArray("features");
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Country country = new Country();
+            JSONObject properties = jsonArray.getJSONObject(i).getJSONObject("properties");
+            country.setName(GermanyState.valueOf(properties.getString("LAN_ew_GEN").replace("-","_").replace("ü","ue").toUpperCase()));
+            country.setInfected(properties.getInt("Fallzahl"));
+            country.setDeaths(properties.getInt("Death"));
+            country.setPopulation((long) (properties.getInt("Fallzahl") / (properties.getDouble("faelle_100000_EW")/100000)));
+            countries.add(country);
+            if(country.getName()==null) System.out.println(properties.getString("LAN_ew_GEN").replace("-","_").replace("ü","ue").toUpperCase());
+        }
+        return countries;
+    }
 
     public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException {
         JSONArray jsonArray = new JSONArray(toParse);
@@ -67,9 +87,9 @@ public class StringToCountryParser {
             switch (tuple[0]) {
                 case"{\"country\"":String normalizedName = Mapper.normalizeCountryName(tuple[1].replace("\"",""));
                                    if(Mapper.isInMap(API.HEROKU, normalizedName)) {
-                                       country.setISOCountry(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName));
+                                       country.setName(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName));
                                    } else if(!Mapper.isInBlacklist(normalizedName)){
-                                       country.setISOCountry(ISOCountry.valueOf(normalizedName));
+                                       country.setName(ISOCountry.valueOf(normalizedName));
                                    }
                                    break;
                 case"\"deaths\"":country.setDeaths(Integer.parseInt(collectNullToZero(tuple[1])));break;

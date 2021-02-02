@@ -169,7 +169,7 @@ public class MapFragment extends Fragment {
                 if (countryList == null)
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
-                    if (countryList.get(i).getISOCountry().equals(isoCountry)) {
+                    if (countryList.get(i).getName().equals(isoCountry)) {
                         Country country = countryList.get(i);
                         textView.setText(" " + isoCountry.toString() +
                                 "\n Population: " + country.getPopulation() +

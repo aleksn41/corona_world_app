@@ -109,4 +109,12 @@ public class APIManagerTests {
         assertNotNull(returnMap);
         System.out.println(returnMap);
     }
+
+    @Test
+    public void testGetDataGermany() throws Throwable {
+        APIManager.disableLogsForTesting();
+        List<Country> countries = APIManager.getDataGermany(API.ARCGIS);
+        assertNotNull(countries);
+        System.out.println(countries);
+    }
 }
