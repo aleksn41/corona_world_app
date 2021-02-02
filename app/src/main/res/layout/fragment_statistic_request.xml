@@ -30,7 +30,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
 
-            <MultiAutoCompleteTextView
+            <de.dhbw.corona_world_app.ui.statistic.CustomMultiAutoCompleteTextView
                 android:id="@+id/nachoIsoCountryTextView"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
@@ -61,7 +61,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/isoCountryChips" />
 
-            <MultiAutoCompleteTextView
+            <de.dhbw.corona_world_app.ui.statistic.CustomMultiAutoCompleteTextView
                 android:id="@+id/nachoCriteriaTextView"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
@@ -93,7 +93,7 @@
                 app:layout_constraintTop_toBottomOf="@id/criteriaChips" />
 
 
-            <MultiAutoCompleteTextView
+            <de.dhbw.corona_world_app.ui.statistic.CustomMultiAutoCompleteTextView
                 android:id="@+id/nachoChartTypeTextView"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
