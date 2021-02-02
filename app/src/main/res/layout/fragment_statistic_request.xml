@@ -30,25 +30,31 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
 
-            <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
-                android:id="@+id/nachoIsoCountryTextView"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/isoCountryTextLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_huge"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle"
-                android:hint="Countries"
-                app:chipSpacing="8dp"
-                android:saveEnabled="false"/>
+                app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle">
+
+                <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
+                    android:id="@+id/nachoIsoCountryTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Countries"
+                    android:saveEnabled="false" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/isoCountryChips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/nachoIsoCountryTextView"
-                />
+                app:layout_constraintTop_toBottomOf="@id/isoCountryTextLayout" />
+
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/criteriaChooserTitle"
                 style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
@@ -61,24 +67,30 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/isoCountryChips" />
 
-            <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
-                android:id="@+id/nachoCriteriaTextView"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/criteriaTextLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_huge"
-                android:hint="Criteria"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle"
-                android:saveEnabled="false"/>
+                app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle">
+
+                <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
+                    android:id="@+id/nachoCriteriaTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Criteria"
+                    android:saveEnabled="false" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/criteriaChips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/nachoCriteriaTextView"
-                />
+                app:layout_constraintTop_toBottomOf="@id/criteriaTextLayout" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/chartTypeChooserTitle"
@@ -93,24 +105,30 @@
                 app:layout_constraintTop_toBottomOf="@id/criteriaChips" />
 
 
-            <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
-                android:id="@+id/nachoChartTypeTextView"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/chartTypeTextLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_huge"
-                android:hint="Chart-Type"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle"
-                android:saveEnabled="false"/>
+                app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle">
+
+                <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
+                    android:id="@+id/nachoChartTypeTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Chart-Type"
+                    android:saveEnabled="false" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chartTypeChips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/nachoChartTypeTextView"
-                />
+                app:layout_constraintTop_toBottomOf="@id/chartTypeTextLayout" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/timePickerTitle"
@@ -150,7 +168,7 @@
                 android:layout_height="100dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/endDateChooser"/>
+                app:layout_constraintTop_toBottomOf="@id/endDateChooser" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -165,7 +183,6 @@
         android:layout_margin="16dp"
         android:contentDescription="@string/fab_content_desc"
         android:text="@string/fab_content_desc"
-        app:icon="@android:drawable/ic_menu_send"
-        />
+        app:icon="@android:drawable/ic_menu_send" />
 
 </RelativeLayout>

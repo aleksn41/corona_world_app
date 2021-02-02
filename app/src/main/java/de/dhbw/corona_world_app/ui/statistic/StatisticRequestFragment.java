@@ -290,22 +290,24 @@ public class StatisticRequestFragment extends Fragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (event == null) {
                     if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
-                        if (adapter.filteredItems.size() > 0)
+                        if (adapter.filteredItems.size() > 0) {
+                            if (!textView.isPopupShowing()) textView.showDropDown();
                             textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
-                        else{
+                        } else {
                             showErrorWithCompletion(textView);
                             return false;
                         }
-                    }else return false;
+                    } else return false;
                 } else if (actionId == EditorInfo.IME_NULL) {
                     if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                        if (adapter.filteredItems.size() > 0)
+                        if (adapter.filteredItems.size() > 0) {
+                            if (!textView.isPopupShowing()) textView.showDropDown();
                             textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
-                        else{
+                        } else {
                             showErrorWithCompletion(textView);
                             return true;
                         }
-                    }else return false;
+                    } else return false;
                 } else return false;
                 return true;
             }
@@ -323,7 +325,7 @@ public class StatisticRequestFragment extends Fragment {
         return chip;
     }
 
-    private void showErrorWithCompletion(TextView textView){
+    private void showErrorWithCompletion(TextView textView) {
         textView.setError("No Matching Item");
     }
 }
