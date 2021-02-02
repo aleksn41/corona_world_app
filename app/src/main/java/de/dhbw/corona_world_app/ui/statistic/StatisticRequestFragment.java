@@ -6,22 +6,27 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.util.Pair;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -275,8 +280,7 @@ public class StatisticRequestFragment extends Fragment {
         return date.atStartOfDay().toEpochSecond(ZoneId.systemDefault().getRules().getOffset(Instant.now())) * 1000;
     }
 
-    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(MultiAutoCompleteTextView textView, MultiAutoCompleteTextViewAdapter<T> adapter, ChipGroup chipGroup) {
-        textView.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(AutoCompleteTextView textView, MultiAutoCompleteTextViewAdapter<T> adapter, ChipGroup chipGroup) {
         textView.setOnItemClickListener((parent, view, position, id) -> {
             adapter.selectItem(position);
             T selectedItem = adapter.getItem(position);
@@ -287,6 +291,21 @@ public class StatisticRequestFragment extends Fragment {
                 chipGroup.removeView(v);
             });
             chipGroup.addView(itemChip);
+        });
+        //when the user presses enter, use top suggestion
+        textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        textView.setImeActionLabel("Done",KeyEvent.KEYCODE_ENTER);
+        textView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId==EditorInfo.IME_ACTION_DONE||event.getKeyCode()==KeyEvent.KEYCODE_ENTER&&event.getAction()==KeyEvent.ACTION_DOWN){
+                    if(adapter.filteredItems.size()!=0){
+                        textView.setListSelection(0);
+                        return true;
+                    }
+                }
+                return false;
+            }
         });
         textView.setAdapter(adapter);
     }
