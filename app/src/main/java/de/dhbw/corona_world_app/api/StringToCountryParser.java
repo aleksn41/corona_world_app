@@ -20,12 +20,15 @@ public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();
 
-    public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException {
-        JSONArray jsonArray = new JSONArray(toParse);
-        TimeFramedCountry country = new TimeFramedCountry();
+    public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException, TooManyRequestsException {
+        if(toParse.toLowerCase().startsWith("{\"message\":\"too many requests")){
+            throw new TooManyRequestsException("Too many requests were made!");
+        }
+            JSONArray jsonArray = new JSONArray(toParse);
+            TimeFramedCountry country = new TimeFramedCountry();
 
-        int dateRange = jsonArray.length();
-        if(skipFirstDate) dateRange--;
+            int dateRange = jsonArray.length();
+            if (skipFirstDate) dateRange--;
 
         LocalDate[] dates = new LocalDate[dateRange];
         int[] deaths = new int[dateRange];
@@ -56,6 +59,7 @@ public class StringToCountryParser {
         country.setRecovered(recovered);
         country.setInfected(infected);
         country.setActive(active);
+
         return country;
     }
 

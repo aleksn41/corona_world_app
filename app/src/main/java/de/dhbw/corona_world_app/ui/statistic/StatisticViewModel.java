@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
@@ -54,7 +55,7 @@ public class StatisticViewModel extends ViewModel {
         }
     }
 
-    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
+    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -132,7 +133,7 @@ public class StatisticViewModel extends ViewModel {
         });
     }
 
-    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException {
         Logger.logV(TAG, "Getting pie chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -194,7 +195,7 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(pieData);
     }
 
-    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException {
         Logger.logV(TAG, "Getting line chart for " + statisticCall);
         init();
 
