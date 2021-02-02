@@ -39,6 +39,7 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
+import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
@@ -84,6 +85,8 @@ public class MapFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
+        mapViewModel.switchResolution(MapData.Resolution.GERMANY);
+
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         progressBar = root.findViewById(R.id.progressBar);
         textView = root.findViewById(R.id.bottomSheetTextView);
@@ -117,13 +120,6 @@ public class MapFragment extends Fragment {
         mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
-        myWebView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                loadingScreen.endLoadingScreen();
-
-            }
-        });
-
         // callback for do something
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -197,8 +193,9 @@ public class MapFragment extends Fragment {
         service.execute(new Runnable() {
             @Override
             public void run() {
+
                 try {
-                    mapViewModel.initCountryList();
+                    mapViewModel.initGermany();
                 } catch (InterruptedException | ExecutionException e) {
                     Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
                     requireActivity().runOnUiThread(new Runnable() {

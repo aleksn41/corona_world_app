@@ -10,7 +10,6 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -62,7 +61,7 @@ public class MapViewModel extends ViewModel {
     }
 
     public void cacheGermany(@NonNull List<Country> germanyData) throws IOException {
-        Log.v(TAG, "Caching world data...");
+        Log.v(TAG, "Caching germany data...");
         FileOutputStream fileOut = new FileOutputStream(pathToCacheDir + "/germany_cache.ser");
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
         out.writeObject(germanyData);
@@ -71,7 +70,7 @@ public class MapViewModel extends ViewModel {
     }
 
     public List<Country> getCachedGermany() throws IOException, ClassNotFoundException {
-        Log.v(TAG, "Getting cached world data...");
+        Log.v(TAG, "Getting cached germany data...");
         FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_cache.ser");
         ObjectInputStream in = new ObjectInputStream(fileIn);
         List<Country> returnList = (List<Country>) in.readObject();
@@ -114,6 +113,10 @@ public class MapViewModel extends ViewModel {
             apiGottenList = getCachedDataWorld();
         }
         mCountryList.postValue(apiGottenList);
+    }
+
+    public void switchResolution(MapData.Resolution resolution){
+        services.setResolution(resolution);
     }
 
     public String getWebViewStringCustom(List<Country> countryList) {

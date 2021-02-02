@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import de.dhbw.corona_world_app.datastructure.GermanyState;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class Mapper {
@@ -14,6 +15,8 @@ public class Mapper {
     private static Map<String, ISOCountry> restcountriesToStandardMap;
 
     private static Map<String, ISOCountry> isoCodeToISOCountryMap;
+
+    private static Map<String, GermanyState> isoCodeToGermany;
 
     private static Map<API,Map<String,ISOCountry>> apisToMap;
     //for faster reverse mapping (so that the reverse map must not be initialized on every function call)
@@ -116,6 +119,17 @@ public class Mapper {
             }
         }
         return isoCodeToISOCountryMap.get(isoCode);
+    }
+
+    public static GermanyState mapISOCodeToGermanyState(String isoCode){
+        if(isoCode.length() != 4) throw new IllegalArgumentException("The given String is no ISOCode! Example:\"DE\"");
+        if(isoCodeToGermany == null){
+            isoCodeToGermany = new HashMap<>();
+            for (GermanyState state:GermanyState.values()) {
+                isoCodeToGermany.put(state.getISOCode(), state);
+            }
+        }
+        return isoCodeToGermany.get(isoCode);
     }
 
     public static boolean isInBlacklist(String countryName){

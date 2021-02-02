@@ -1,32 +1,40 @@
 package de.dhbw.corona_world_app.datastructure;
 
 public enum GermanyState implements Displayable {
-    BADEN_WUERTTEMBERG("Baden-Wuerttemberg"),
-    BAYERN("Bayern"),
-    BERLIN("Berlin"),
-    BRANDENBURG("Brandenburg"),
-    BREMEN("Bremen"),
-    HAMBURG("Hamburg"),
-    HESSEN("Hessen"),
-    MECKLENBURG_VORPOMMERN("Mecklenburg-Vorpommern"),
-    NIEDERSACHSEN("Niedersachsen"),
-    NORDRHEIN_WESTFALEN("Nordrhein-Westfalen"),
-    RHEINLAND_PFALZ("Rheinland-Pfalz"),
-    SAARLAND("Saarland"),
-    SACHSEN("Sachsen"),
-    SACHSEN_ANHALT("Sachsen-Anhalt"),
-    SCHLESWIG_HOLSTEIN("Schleswig-Holstein"),
-    THUERINGEN("Thueringen"),
+    BADEN_WUERTTEMBERG("DE-BW","Baden-Wuerttemberg"),
+    BAYERN("DE-BY","Bayern"),
+    BERLIN("DE-BE","Berlin"),
+    BRANDENBURG("DE-BB","Brandenburg"),
+    BREMEN("DE-HB","Bremen"),
+    HAMBURG("DE-HH","Hamburg"),
+    HESSEN("DE-HE","Hessen"),
+    MECKLENBURG_VORPOMMERN("DE-MV","Mecklenburg-Vorpommern"),
+    NIEDERSACHSEN("DE-NI","Niedersachsen"),
+    NORDRHEIN_WESTFALEN("DE-NW","Nordrhein-Westfalen"),
+    RHEINLAND_PFALZ("DE-RP","Rheinland-Pfalz"),
+    SAARLAND("DE-SL","Saarland"),
+    SACHSEN("DE-SN","Sachsen"),
+    SACHSEN_ANHALT("DE-ST","Sachsen-Anhalt"),
+    SCHLESWIG_HOLSTEIN("DE-SH","Schleswig-Holstein"),
+    THUERINGEN("DE-TH","Thueringen"),
     ;
 
     private final String displayName;
 
-    GermanyState(String displayName) {
+    private final String isoCode;
+
+    GermanyState(String isoCode,String displayName) {
         this.displayName = displayName;
+        this.isoCode = isoCode;
     }
 
     public String getDisplayName() {
         return this.displayName;
+    }
+
+    @Override
+    public String getISOCode() {
+        return this.isoCode;
     }
 
     @Override
