@@ -98,7 +98,7 @@ public class StatisticRequestFragment extends Fragment {
         });
         //TODO change with post
         //init floatingActionButtonPosition once it is known if the scrollview is at the end when initialized
-        ViewTreeObserver vto=scrollView.getViewTreeObserver();
+        ViewTreeObserver vto = scrollView.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -111,24 +111,24 @@ public class StatisticRequestFragment extends Fragment {
         });
 
         //TODO visually show that limit is reached
-        MultiAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
+        CustomMultiAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
         MultiAutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, null);
-        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter,root.findViewById(R.id.isoCountryChips));
+        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, root.findViewById(R.id.isoCountryChips));
 
-        MultiAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
+        CustomMultiAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
         MultiAutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1, null);
-        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter,root.findViewById(R.id.criteriaChips));
+        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, root.findViewById(R.id.criteriaChips));
 
-        MultiAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
+        CustomMultiAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
         MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, null) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
-                if(allowOnlyOneItem)addToBlackList(ChartType.BAR);
+                if (allowOnlyOneItem) addToBlackList(ChartType.BAR);
                 super.conditionApplies(allowOnlyOneItem);
             }
         };
-        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter,root.findViewById(R.id.chartTypeChips));
+        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter, root.findViewById(R.id.chartTypeChips));
 
         //get current Date
         final Calendar c = Calendar.getInstance();
@@ -196,9 +196,9 @@ public class StatisticRequestFragment extends Fragment {
 
             @Override
             public void conditionApplies(boolean startAndEndDateMustBeSame) {
-                if (startAndEndDateMustBeSame&&!changed) {
+                if (startAndEndDateMustBeSame && !changed) {
                     //end and start date must not be same
-                    if (!Objects.equals(start,end)) {
+                    if (!Objects.equals(start, end)) {
                         throw new IllegalStateException("Unexpected State, start and end are different but must be same");
                     }
                     endDatePicker.setOnDateSetListener(null);
@@ -275,22 +275,29 @@ public class StatisticRequestFragment extends Fragment {
         return date.atStartOfDay().toEpochSecond(ZoneId.systemDefault().getRules().getOffset(Instant.now())) * 1000;
     }
 
-    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(MultiAutoCompleteTextView textView, MultiAutoCompleteTextViewAdapter<T> adapter,ChipGroup chipGroup) {
+    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(MultiAutoCompleteTextView textView, MultiAutoCompleteTextViewAdapter<T> adapter, ChipGroup chipGroup) {
         textView.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
         textView.setOnItemClickListener((parent, view, position, id) -> {
             adapter.selectItem(position);
-            addItemToChipGroup(adapter.getItem(position),chipGroup);
+            T selectedItem = adapter.getItem(position);
+            textView.setText("");
+            Chip itemChip = getChip(selectedItem);
+            itemChip.setOnCloseIconClickListener(v -> {
+                adapter.unSelectItem(selectedItem);
+                chipGroup.removeView(v);
+            });
+            chipGroup.addView(itemChip);
         });
         textView.setAdapter(adapter);
-        textView.setThreshold(0);
     }
 
-    private <T extends Enum<T>> void addItemToChipGroup(T item, ChipGroup chipGroup) {
-        Chip chip=new Chip(requireContext());
+    private <T extends Enum<T>> Chip getChip(T item) {
+        Chip chip = new Chip(requireContext());
         chip.setCloseIconVisible(true);
         chip.setChipIconVisible(true);
-        chip.setChipIcon(ContextCompat.getDrawable(requireContext(),R.drawable.ic_home_black_24dp));
+        chip.setChipIcon(ContextCompat.getDrawable(requireContext(), R.drawable.ic_home_black_24dp));
         chip.setText(item.toString());
-        chipGroup.addView(chip);
+        chip.setTextIsSelectable(false);
+        return chip;
     }
 }
