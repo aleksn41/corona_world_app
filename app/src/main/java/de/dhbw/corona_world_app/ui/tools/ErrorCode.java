@@ -13,6 +13,7 @@ public enum ErrorCode {
     NO_CONNECTION(7, "The Internet could not be accessed."),
     CONNECTION_TIMEOUT(8, "A timeout occurred while querying data."),
     UNEXPECTED_ANSWER(9,"The requested data has an unexpected format."),
+    TOO_MANY_REQUESTS(10, "Too many requests were made, please retry querying in a few seconds."),
     ;
 
     int code;

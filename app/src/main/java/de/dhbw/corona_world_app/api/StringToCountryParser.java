@@ -20,38 +20,41 @@ public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();
 
-    public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException {
-        JSONArray jsonArray = new JSONArray(toParse);
-        TimeFramedCountry country = new TimeFramedCountry();
-
-        int dateRange = jsonArray.length();
-        if(skipFirstDate) dateRange--;
-
-        LocalDate[] dates = new LocalDate[dateRange];
-        int[] deaths = new int[dateRange];
-        int[] recovered = new int[dateRange];
-        int[] infected = new int[dateRange];
-        country.setPop_inf_ratio(new double[dateRange]);
-        country.setCountry(isoCountry);
-        int i = 0;
-        if(skipFirstDate) i++;
-        for (; i < jsonArray.length(); i++) {
-            if(skipFirstDate){
-                dates[i-1] = LocalDate.parse(jsonArray.getJSONObject(i).getString("Date").substring(0, 10));
-                infected[i-1] = jsonArray.getJSONObject(i).getInt("Confirmed");
-                recovered[i-1] = jsonArray.getJSONObject(i).getInt("Recovered");
-                deaths[i-1] = jsonArray.getJSONObject(i).getInt("Deaths");
-            } else {
-                dates[i] = LocalDate.parse(jsonArray.getJSONObject(i).getString("Date").substring(0, 10));
-                infected[i] = jsonArray.getJSONObject(i).getInt("Confirmed");
-                recovered[i] = jsonArray.getJSONObject(i).getInt("Recovered");
-                deaths[i] = jsonArray.getJSONObject(i).getInt("Deaths");
-            }
+    public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException, TooManyRequestsException {
+        if(toParse.toLowerCase().startsWith("{\"message\":\"too many requests")){
+            throw new TooManyRequestsException("Too many requests were made!");
         }
-        country.setDates(dates);
-        country.setDeaths(deaths);
-        country.setRecovered(recovered);
-        country.setInfected(infected);
+            JSONArray jsonArray = new JSONArray(toParse);
+            TimeFramedCountry country = new TimeFramedCountry();
+
+            int dateRange = jsonArray.length();
+            if (skipFirstDate) dateRange--;
+
+            LocalDate[] dates = new LocalDate[dateRange];
+            int[] deaths = new int[dateRange];
+            int[] recovered = new int[dateRange];
+            int[] infected = new int[dateRange];
+            country.setPop_inf_ratio(new double[dateRange]);
+            country.setCountry(isoCountry);
+            int i = 0;
+            if (skipFirstDate) i++;
+            for (; i < jsonArray.length(); i++) {
+                if (skipFirstDate) {
+                    dates[i - 1] = LocalDate.parse(jsonArray.getJSONObject(i).getString("Date").substring(0, 10));
+                    infected[i - 1] = jsonArray.getJSONObject(i).getInt("Confirmed");
+                    recovered[i - 1] = jsonArray.getJSONObject(i).getInt("Recovered");
+                    deaths[i - 1] = jsonArray.getJSONObject(i).getInt("Deaths");
+                } else {
+                    dates[i] = LocalDate.parse(jsonArray.getJSONObject(i).getString("Date").substring(0, 10));
+                    infected[i] = jsonArray.getJSONObject(i).getInt("Confirmed");
+                    recovered[i] = jsonArray.getJSONObject(i).getInt("Recovered");
+                    deaths[i] = jsonArray.getJSONObject(i).getInt("Deaths");
+                }
+            }
+            country.setDates(dates);
+            country.setDeaths(deaths);
+            country.setRecovered(recovered);
+            country.setInfected(infected);
         return country;
     }
 

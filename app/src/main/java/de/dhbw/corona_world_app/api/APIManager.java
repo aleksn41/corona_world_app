@@ -56,7 +56,7 @@ public class APIManager {
     public static List<Country> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
         Logger.logV(TAG, "Getting Data for every Country from api " + api.getName());
 
-        List<Country> returnList = null;
+        List<Country> returnList;
 
         Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
@@ -109,12 +109,7 @@ public class APIManager {
                 );
                 futureCoronaData.add(future);
                 if (popNeeded) {
-                    Future<Country> future1 = service.submit(new Callable<Country>() {
-                        @Override
-                        public Country call() throws Exception {
-                            return StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name());
-                        }
-                    });
+                    Future<Country> future1 = service.submit(() -> StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name()));
                     futurePopData.add(future1);
                 }
             }
@@ -133,7 +128,7 @@ public class APIManager {
         return returnList;
     }
 
-    public static List<TimeFramedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException {
+    public static List<TimeFramedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         if (endDate != null && (startDate == null || endDate.isBefore(startDate)))
             throw new IllegalArgumentException("Ending date is before starting date!");
@@ -184,12 +179,7 @@ public class APIManager {
                     futureCoronaData.add(future);
 
                     if (popNeeded) {
-                        Future<Country> future1 = service.submit(new Callable<Country>() {
-                            @Override
-                            public Country call() throws Exception {
-                                return StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name());
-                            }
-                        });
+                        Future<Country> future1 = service.submit(() -> StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name()));
                         futurePopData.add(future1);
                     }
                 }
@@ -214,7 +204,7 @@ public class APIManager {
     public static Map<ISOCountry, Long> getAllCountriesPopData() throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting population data...");
         Future<String> future = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getAllCountries()));
-        Map<ISOCountry, Long> returnMap = new HashMap<>();
+        Map<ISOCountry, Long> returnMap;
         returnMap = StringToCountryParser.parseMultiPopCount(future.get());
         return returnMap;
     }
