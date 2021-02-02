@@ -38,7 +38,7 @@ public class StatisticViewModel extends ViewModel {
 
     private static final String TAG = StatisticViewModel.class.getName();
 
-    private final Criteria[] criteriaOrder = new Criteria[]{Criteria.POPULATION, Criteria.HEALTHY, Criteria.INFECTED, Criteria.RECOVERED, Criteria.DEATHS, Criteria.IH_RATION, Criteria.ID_RATION};
+    private final Criteria[] criteriaOrder = new Criteria[]{Criteria.POPULATION, Criteria.HEALTHY, Criteria.INFECTED, Criteria.ACTIVE, Criteria.RECOVERED, Criteria.DEATHS, Criteria.IH_RATION, Criteria.ID_RATION};
 
     private ChartValueSetGenerator dataSetGenerator;
 
@@ -299,6 +299,9 @@ public class StatisticViewModel extends ViewModel {
             case POPULATION:
                 data.add((float) country.getPopulation());
                 break;
+            case ACTIVE:
+                data.add((float) averageValues.getAvgActive());
+                break;
         }
     }
 
@@ -345,6 +348,9 @@ public class StatisticViewModel extends ViewModel {
                 case POPULATION:
                     data.add((float) country.getPopulation());
                     break;
+                case ACTIVE:
+                    data.add((float) country.getActive()[i]);
+                    break;
             }
         }
         return data;
@@ -359,6 +365,7 @@ public class StatisticViewModel extends ViewModel {
         private int avgInfected;
         private int avgDeaths;
         private int avgRecovered;
+        private int avgActive;
         private double avgPopInfRatio;
         private double avgInfDeathRatio;
 
@@ -369,6 +376,7 @@ public class StatisticViewModel extends ViewModel {
             this.avgRecovered = 0;
             this.avgPopInfRatio = 0;
             this.avgInfDeathRatio = 0;
+            this.avgActive = 0;
         }
 
         public int getAvgInfected() {
@@ -381,6 +389,10 @@ public class StatisticViewModel extends ViewModel {
 
         public int getAvgRecovered() {
             return avgRecovered;
+        }
+
+        public int getAvgActive() {
+            return avgActive;
         }
 
         public double getAvgPopInfRatio() {
@@ -416,6 +428,11 @@ public class StatisticViewModel extends ViewModel {
                 avgInfDeathRatio = (double) country.getDeaths()[i] / country.getInfected()[i];
             }
             avgInfDeathRatio = avgInfDeathRatio / country.getDates().length;
+
+            for (int i = 0; i < country.getActive().length; i++) {
+                avgActive += country.getActive()[i];
+            }
+            avgActive = avgActive / country.getActive().length;
             return this;
         }
     }
