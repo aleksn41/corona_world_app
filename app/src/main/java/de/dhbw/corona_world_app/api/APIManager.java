@@ -161,17 +161,17 @@ public class APIManager {
 
         //this is only needed because the api cannot handle when start and end date are equal and returns all dates' data
         boolean startAndEndEqual = startDate.equals(endDate);
-        if(startAndEndEqual){
+        if (startAndEndEqual) {
             finalStartDate = startDate.minusDays(1);
         } else {
             finalStartDate = startDate;
         }
 
         boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
-        if(startAndEndEqual && startDate.equals(LocalDate.now())){
+        if (startAndEndEqual && startDate.equals(LocalDate.now())) {
             List<Country> countries = getData(countryList, criteriaList);
             List<TimeFramedCountry> timeframedCountries = new ArrayList<>();
-            for (Country country: countries) {
+            for (Country country : countries) {
                 TimeFramedCountry countryToAdd = new TimeFramedCountry();
                 countryToAdd.setInfected(new int[]{country.getInfected()});
                 countryToAdd.setDates(new LocalDate[]{startDate});

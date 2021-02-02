@@ -18,11 +18,11 @@ public class Country implements Serializable {
 
     private double pop_inf_ratio;
 
-    public Country(){
+    public Country() {
     }
 
-    public long getHealthy(){
-        return this.population-this.infected;
+    public long getHealthy() {
+        return this.population - this.infected;
     }
 
     public double getPop_inf_ratio() {

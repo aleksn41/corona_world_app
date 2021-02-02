@@ -55,8 +55,8 @@ public class MapData {
 
     public String putEntries(List<Country> entryList) {
         StringBuilder builder = new StringBuilder(entryList.size() * 100);
-        Logger.logV(TAG,"Putting entries into StringBuilder...");
-        if(entryList.size() > 0) {
+        Logger.logV(TAG, "Putting entries into StringBuilder...");
+        if (entryList.size() > 0) {
             Country country = entryList.get(0);
             ISOCountry isoCountry = (ISOCountry) country.getName();
             builder.append("['").append(isoCountry.getISOCode()).append("',").append(getPercentValueOfDouble(country.getPop_inf_ratio())).append("]");
@@ -72,7 +72,7 @@ public class MapData {
         return Base64.encodeToString((WebViewStart + builder.toString() + WebViewEnd).getBytes(), Base64.NO_PADDING);
     }
 
-    public double getPercentValueOfDouble(double number){
+    public double getPercentValueOfDouble(double number) {
         return 100 * number;
     }
 

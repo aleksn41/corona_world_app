@@ -22,10 +22,12 @@ public enum GermanyState implements Displayable {
     private final String displayName;
 
     GermanyState(String displayName) {
-        this.displayName=displayName;
+        this.displayName = displayName;
     }
 
-    public String getDisplayName(){return this.displayName;}
+    public String getDisplayName() {
+        return this.displayName;
+    }
 
     @Override
     public String toString() {
