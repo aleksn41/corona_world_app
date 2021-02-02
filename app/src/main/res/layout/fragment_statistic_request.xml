@@ -30,7 +30,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
 
-            <de.dhbw.corona_world_app.ui.statistic.CustomNachoTextView
+            <MultiAutoCompleteTextView
                 android:id="@+id/nachoIsoCountryTextView"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
@@ -41,11 +41,14 @@
                 app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle"
                 android:hint="Countries"
                 app:chipSpacing="8dp"
-                app:chipTextSize="16dp"
-                app:chipHeight="30dp"
-                app:chipVerticalSpacing="3dp"
                 android:saveEnabled="false"/>
 
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/isoCountryChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/nachoIsoCountryTextView"
+                />
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/criteriaChooserTitle"
                 style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
@@ -56,9 +59,9 @@
                 android:textAlignment="center"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/nachoIsoCountryTextView" />
+                app:layout_constraintTop_toBottomOf="@id/isoCountryChips" />
 
-            <de.dhbw.corona_world_app.ui.statistic.CustomNachoTextView
+            <MultiAutoCompleteTextView
                 android:id="@+id/nachoCriteriaTextView"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
@@ -68,11 +71,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle"
-                app:chipSpacing="8dp"
-                app:chipTextSize="16dp"
-                app:chipHeight="30dp"
-                app:chipVerticalSpacing="3dp"
                 android:saveEnabled="false"/>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/criteriaChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/nachoCriteriaTextView"
+                />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/chartTypeChooserTitle"
@@ -84,10 +90,10 @@
                 android:textAlignment="center"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/nachoCriteriaTextView" />
+                app:layout_constraintTop_toBottomOf="@id/criteriaChips" />
 
 
-            <de.dhbw.corona_world_app.ui.statistic.CustomNachoTextView
+            <MultiAutoCompleteTextView
                 android:id="@+id/nachoChartTypeTextView"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
@@ -97,11 +103,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle"
-                app:chipSpacing="8dp"
-                app:chipTextSize="16dp"
-                app:chipHeight="30dp"
-                app:chipVerticalSpacing="3dp"
                 android:saveEnabled="false"/>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chartTypeChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/nachoChartTypeTextView"
+                />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/timePickerTitle"
@@ -113,7 +122,7 @@
                 android:textAlignment="center"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/nachoChartTypeTextView" />
+                app:layout_constraintTop_toBottomOf="@id/chartTypeChips" />
 
             <Button
                 android:id="@+id/startDateChooser"
