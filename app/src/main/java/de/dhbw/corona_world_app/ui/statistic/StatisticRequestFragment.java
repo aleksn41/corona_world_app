@@ -292,13 +292,20 @@ public class StatisticRequestFragment extends Fragment {
                     if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                         if (adapter.filteredItems.size() > 0)
                             textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
-
-                    } else return false;
+                        else{
+                            showErrorWithCompletion(textView);
+                            return false;
+                        }
+                    }else return false;
                 } else if (actionId == EditorInfo.IME_NULL) {
                     if (event.getAction() == KeyEvent.ACTION_DOWN) {
                         if (adapter.filteredItems.size() > 0)
                             textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
-                    } else return true;
+                        else{
+                            showErrorWithCompletion(textView);
+                            return true;
+                        }
+                    }else return false;
                 } else return false;
                 return true;
             }
@@ -314,5 +321,9 @@ public class StatisticRequestFragment extends Fragment {
         chip.setText(item.toString());
         chip.setTextIsSelectable(false);
         return chip;
+    }
+
+    private void showErrorWithCompletion(TextView textView){
+        textView.setError("No Matching Item");
     }
 }
