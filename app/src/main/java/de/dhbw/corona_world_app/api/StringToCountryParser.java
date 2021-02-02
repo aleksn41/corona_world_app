@@ -35,7 +35,7 @@ public class StringToCountryParser {
             country.setDeaths(properties.getInt("Death"));
             country.setPopulation((long) (properties.getInt("Fallzahl") / (properties.getDouble("faelle_100000_EW")/100000)));
             countries.add(country);
-            if(country.getName()==null) System.out.println(properties.getString("LAN_ew_GEN").replace("-","_").replace("ü","ue").toUpperCase());
+            if(country.getName()==null) Log.e(TAG, properties.getString("LAN_ew_GEN").replace("-","_").replace("ü","ue").toUpperCase() + "has not been matched!");
         }
         return countries;
     }

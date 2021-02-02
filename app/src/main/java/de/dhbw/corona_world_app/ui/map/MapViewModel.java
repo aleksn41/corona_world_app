@@ -61,6 +61,43 @@ public class MapViewModel extends ViewModel {
         return returnList;
     }
 
+    public void cacheGermany(@NonNull List<Country> germanyData) throws IOException {
+        Log.v(TAG, "Caching world data...");
+        FileOutputStream fileOut = new FileOutputStream(pathToCacheDir + "/germany_cache.ser");
+        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+        out.writeObject(germanyData);
+        out.close();
+        fileOut.close();
+    }
+
+    public List<Country> getCachedGermany() throws IOException, ClassNotFoundException {
+        Log.v(TAG, "Getting cached world data...");
+        FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_cache.ser");
+        ObjectInputStream in = new ObjectInputStream(fileIn);
+        List<Country> returnList = (List<Country>) in.readObject();
+        in.close();
+        fileIn.close();
+        return returnList;
+    }
+
+    public void initGermany() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
+        List<Country> apiGottenList;
+        Log.v(TAG, "Initiating country list...");
+        if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+            apiGottenList = APIManager.getDataGermany(API.ARCGIS);
+            if (!(apiGottenList.size() > 0)) {
+                throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
+            }
+            if (APIManager.isCacheEnabled()) {
+                cacheGermany(apiGottenList);
+                worldCacheAge = LocalDateTime.now();
+            }
+        } else {
+            apiGottenList = getCachedGermany();
+        }
+        mCountryList.postValue(apiGottenList);
+    }
+
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         List<Country> apiGottenList;
         Log.v(TAG, "Initiating country list...");
