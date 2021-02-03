@@ -1,7 +1,9 @@
 package de.dhbw.corona_world_app.datastructure;
 
 public interface Displayable {
-    public String getDisplayName();
+    String getDisplayName();
 
-    public String getISOCode();
+    String getISOCode();
+
+    int getFlagDrawableID();
 }

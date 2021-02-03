@@ -16,8 +16,8 @@ import java.util.Map;
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
-import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 public class StringToCountryParser {
 

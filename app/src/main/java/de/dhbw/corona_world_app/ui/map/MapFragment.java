@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -9,9 +8,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.ConsoleMessage;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -49,10 +45,10 @@ import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.map.MapData;
-import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
@@ -112,7 +108,7 @@ public class MapFragment extends Fragment {
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
         percentageFormat.setMaximumFractionDigits(3);
-        ((Button)root.findViewById(R.id.bottomSheetButton)).setOnClickListener((View.OnClickListener) this::goToStatistic);
+        root.findViewById(R.id.bottomSheetButton).setOnClickListener(this::goToStatistic);
         //setup bottomsheet
         RelativeLayout bottomSheet = root.findViewById(R.id.bottomSheet);
         BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -297,12 +293,12 @@ public class MapFragment extends Fragment {
     }
 
     public void goToStatistic(final View view){
-        StatisticCall request=new StatisticCall(Collections.singletonList(selectedCountry.getISOCountry()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
-        MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
+        StatisticCall request=new StatisticCall(Collections.singletonList((ISOCountry) selectedCountry.getName()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
+        //MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
         NavHostFragment navHostFragment =
                 (NavHostFragment) requireActivity().getSupportFragmentManager()
                         .findFragmentById(R.id.nav_host_fragment);
-        navHostFragment.getNavController().navigate(action);
+        //navHostFragment.getNavController().navigate(action);
     }
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {

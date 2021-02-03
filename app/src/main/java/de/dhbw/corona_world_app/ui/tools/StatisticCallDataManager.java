@@ -40,8 +40,8 @@ import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.Enum64BitEncoder;
-import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
  * This class manages the saving and reading of all Data related to Statistic requests ({@link StatisticCall}).

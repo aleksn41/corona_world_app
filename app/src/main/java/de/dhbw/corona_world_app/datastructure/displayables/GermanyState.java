@@ -40,6 +40,11 @@ public enum GermanyState implements Displayable {
     }
 
     @Override
+    public int getFlagDrawableID() {
+        return com.michaelfotiadis.androidflags.R.drawable.ic_list_country_de;
+    }
+
+    @Override
     public String toString() {
         return getDisplayName();
     }

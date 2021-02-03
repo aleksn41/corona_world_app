@@ -22,8 +22,8 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
