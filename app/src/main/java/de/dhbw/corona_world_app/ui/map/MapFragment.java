@@ -83,8 +83,6 @@ public class MapFragment extends Fragment {
         }
     };
 
-    //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
-    //todo establish order
     @SuppressLint({"SetJavaScriptEnabled", "SetTextI18n"})
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "Creating MapFragment view");
