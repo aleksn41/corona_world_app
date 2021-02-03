@@ -18,11 +18,12 @@ public class JavaScriptInterface {
 
     @JavascriptInterface
     public void setISOCountry(String isoCode){
+        System.out.println(isoCode);
         if(isoCode == null){
             current.postValue(null);
         } else if(isoCode.length()==2){
             current.postValue(Mapper.mapISOCodeToISOCountry(isoCode));
-        } else if(isoCode.length()==4){
+        } else if(isoCode.length()==5){
             current.postValue(Mapper.mapISOCodeToGermanyState(isoCode));
         }
     }

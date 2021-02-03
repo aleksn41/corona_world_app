@@ -122,7 +122,7 @@ public class Mapper {
     }
 
     public static GermanyState mapISOCodeToGermanyState(String isoCode){
-        if(isoCode.length() != 4) throw new IllegalArgumentException("The given String is no ISOCode! Example:\"DE\"");
+        if(isoCode.length() != 5) throw new IllegalArgumentException("The given String is no ISOCode! Example:\"DE-RP\"");
         if(isoCodeToGermany == null){
             isoCodeToGermany = new HashMap<>();
             for (GermanyState state:GermanyState.values()) {
