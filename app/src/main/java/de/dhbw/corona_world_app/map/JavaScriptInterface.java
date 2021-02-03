@@ -18,7 +18,6 @@ public class JavaScriptInterface {
 
     @JavascriptInterface
     public void setISOCountry(String isoCode){
-        System.out.println(isoCode);
         if(isoCode == null){
             current.postValue(null);
         } else if(isoCode.length()==2){
