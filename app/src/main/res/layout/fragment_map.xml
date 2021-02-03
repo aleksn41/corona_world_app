@@ -98,7 +98,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:clickable="true"
-        android:src="@android:drawable/ic_menu_compass"
+        android:src="@drawable/germany_flag_black_n_white"
         app:layout_anchor="@+id/floatingActionButton"
         app:layout_anchorGravity="center" />
 
