@@ -24,10 +24,10 @@ public class StringToCountryParser {
         if(toParse.toLowerCase().startsWith("{\"message\":\"too many requests")){
             throw new TooManyRequestsException("Too many requests were made!");
         }
-  
+        TimeFramedCountry country = new TimeFramedCountry();
+
         try {
             JSONArray jsonArray = new JSONArray(toParse);
-
             int dateRange = jsonArray.length();
             if (skipFirstDate) dateRange--;
 

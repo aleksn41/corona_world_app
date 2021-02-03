@@ -163,7 +163,13 @@ public class StatisticViewModel extends ViewModel {
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return dates.get((int) value);
+                if (value >= 0) {
+                    if (dates.size() > (int) value) {
+                        return dates.get((int) value);
+                    } else return "";
+                } else {
+                    return "";
+                }
             }
         });
     }
@@ -292,6 +298,7 @@ public class StatisticViewModel extends ViewModel {
                 }
             });
         }
+
 
         chart.setData(lineData);
     }
