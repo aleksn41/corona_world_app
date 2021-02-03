@@ -15,6 +15,7 @@
         <item name="colorOnSecondary">@color/black</item>
         <item name="windowActionModeOverlay">true</item>
         <!-- Customize your theme here. -->
+        <item name="bottom_sheet_background">@color/white</item>
     </style>
     <array name="chartColors">
         <!-- 60 Colors should be more than sufficient -->
