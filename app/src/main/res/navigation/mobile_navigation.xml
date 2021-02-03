@@ -9,7 +9,11 @@
         android:id="@+id/navigation_world"
         android:name="de.dhbw.corona_world_app.ui.map.MapFragment"
         android:label="@string/title_world"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map" >
+        <action
+            android:id="@+id/goToStatistic"
+            app:destination="@id/navigation_statistic" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_statistic_request"
