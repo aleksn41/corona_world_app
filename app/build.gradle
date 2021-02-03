@@ -44,7 +44,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.github.varunest:sparkbutton:1.0.6'
-    implementation "com.hootsuite.android:nachos:1.1.1"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.michaelfotiadis:android-country-flags:1.0.3'
     testImplementation 'junit:junit:4.13.1'
