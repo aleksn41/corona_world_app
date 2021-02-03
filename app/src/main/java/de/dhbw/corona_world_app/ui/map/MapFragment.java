@@ -159,7 +159,7 @@ public class MapFragment extends Fragment {
                     case BottomSheetBehavior.STATE_SETTLING:
                         break;
                 }
-                if(selectedCountry!=null)root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
+                if(selectedCountry!=null && mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD))root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -176,6 +176,7 @@ public class MapFragment extends Fragment {
 
         button.setOnClickListener(v -> {
             if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD)){
+                root.findViewById(R.id.bottomSheetButton).setVisibility(View.GONE);
                 mapViewModel.switchResolution(MapData.Resolution.GERMANY);
                 try {
                     mapViewModel.initGermany();
@@ -183,6 +184,7 @@ public class MapFragment extends Fragment {
                     handleException(e);
                 }
             } else {
+                root.findViewById(R.id.bottomSheetButton).setVisibility(View.INVISIBLE);
                 mapViewModel.switchResolution(MapData.Resolution.WOLRD);
                 try {
                     mapViewModel.initCountryList();
@@ -294,11 +296,11 @@ public class MapFragment extends Fragment {
 
     public void goToStatistic(final View view){
         StatisticCall request=new StatisticCall(Collections.singletonList((ISOCountry) selectedCountry.getName()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
-        //MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
+        MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
         NavHostFragment navHostFragment =
                 (NavHostFragment) requireActivity().getSupportFragmentManager()
                         .findFragmentById(R.id.nav_host_fragment);
-        //navHostFragment.getNavController().navigate(action);
+        navHostFragment.getNavController().navigate(action);
     }
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
