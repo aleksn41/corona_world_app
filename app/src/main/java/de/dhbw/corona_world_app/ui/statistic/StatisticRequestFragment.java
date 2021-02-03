@@ -1,47 +1,39 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
 import android.app.DatePickerDialog;
-import android.os.Build;
+import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
-import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.AdapterView;
+import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.hootsuite.nachos.chip.Chip;
-import com.hootsuite.nachos.chip.ChipSpan;
-import com.hootsuite.nachos.chip.ChipSpanChipCreator;
-import com.hootsuite.nachos.terminator.ChipTerminatorHandler;
-import com.hootsuite.nachos.terminator.DefaultChipTerminatorHandler;
-import com.hootsuite.nachos.tokenizer.ChipTokenizer;
-import com.hootsuite.nachos.tokenizer.SpanChipTokenizer;
-import com.hootsuite.nachos.validator.NachoValidator;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,7 +41,6 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
-import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
@@ -99,9 +90,9 @@ public class StatisticRequestFragment extends Fragment {
                 floatingActionButton.extend();
             } else floatingActionButton.shrink();
         });
-
+        //TODO change with post
         //init floatingActionButtonPosition once it is known if the scrollview is at the end when initialized
-        ViewTreeObserver vto=scrollView.getViewTreeObserver();
+        ViewTreeObserver vto = scrollView.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -114,24 +105,24 @@ public class StatisticRequestFragment extends Fragment {
         });
 
         //TODO visually show that limit is reached
-        CustomNachoTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
-        MultiAutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, null);
-        setupNachoTextView(ISOCountry.class, isoCountryNachoTextView, isoCountryAdapter);
+        CustomAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
+        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, null);
+        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, root.findViewById(R.id.isoCountryChips));
 
-        CustomNachoTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
-        MultiAutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new MultiAutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1, null);
-        setupNachoTextView(Criteria.class, criteriaNachoTextView, criteriaAdapter);
+        CustomAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
+        AutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new AutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1, null);
+        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, root.findViewById(R.id.criteriaChips));
 
-        CustomNachoTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
-        MultiAutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new MultiAutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, null) {
+        CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
+        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, null) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
-                if(allowOnlyOneItem)addToBlackList(ChartType.BAR);
+                if (allowOnlyOneItem) addToBlackList(ChartType.BAR);
                 super.conditionApplies(allowOnlyOneItem);
             }
         };
-        setupNachoTextView(ChartType.class, chartTypeNachoTextView, chartTypeAdapter);
+        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter, root.findViewById(R.id.chartTypeChips));
 
         //get current Date
         final Calendar c = Calendar.getInstance();
@@ -199,9 +190,9 @@ public class StatisticRequestFragment extends Fragment {
 
             @Override
             public void conditionApplies(boolean startAndEndDateMustBeSame) {
-                if (startAndEndDateMustBeSame&&!changed) {
+                if (startAndEndDateMustBeSame && !changed) {
                     //end and start date must not be same
-                    if (!Objects.equals(start,end)) {
+                    if (!Objects.equals(start, end)) {
                         throw new IllegalStateException("Unexpected State, start and end are different but must be same");
                     }
                     endDatePicker.setOnDateSetListener(null);
@@ -278,71 +269,63 @@ public class StatisticRequestFragment extends Fragment {
         return date.atStartOfDay().toEpochSecond(ZoneId.systemDefault().getRules().getOffset(Instant.now())) * 1000;
     }
 
-    private <T extends Enum<T>> void setupNachoTextView(Class<T> tClass, CustomNachoTextView textView, MultiAutoCompleteTextViewAdapter<T> adapter) {
-        textView.enableEditChipOnTouch(true, true);
-
-        textView.setOnChipClickListener((chip, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                adapter.unSelectItem(tClass.cast(chip.getData()));
-            }
-        });
-        //need to get old OnItemClickListener for library to function properly
-        AdapterView.OnItemClickListener oldListener = textView.getOnItemClickListener();
-
+    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(AutoCompleteTextView textView, AutoCompleteTextViewAdapter<T> adapter, ChipGroup chipGroup) {
         textView.setOnItemClickListener((parent, view, position, id) -> {
             adapter.selectItem(position);
-            oldListener.onItemClick(parent, view, position, id);
+            T selectedItem = adapter.getItem(position);
+            textView.setText("");
+            Chip itemChip = getChip(selectedItem);
+            itemChip.setOnCloseIconClickListener(v -> {
+                adapter.unSelectItem(selectedItem);
+                chipGroup.removeView(v);
+            });
+            chipGroup.addView(itemChip);
         });
-
-        textView.setChipTokenizer(new SpanChipTokenizer<ChipSpan>(getContext(), new ChipSpanChipCreator(), ChipSpan.class) {
+        //when the user presses enter, use top suggestion
+        textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        textView.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
+        //only works for non virtual keyboards
+        textView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public void deleteChip(Chip chip, Editable text) {
-                adapter.unSelectItem(tClass.cast(chip.getData()));
-                super.deleteChip(chip, text);
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event == null) {
+                    if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                        if (adapter.filteredItems.size() > 0) {
+                            if (!textView.isPopupShowing()) textView.showDropDown();
+                            textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
+                        } else {
+                            showErrorWithCompletion(textView);
+                            return false;
+                        }
+                    } else return false;
+                } else if (actionId == EditorInfo.IME_NULL) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                        if (adapter.filteredItems.size() > 0) {
+                            if (!textView.isPopupShowing()) textView.showDropDown();
+                            textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
+                        } else {
+                            showErrorWithCompletion(textView);
+                            return true;
+                        }
+                    } else return false;
+                } else return false;
+                return true;
             }
         });
-
-        textView.setChipTerminatorHandler(new DefaultChipTerminatorHandler() {
-            @Override
-            public int findAndHandleChipTerminators(@NonNull ChipTokenizer tokenizer, @NonNull Editable text, int start, int end, boolean isPasteEvent) {
-                super.findAndHandleChipTerminators(tokenizer, text, start, end, isPasteEvent);
-                boolean allChipsValid = textView.getAllChips().parallelStream().allMatch(chip -> chip.getData() != null);
-                if (!allChipsValid) {
-                    textView.performValidation();
-
-                }
-                return textView.getText().length();
-            }
-        });
-        textView.addChipTerminator('\n', ChipTerminatorHandler.BEHAVIOR_CHIPIFY_ALL);
-
-        textView.setNachoValidator(new NachoValidator() {
-            @Override
-            public boolean isValid(@NonNull ChipTokenizer chipTokenizer, CharSequence text) {
-                // The text is considered valid if there are no unterminated tokens (everything is a chip)
-                List<Pair<Integer, Integer>> unterminatedTokens = chipTokenizer.findAllTokens(text);
-                // All Chips are Enums
-                List<Chip> chips = textView.getAllChips();
-                return unterminatedTokens.isEmpty() && chips.parallelStream().allMatch(chip -> chip.getData() != null);
-            }
-
-            @Override
-            public CharSequence fixText(@NonNull ChipTokenizer chipTokenizer, CharSequence invalidText) {
-                SpannableStringBuilder newText = new SpannableStringBuilder(invalidText);
-                chipTokenizer.terminateAllTokens(newText);
-                Chip[] chips = chipTokenizer.findAllChips(0, newText.length(), newText);
-                for (Chip chip : chips) {
-                    if (chip.getData() == null) {
-                        int start = chipTokenizer.findChipStart(chip, newText);
-                        int end = chipTokenizer.findChipEnd(chip, newText);
-                        newText.replace(start, end, "");
-                    }
-                }
-                return newText;
-            }
-        });
-
         textView.setAdapter(adapter);
-        textView.setThreshold(0);
+    }
+
+    private <T extends Enum<T>> Chip getChip(T item) {
+        Chip chip = new Chip(requireContext());
+        chip.setCloseIconVisible(true);
+        chip.setChipIconVisible(true);
+        chip.setChipIcon(ContextCompat.getDrawable(requireContext(), R.drawable.ic_home_black_24dp));
+        chip.setText(item.toString());
+        chip.setTextIsSelectable(false);
+        return chip;
+    }
+
+    private void showErrorWithCompletion(TextView textView) {
+        textView.setError("No Matching Item");
     }
 }

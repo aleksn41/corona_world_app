@@ -69,12 +69,25 @@
             android:layout_margin="@dimen/margin_big"
             android:contentDescription="Flag of currently selected Country"
             android:src="@michaelfotiadis:drawable/ic_list_country_unknown" />
+
         <TextView
             android:id="@+id/bottomSheetDescription"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_below="@id/map_box_flag"
+            android:layout_above="@id/bottomSheetButton"
             android:textAlignment="center"
-            android:textSize="24sp"
-            android:layout_below="@+id/map_box_flag"/>
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/bottomSheetButton"
+            android:layout_margin="@dimen/margin_big"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/bottomSheetButtonText"
+            android:visibility="invisible" />
+
     </RelativeLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

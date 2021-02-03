@@ -12,6 +12,8 @@ public class Country implements Serializable {
 
     private int recovered;
 
+    private int active;
+
     private long population;
 
     private double pop_inf_ratio;
@@ -66,6 +68,14 @@ public class Country implements Serializable {
     public void setPopulation(long population) {
         this.population = population;
         this.pop_inf_ratio = (double) infected / population;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public void setActive(int active) {
+        this.active = active;
     }
 
     public ISOCountry getISOCountry() {

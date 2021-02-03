@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.R;
 
-public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter implements Filterable, StatisticRequestRule.RuleEnumAdapter<T> {
+public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter implements Filterable, StatisticRequestRule.RuleEnumAdapter<T> {
     private final Context context;
     HashSet<T> selectedItems;
     List<T> originalItems;
@@ -35,7 +35,7 @@ public class MultiAutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAda
         void onLimitReached(int limit);
     }
 
-    public MultiAutoCompleteTextViewAdapter(Context context, Class<T> tClass, int limit, LimitListener limitListener) {
+    public AutoCompleteTextViewAdapter(Context context, Class<T> tClass, int limit, LimitListener limitListener) {
         this.context = context;
         originalItems = Arrays.asList(tClass.getEnumConstants());
         selectedItems = new HashSet<>();

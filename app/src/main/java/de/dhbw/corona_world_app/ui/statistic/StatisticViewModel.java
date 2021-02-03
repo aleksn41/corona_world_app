@@ -20,13 +20,16 @@ import org.json.JSONException;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
@@ -38,7 +41,7 @@ public class StatisticViewModel extends ViewModel {
 
     private static final String TAG = StatisticViewModel.class.getName();
 
-    private final Criteria[] criteriaOrder = new Criteria[]{Criteria.POPULATION, Criteria.HEALTHY, Criteria.INFECTED, Criteria.RECOVERED, Criteria.DEATHS, Criteria.IH_RATION, Criteria.ID_RATION};
+    private List<Criteria> criteriaOrder;
 
     private ChartValueSetGenerator dataSetGenerator;
 
@@ -52,9 +55,11 @@ public class StatisticViewModel extends ViewModel {
         if (dataSetGenerator == null) {
             dataSetGenerator = new ChartValueSetGenerator();
         }
+        criteriaOrder = new LinkedList<>();
+        criteriaOrder.addAll(Arrays.asList(Criteria.POPULATION, Criteria.HEALTHY, Criteria.INFECTED, Criteria.ACTIVE, Criteria.RECOVERED, Criteria.DEATHS, Criteria.IH_RATION, Criteria.ID_RATION));
     }
 
-    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException {
+    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -71,6 +76,29 @@ public class StatisticViewModel extends ViewModel {
         LocalDate endDate = statisticCall.getEndDate();
         if (startDate == null) startDate = LocalDate.now();
         if (endDate == null) endDate = LocalDate.now();
+
+        int activeavg = 0;
+        int recoveredavg = 0;
+        int deathsavg = 0;
+        for (TimeFramedCountry country:apiGottenList) {
+             activeavg += getIntArrayAvg(country.getActive());
+             recoveredavg += getIntArrayAvg(country.getRecovered());
+             deathsavg += getIntArrayAvg(country.getDeaths());
+        }
+        if(activeavg > recoveredavg){
+            if(activeavg < deathsavg){
+                criteriaOrder.remove(Criteria.DEATHS);
+                criteriaOrder.add(3, Criteria.DEATHS);
+            }
+        } else {
+            if(activeavg < deathsavg){
+                criteriaOrder.remove(Criteria.ACTIVE);
+                criteriaOrder.add(5, Criteria.ACTIVE);
+            } else {
+                criteriaOrder.remove(Criteria.ACTIVE);
+                criteriaOrder.add(4,Criteria.ACTIVE);
+            }
+        }
         if (dates2D) {
             //this sets the steps (in days) and breaks down the data accordingly, so that the user is not showered with too much data
             int dayDifference = (int) DAYS.between(startDate, endDate) + (endDate.equals(LocalDate.now()) ? 0 : 1);
@@ -117,6 +145,14 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(barData);
     }
 
+    private int getIntArrayAvg(int[] array){
+        int avg = 0;
+        for (int value : array) {
+            avg += value;
+        }
+        return avg / array.length;
+    }
+
     private void formatXAxis(List<TimeFramedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
         List<String> dates = new ArrayList<>();
         for (int i = 0; i < dayDifference; i += step) {
@@ -127,12 +163,18 @@ public class StatisticViewModel extends ViewModel {
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return dates.get((int) value);
+                if (value >= 0) {
+                    if (dates.size() > (int) value) {
+                        return dates.get((int) value);
+                    } else return "";
+                } else {
+                    return "";
+                }
             }
         });
     }
 
-    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException {
         Logger.logV(TAG, "Getting pie chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -194,7 +236,7 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(pieData);
     }
 
-    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException {
+    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException {
         Logger.logV(TAG, "Getting line chart for " + statisticCall);
         init();
 
@@ -257,6 +299,7 @@ public class StatisticViewModel extends ViewModel {
             });
         }
 
+
         chart.setData(lineData);
     }
 
@@ -298,6 +341,9 @@ public class StatisticViewModel extends ViewModel {
                 break;
             case POPULATION:
                 data.add((float) country.getPopulation());
+                break;
+            case ACTIVE:
+                data.add((float) averageValues.getAvgActive());
                 break;
         }
     }
@@ -345,6 +391,9 @@ public class StatisticViewModel extends ViewModel {
                 case POPULATION:
                     data.add((float) country.getPopulation());
                     break;
+                case ACTIVE:
+                    data.add((float) country.getActive()[i]);
+                    break;
             }
         }
         return data;
@@ -359,6 +408,7 @@ public class StatisticViewModel extends ViewModel {
         private int avgInfected;
         private int avgDeaths;
         private int avgRecovered;
+        private int avgActive;
         private double avgPopInfRatio;
         private double avgInfDeathRatio;
 
@@ -369,6 +419,7 @@ public class StatisticViewModel extends ViewModel {
             this.avgRecovered = 0;
             this.avgPopInfRatio = 0;
             this.avgInfDeathRatio = 0;
+            this.avgActive = 0;
         }
 
         public int getAvgInfected() {
@@ -381,6 +432,10 @@ public class StatisticViewModel extends ViewModel {
 
         public int getAvgRecovered() {
             return avgRecovered;
+        }
+
+        public int getAvgActive() {
+            return avgActive;
         }
 
         public double getAvgPopInfRatio() {
@@ -416,6 +471,11 @@ public class StatisticViewModel extends ViewModel {
                 avgInfDeathRatio = (double) country.getDeaths()[i] / country.getInfected()[i];
             }
             avgInfDeathRatio = avgInfDeathRatio / country.getDates().length;
+
+            for (int i = 0; i < country.getActive().length; i++) {
+                avgActive += country.getActive()[i];
+            }
+            avgActive = avgActive / country.getActive().length;
             return this;
         }
     }
