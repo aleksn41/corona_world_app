@@ -106,14 +106,11 @@ public class MapFragment extends Fragment {
         button.setVisibility(View.INVISIBLE);
         //listeners for bottom sheet
         //click event for show-dismiss bottom sheet
-        bottomSheet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                } else {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
+        bottomSheet.setOnClickListener(view -> {
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HALF_EXPANDED) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+            } else {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
         boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated", false);
@@ -146,23 +143,20 @@ public class MapFragment extends Fragment {
             }
         });
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD)){
-                    mapViewModel.switchResolution(MapData.Resolution.GERMANY);
-                    try {
-                        mapViewModel.initGermany();
-                    } catch (IOException | ClassNotFoundException | InterruptedException | ExecutionException | JSONException e) {
-                        handleException(e);
-                    }
-                } else {
-                    mapViewModel.switchResolution(MapData.Resolution.WOLRD);
-                    try {
-                        mapViewModel.initCountryList();
-                    } catch (InterruptedException | ExecutionException | IOException | JSONException | ClassNotFoundException e) {
-                        handleException(e);
-                    }
+        button.setOnClickListener(v -> {
+            if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD)){
+                mapViewModel.switchResolution(MapData.Resolution.GERMANY);
+                try {
+                    mapViewModel.initGermany();
+                } catch (IOException | ClassNotFoundException | InterruptedException | ExecutionException | JSONException e) {
+                    handleException(e);
+                }
+            } else {
+                mapViewModel.switchResolution(MapData.Resolution.WOLRD);
+                try {
+                    mapViewModel.initCountryList();
+                } catch (InterruptedException | ExecutionException | IOException | JSONException | ClassNotFoundException e) {
+                    handleException(e);
                 }
             }
         });
@@ -173,12 +167,7 @@ public class MapFragment extends Fragment {
                 loadingScreen.endLoadingScreen();
                 if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.GERMANY)){
                     myWebView.zoomBy(2.15f);
-                    myWebView.setOnTouchListener(new View.OnTouchListener() {
-                        @Override
-                        public boolean onTouch(View v, MotionEvent event) {
-                            return (event.getAction() == MotionEvent.ACTION_MOVE);
-                        }
-                    });
+                    myWebView.setOnTouchListener((v, event) -> (event.getAction() == MotionEvent.ACTION_MOVE));
                 } else {
                     myWebView.setOnTouchListener(null);
                 }
@@ -228,51 +217,11 @@ public class MapFragment extends Fragment {
 
         Log.v(TAG, "Requesting all countries...");
         loadingScreen.setProgressBar(25);
-        service.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    mapViewModel.initCountryList();
-                } catch (InterruptedException | ExecutionException e) {
-                    Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
-                    requireActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
-                        }
-                    });
-                } catch (ClassNotFoundException e) {
-                    Logger.logE(TAG, "Exception during loading cache!", e);
-                    requireActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null);
-                        }
-                    });
-                    //todo call a method that kills cache
-                } catch (JSONException e) {
-                    Logger.logE(TAG, "Exception while parsing data!", e);
-                } catch (IOException e) {
-                    Logger.logE(TAG, "Exception during request!", e);
-                    try {
-                        APIManager.createAPICall("8.8.8.8");
-                        requireActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null);
-                            }
-                        });
-                    } catch (IOException e1) {
-                        requireActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null);
-                            }
-                        });
-                    }
-
-                }
+        service.execute(() -> {
+            try {
+                mapViewModel.initCountryList();
+            } catch (InterruptedException | ExecutionException | IOException | JSONException | ClassNotFoundException e) {
+                handleException(e);
             }
         });
         mapViewModel.mCountryList.observe(
@@ -292,20 +241,10 @@ public class MapFragment extends Fragment {
     private void handleException(Exception e){
         if(e instanceof InterruptedException || e instanceof ExecutionException) {
         Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
-        requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
-            }
-        });
+        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null));
         } else if (e instanceof ClassNotFoundException) {
         Logger.logE(TAG, "Exception during loading cache!", e);
-        requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null);
-            }
-        });
+        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null));
         //todo call a method that kills cache
     } else if (e instanceof JSONException) {
         Logger.logE(TAG, "Exception while parsing data!", e);
@@ -313,20 +252,13 @@ public class MapFragment extends Fragment {
     } else if (e instanceof IOException) {
         Logger.logE(TAG, "Exception during request!", e);
         try {
+            Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
             APIManager.createAPICall("8.8.8.8");
-            requireActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null);
-                }
-            });
+            Logger.logE(TAG, "Success!");
+            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
         } catch (IOException e1) {
-            requireActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null);
-                }
-            });
+            Logger.logE(TAG, "Failure!", e1);
+            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
         }
 
     }
