@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
 import android.app.DatePickerDialog;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
@@ -18,7 +17,6 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -38,10 +36,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,9 +44,8 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
-import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 //TODO put data in View Model

@@ -1,4 +1,6 @@
-package de.dhbw.corona_world_app.datastructure;
+package de.dhbw.corona_world_app.datastructure.displayables;
+
+import de.dhbw.corona_world_app.datastructure.Displayable;
 
 public enum GermanyState implements Displayable {
     BADEN_WUERTTEMBERG("DE-BW","Baden-Wuerttemberg"),

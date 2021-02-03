@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import de.dhbw.corona_world_app.api.Mapper;
 import de.dhbw.corona_world_app.datastructure.Displayable;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class JavaScriptInterface {
 

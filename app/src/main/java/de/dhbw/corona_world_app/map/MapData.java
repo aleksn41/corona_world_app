@@ -2,16 +2,10 @@ package de.dhbw.corona_world_app.map;
 
 import android.util.Base64;
 
-import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
 
 public class MapData {
 

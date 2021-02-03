@@ -13,7 +13,7 @@ import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 
 import static org.junit.Assert.*;

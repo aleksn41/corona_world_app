@@ -1,6 +1,8 @@
-package de.dhbw.corona_world_app.datastructure;
+package de.dhbw.corona_world_app.datastructure.displayables;
 
 import androidx.annotation.NonNull;
+
+import de.dhbw.corona_world_app.datastructure.Displayable;
 
 public enum ISOCountry implements Displayable {
 

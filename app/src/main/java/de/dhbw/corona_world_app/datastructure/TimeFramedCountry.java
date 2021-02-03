@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
+
 public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCountry> {
 
     private ISOCountry country;

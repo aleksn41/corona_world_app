@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,13 +20,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -45,7 +40,7 @@ import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.Enum64BitEncoder;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 /**
