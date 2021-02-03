@@ -31,14 +31,17 @@ import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 
+import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticFragment extends Fragment {
@@ -65,7 +68,7 @@ public class StatisticFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
-
+        //TODO change this
         if (statisticCallViewModel.isNotInit()) {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
@@ -73,6 +76,23 @@ public class StatisticFragment extends Fragment {
                 Log.e(this.getClass().getName(), ErrorCode.CANNOT_READ_FILE.toString(), e);
                 ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, null);
             }
+        }
+        try {
+            Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
+            Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
+            future.get();
+            future1.get();
+        } catch (ExecutionException e) {
+            Throwable error=e.getCause();
+            Log.e(TAG,"error getting new Data",e);
+            if(error instanceof IOException){
+                //check if error is undoable
+            }else if(error instanceof DataException){
+                //inform User that data is corrupt and must be remade
+            }
+        }catch (InterruptedException e){
+            Log.e(TAG,"Thread has been interrupted",e);
+            //future.cancel(true);
         }
 
         // ChartValueSetGenerator provider = new ChartValueSetGenerator();

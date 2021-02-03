@@ -1,22 +1,21 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.ConsoleMessage;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,7 +27,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.net.ConnectException;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -53,7 +52,11 @@ public class MapFragment extends Fragment {
 
     LinearProgressIndicator progressBar;
 
-    TextView textView;
+    TextView bottomSheetTitle;
+
+    ImageView bottomSheetExpandImage;
+
+    NumberFormat percentageFormat = NumberFormat.getPercentInstance();
 
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
@@ -86,29 +89,65 @@ public class MapFragment extends Fragment {
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         progressBar = root.findViewById(R.id.progressBar);
-        textView = root.findViewById(R.id.bottomSheetTextView);
+        bottomSheetTitle = root.findViewById(R.id.bottomSheetTitle);
         Log.v(TAG, "Starting loading screen");
         loadingScreen.startLoadingScreen();
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
-
+        percentageFormat.setMaximumFractionDigits(3);
         //setup bottomsheet
-        LinearLayout bottomSheet = root.findViewById(R.id.bottomSheet);
-        BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-
-        bottomSheetBehavior.setPeekHeight(190);
+        RelativeLayout bottomSheet = root.findViewById(R.id.bottomSheet);
+        BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetExpandImage =root.findViewById(R.id.bottom_sheet_expand);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        bottomSheetBehavior.setFitToContents(true);
+        bottomSheetBehavior.setFitToContents(false);
         //listeners for bottom sheet
         //click event for show-dismiss bottom sheet
         bottomSheet.setOnClickListener(new View.OnClickListener() {
+            boolean up=true;
             @Override
             public void onClick(View view) {
-                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                } else {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                switch (bottomSheetBehavior.getState()) {
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                        break;
+                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
+                        if (!up) {
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                        }
+                        else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                        up ^= true;
+                        break;
+                    case BottomSheetBehavior.STATE_DRAGGING:
+                    case BottomSheetBehavior.STATE_HIDDEN:
+                    case BottomSheetBehavior.STATE_SETTLING:
+                        break;
                 }
+            }
+        });
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                switch (newState) {
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_more_24));
+                        break;
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_less_24));
+                        break;
+                    case BottomSheetBehavior.STATE_DRAGGING:
+                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
+                    case BottomSheetBehavior.STATE_HIDDEN:
+                    case BottomSheetBehavior.STATE_SETTLING:
+                        break;
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
             }
         });
         boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated", false);
@@ -117,40 +156,16 @@ public class MapFragment extends Fragment {
         mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
-        myWebView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                loadingScreen.endLoadingScreen();
-
-            }
-        });
-
-        // callback for do something
-        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View view, int newState) {
-                switch (newState) {
-                    case BottomSheetBehavior.STATE_HIDDEN:
-                        break;
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                        break;
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                        break;
-                    case BottomSheetBehavior.STATE_SETTLING:
-                        break;
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View view, float v) {
-
-            }
-        });
 
         myWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 loadingScreen.endLoadingScreen();
+                loadingScreen.endLoadingScreen();
+                TextView mapBox = root.findViewById(R.id.mapBox);
+                setDataOfBox(mapBox, 7000000000L, 1000000L, 100000L, 10000L);
+                bottomSheet.setVisibility(View.VISIBLE);
+                bottomSheet.post(()->bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
+                mapBox.setVisibility(View.VISIBLE);
             }
         });
         webSettings.setJavaScriptEnabled(true);
@@ -170,25 +185,17 @@ public class MapFragment extends Fragment {
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
                     if (countryList.get(i).getISOCountry().equals(isoCountry)) {
+                        ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
                         Country country = countryList.get(i);
-                        textView.setText(" " + isoCountry.toString() +
-                                "\n Population: " + country.getPopulation() +
-                                "\n Healthy: " + country.getHealthy() +
-                                "\n Infected: " + country.getInfected() +
-                                "\n Recovered: " + country.getRecovered() +
-                                "\n Deaths: " + country.getDeaths() +
-                                "\n Population-Infected Ratio: " + country.getPop_inf_ratio() +
-                                "\n Infected-Deaths Ratio: " + (double) country.getDeaths() / country.getInfected()
-                        );
+                        bottomSheetTitle.setText(isoCountry.toString());
+                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description, country.getPopulation(),"100%", country.getHealthy(),percentageFormat.format((double)country.getHealthy()/country.getPopulation()), country.getInfected(),percentageFormat.format((double)country.getInfected()/country.getPopulation()), country.getRecovered(),percentageFormat.format((double)country.getRecovered()/country.getPopulation()), country.getDeaths(),percentageFormat.format((double)country.getDeaths()/country.getPopulation()), percentageFormat.format(country.getPop_inf_ratio()), percentageFormat.format((double) country.getDeaths() / country.getInfected())));
                     }
                 }
-                if (textView.getText().length() == 0) {
+                if (bottomSheetTitle.getText().length() == 0) {
                     Log.e(TAG, "No data was found for country " + isoCountry + "!");
-                    textView.setText("No data available!");
+                    bottomSheetTitle.setText("No data available!");
                     ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_DATA_FOUND, null);
                 }
-            } else {
-                textView.setText("");
             }
         });
 
@@ -252,5 +259,16 @@ public class MapFragment extends Fragment {
                     myWebView.loadData(webViewString.getValue(), "text/html", "base64");
                 });
         return root;
+    }
+
+    private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
+        NumberFormat percentFormat = NumberFormat.getPercentInstance();
+        percentFormat.setMaximumFractionDigits(3);
+        textView.setText(getString(R.string.map_box_content, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld * 100 / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld * 100 / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld * 100 / populationWorld)));
+    }
+
+    private int pxToDp(int px) {
+        DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
+        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }
