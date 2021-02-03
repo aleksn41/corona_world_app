@@ -119,6 +119,10 @@ public class MapViewModel extends ViewModel {
         services.setResolution(resolution);
     }
 
+    public MapData.Resolution getCurrentResolution(){
+        return services.getResolution();
+    }
+
     public String getWebViewStringCustom(List<Country> countryList) {
         return services.putEntries(countryList);
     }

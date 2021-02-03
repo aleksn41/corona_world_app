@@ -102,6 +102,10 @@ public class MapData {
         this.resolution = resolution;
     }
 
+    public Resolution getResolution() {
+        return resolution;
+    }
+
     public double getPercentValueOfDouble(double number) {
         return 100 * number;
     }

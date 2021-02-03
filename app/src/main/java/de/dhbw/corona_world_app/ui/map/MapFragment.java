@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
@@ -145,16 +146,28 @@ public class MapFragment extends Fragment {
         });
 
         myWebView.setWebViewClient(new WebViewClient() {
+            @SuppressLint("ClickableViewAccessibility")
             public void onPageFinished(WebView view, String url) {
                 loadingScreen.endLoadingScreen();
+                if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.GERMANY)){
+                    myWebView.zoomBy(2.15f);
+                    myWebView.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            return (event.getAction() == MotionEvent.ACTION_MOVE);
+                        }
+                    });
+                }
             }
         });
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(false);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-        webSettings.setSupportZoom(true);
+        if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD)) {
+            webSettings.setBuiltInZoomControls(true);
+            webSettings.setDisplayZoomControls(false);
+            webSettings.setSupportZoom(true);
+        }
         JavaScriptInterface jsInterface = new JavaScriptInterface();
         myWebView.addJavascriptInterface(jsInterface, "jsinterface");
         ExecutorService service = ThreadPoolHandler.getInstance();
