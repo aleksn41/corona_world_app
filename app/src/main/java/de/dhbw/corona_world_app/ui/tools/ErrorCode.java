@@ -12,7 +12,7 @@ public enum ErrorCode {
     CANNOT_RESTORE_FILE(5, "No backup has been found, all corrupt files will be deleted."),
     CREATE_STATISTIC_FAILED(6, "An unexpected error occurred while creating the statistic."),
     NO_CONNECTION(7, "The Internet could not be accessed."),
-    CONNECTION_TIMEOUT(8, "A timeout occurred while querying data."),
+    CONNECTION_TIMEOUT(8, "A timeout occurred while querying data. Please try again later."),
     UNEXPECTED_ANSWER(9,"The requested data has an unexpected format."),
     TOO_MANY_REQUESTS(10, "Too many requests were made, please retry querying in a few seconds."),
     NO_DATA_FOUND(11, "There was no data found. Please try reloading your request."),
