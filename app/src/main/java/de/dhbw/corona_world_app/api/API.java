@@ -46,4 +46,8 @@ public enum API {
     public boolean acceptsISOCode() {
         return acceptsISOCode;
     }
+
+    public boolean acceptsTimeFrames() {
+        return acceptsTimeFrames;
+    }
 }

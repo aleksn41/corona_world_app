@@ -235,16 +235,14 @@ public class APIManager {
         return toReturn;
     }
 
-    private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) throws IllegalAccessException {
+    private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) {
+        if (!api.acceptsTimeFrames())
+            throw new IllegalArgumentException("The given api \"" + api.getName() + "\" does not support time frames!");
         switch (api) {
             case POSTMANAPI:
                 return "?from=" + LocalDateTime.of(from, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME) + "&to=" + LocalDateTime.of(to, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME);
-            case HEROKU:
-                throw new IllegalAccessException("API " + API.HEROKU.getName() + " does not support time frames!");
-            case RESTCOUNTRIES:
-                throw new IllegalAccessException("API " + API.RESTCOUNTRIES.getName() + " does not support time frames!");
             default:
-                throw new IllegalArgumentException("Given API has not been implemented to use time frames!");
+                throw new IllegalArgumentException("Given API has not yet been implemented to use time frames!");
         }
     }
 

@@ -42,7 +42,7 @@ public class StringToCountryParser {
     }
 
     public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException, TooManyRequestsException {
-        if(toParse.toLowerCase().startsWith("{\"message\":\"too many requests")){
+        if (toParse.toLowerCase().startsWith("{\"message\":\"too many requests")) {
             throw new TooManyRequestsException("Too many requests were made!");
         }
         TimeFramedCountry country = new TimeFramedCountry();
@@ -81,8 +81,8 @@ public class StringToCountryParser {
             country.setRecovered(recovered);
             country.setInfected(infected);
             country.setActive(active);
-        } catch (JSONException e){
-            Log.e(TAG, "Error while parsing this JSON:\n"+toParse, e);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error while parsing this JSON:\n" + toParse, e);
             throw e;
         }
 
@@ -134,7 +134,6 @@ public class StringToCountryParser {
         return countryList;
     }
 
-    //todo use JSONObject
     public static Country<ISOCountry> parsePopCount(String toParse, String name) {
         Country<ISOCountry> country = new Country<>(ISOCountry.valueOf(name));
         String[] splitArray = toParse.split(",");

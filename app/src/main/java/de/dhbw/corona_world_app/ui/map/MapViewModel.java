@@ -66,7 +66,7 @@ public class MapViewModel extends ViewModel {
     public List<Country<ISOCountry>> getCachedDataWorld() throws IOException, ClassNotFoundException {
         Log.v(TAG, "Getting cached world data...");
         List<Country<ISOCountry>> returnList;
-        try(FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/world_cache.ser")) {
+        try (FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/world_cache.ser")) {
             ObjectInputStream in = new ObjectInputStream(fileIn);
             returnList = (List<Country<ISOCountry>>) in.readObject();
             in.close();
@@ -95,13 +95,13 @@ public class MapViewModel extends ViewModel {
         List<Country<GermanyState>> returnList;
         Country<ISOCountry> germanySummary;
         Log.v(TAG, "Getting cached germany data...");
-        try(FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_cache.ser")) {
+        try (FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_cache.ser")) {
             ObjectInputStream in = new ObjectInputStream(fileIn);
             returnList = (List<Country<GermanyState>>) in.readObject();
             in.close();
         }
         Log.v(TAG, "Getting cached germany summary data...");
-        try(FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_sum_cache.ser")) {
+        try (FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_sum_cache.ser")) {
             ObjectInputStream in = new ObjectInputStream(fileIn);
             germanySummary = (Country<ISOCountry>) in.readObject();
             in.close();
@@ -146,19 +146,19 @@ public class MapViewModel extends ViewModel {
         } else {
             apiGottenList = getCachedDataWorld();
         }
-        for (Country<ISOCountry> country:apiGottenList) {
-            if(country.getName().equals(ISOCountry.World)){
+        for (Country<ISOCountry> country : apiGottenList) {
+            if (country.getName().equals(ISOCountry.World)) {
                 mBoxValue.postValue(country);
             }
         }
         mCountryList.postValue(apiGottenList);
     }
 
-    public void switchResolution(MapData.Resolution resolution){
+    public void switchResolution(MapData.Resolution resolution) {
         services.setResolution(resolution);
     }
 
-    public MapData.Resolution getCurrentResolution(){
+    public MapData.Resolution getCurrentResolution() {
         return services.getResolution();
     }
 
