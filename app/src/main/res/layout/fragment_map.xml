@@ -25,7 +25,6 @@
         android:layout_margin="@dimen/margin_big"
         android:background="?attr/bottom_sheet_background"
         android:padding="@dimen/margin_medium"
-        android:text="@string/map_box_title"
         android:textSize="12sp"
         android:visibility="gone"
         tools:visibility="visible" />

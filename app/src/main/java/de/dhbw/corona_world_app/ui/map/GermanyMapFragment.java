@@ -177,7 +177,9 @@ public class GermanyMapFragment extends Fragment {
                 myWebView.zoomBy(2.15f);
                 myWebView.setOnTouchListener((v, event) -> (event.getAction() == MotionEvent.ACTION_MOVE));
                 TextView mapBox = root.findViewById(R.id.mapBox);
-                setDataOfBox(mapBox, 7000000000L, 1000000L, 100000L, 10000L);
+                mapBox.setText("Germany:");
+                Country germany = mapViewModel.mBoxValue.getValue();
+                setDataOfBox(mapBox, germany.getPopulation(), germany.getInfected(), germany.getRecovered(), germany.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
                 bottomSheet.post(()->bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
                 mapBox.setVisibility(View.VISIBLE);
@@ -263,7 +265,7 @@ public class GermanyMapFragment extends Fragment {
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
         NumberFormat percentFormat = NumberFormat.getPercentInstance();
         percentFormat.setMaximumFractionDigits(3);
-        textView.setText(getString(R.string.map_box_content, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld * 100 / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld * 100 / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld * 100 / populationWorld)));
+        textView.setText(getString(R.string.map_box_content_germany, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
     }
 
     private int pxToDp(int px) {

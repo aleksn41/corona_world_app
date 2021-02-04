@@ -16,12 +16,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Country;
+import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.MapData;
 
 public class MapViewModel extends ViewModel {
@@ -37,6 +41,8 @@ public class MapViewModel extends ViewModel {
     private static LocalDateTime germanyCacheAge;
 
     public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
+
+    public MutableLiveData<Country> mBoxValue = new MutableLiveData<>();
 
     public void init(boolean cacheDisabled, boolean longTermDisabled) {
         APIManager.setSettings(!cacheDisabled, !longTermDisabled);
@@ -99,6 +105,8 @@ public class MapViewModel extends ViewModel {
         } else {
             apiGottenList = getCachedGermany();
         }
+        Country germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
+        mBoxValue.postValue(germanySummary);
         mCountryList.postValue(apiGottenList);
     }
 
@@ -116,6 +124,11 @@ public class MapViewModel extends ViewModel {
             }
         } else {
             apiGottenList = getCachedDataWorld();
+        }
+        for (Country country:apiGottenList) {
+            if(country.getName().equals(ISOCountry.World)){
+                mBoxValue.postValue(country);
+            }
         }
         mCountryList.postValue(apiGottenList);
     }

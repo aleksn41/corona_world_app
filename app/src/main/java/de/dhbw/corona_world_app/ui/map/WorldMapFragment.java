@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
@@ -173,7 +174,9 @@ public class WorldMapFragment extends Fragment {
                 loadingScreen.endLoadingScreen();
                 myWebView.setOnTouchListener(null);
                 TextView mapBox = root.findViewById(R.id.mapBox);
-                setDataOfBox(mapBox, 7000000000L, 1000000L, 100000L, 10000L);
+                Country world = mapViewModel.mBoxValue.getValue();
+                mapBox.setText("World:");
+                setDataOfBox(mapBox, world.getPopulation(), world.getInfected(), world.getRecovered(), world.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
                 bottomSheet.post(()->bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
                 mapBox.setVisibility(View.VISIBLE);
@@ -273,7 +276,7 @@ public class WorldMapFragment extends Fragment {
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
         NumberFormat percentFormat = NumberFormat.getPercentInstance();
         percentFormat.setMaximumFractionDigits(3);
-        textView.setText(getString(R.string.map_box_content, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld * 100 / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld * 100 / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld * 100 / populationWorld)));
+        textView.setText(getString(R.string.map_box_content_world, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
     }
 
     private int pxToDp(int px) {

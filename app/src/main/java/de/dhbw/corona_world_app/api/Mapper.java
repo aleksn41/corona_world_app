@@ -38,7 +38,6 @@ public class Mapper {
             apisToMap.put(API.RESTCOUNTRIES, restcountriesToStandardMap);
             reverseMapAPI = null;
             blackList.add("Channel_Islands");
-            blackList.add("World");
             blackList.add("Diamond_Princess");
             blackList.add("Vatican_City");
             blackList.add("MS_Zaandam");

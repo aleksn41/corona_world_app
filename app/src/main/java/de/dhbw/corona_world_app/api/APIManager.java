@@ -50,7 +50,7 @@ public class APIManager {
         APIManager.longTermStorageEnabled = longTermStorageEnabled;
     }
 
-    //gets the data of the whole world through the specified api -> throws the cause of the ExecutionException
+    //gets the data of the whole world through the specified api
     public static List<Country> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
         Logger.logV(TAG, "Getting data for every Country from api " + api.getName() + "...");
 

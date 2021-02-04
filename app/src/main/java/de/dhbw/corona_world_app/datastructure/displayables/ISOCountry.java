@@ -253,7 +253,8 @@ public enum ISOCountry implements Displayable {
     Republic_of_Kosovo("XK","Kosovo",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_kosovo),
     Yemen("YE","Yemen",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_ye),
     Zambia("ZM","Zambia",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_zm),
-    Zimbabwe("ZW","Zimbabwe",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_zw);
+    Zimbabwe("ZW","Zimbabwe",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_zw),
+    World("WW", "World", com.michaelfotiadis.androidflags.R.drawable.ic_list_country_unknown);
 
     private final String ISOCode;
     private final String displayName;

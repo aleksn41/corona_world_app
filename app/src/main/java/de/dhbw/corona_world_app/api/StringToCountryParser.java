@@ -147,6 +147,7 @@ public class StringToCountryParser {
         Log.v(TAG, "Parsing multiple population counts of countries from String...");
         Map<ISOCountry, Long> returnMap = new HashMap<>();
         JSONArray jsonArray = new JSONArray(toParse);
+        long sum = 0;
         for (int i = 0; i < jsonArray.length(); i++) {
             String name = jsonArray.getJSONObject(i).getString("name");
             if (Mapper.isInMap(API.RESTCOUNTRIES, name)) {
@@ -157,7 +158,9 @@ public class StringToCountryParser {
                     returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
                 }
             }
+            sum += jsonArray.getJSONObject(i).getLong("population");
         }
+        returnMap.put(ISOCountry.World, sum);
         Log.v(TAG, "Finished parsing the population count from String!");
         return returnMap;
     }
