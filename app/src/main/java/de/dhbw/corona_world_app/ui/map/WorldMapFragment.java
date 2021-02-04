@@ -178,6 +178,7 @@ public class WorldMapFragment extends Fragment {
                 Country<ISOCountry> world = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, world.getPopulation(), world.getInfected(), world.getRecovered(), world.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
+                //todo @Aleks this can cause crashes if user quickly changes fragments!
                 bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
                 mapBox.setVisibility(View.VISIBLE);
             }
