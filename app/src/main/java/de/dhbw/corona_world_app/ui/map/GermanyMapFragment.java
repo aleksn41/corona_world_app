@@ -249,30 +249,32 @@ public class GermanyMapFragment extends Fragment {
     }
 
     private void handleException(Exception e) {
-        if (e instanceof InterruptedException || e instanceof ExecutionException) {
-            Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
-            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null));
-        } else if (e instanceof ClassNotFoundException) {
-            Logger.logE(TAG, "Exception during loading cache!", e);
-            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null));
-            //todo call a method that kills cache
-        } else if (e instanceof JSONException) {
-            Logger.logE(TAG, "Exception while parsing data!", e);
-            //todo inform user
-        } else if (e instanceof IOException) {
-            Logger.logE(TAG, "Exception during request!", e);
-            try {
-                Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
-                if (APIManager.pingGoogleDNS()) {
-                    Logger.logE(TAG, "Success!");
-                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
-                } else {
-                    Logger.logE(TAG, "Failure!");
+        if(getContext()!=null) {
+            if (e instanceof InterruptedException || e instanceof ExecutionException) {
+                Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
+                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null));
+            } else if (e instanceof ClassNotFoundException) {
+                Logger.logE(TAG, "Exception during loading cache!", e);
+                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null));
+                //todo call a method that kills cache
+            } else if (e instanceof JSONException) {
+                Logger.logE(TAG, "Exception while parsing data!", e);
+                //todo inform user
+            } else if (e instanceof IOException) {
+                Logger.logE(TAG, "Exception during request!", e);
+                try {
+                    Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
+                    if (APIManager.pingGoogleDNS()) {
+                        Logger.logE(TAG, "Success!");
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
+                    } else {
+                        Logger.logE(TAG, "Failure!");
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
+                    }
+                } catch (IOException e1) {
+                    Logger.logE(TAG, "Failure with Exception!", e1);
                     requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
                 }
-            } catch (IOException e1) {
-                Logger.logE(TAG, "Failure with Exception!", e1);
-                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
             }
         }
     }
