@@ -179,7 +179,7 @@ public class WorldMapFragment extends Fragment {
                 Country<ISOCountry> world = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, world.getPopulation(), world.getInfected(), world.getRecovered(), world.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-                if(getContext()!=null)bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
+                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
                 mapBox.setVisibility(View.VISIBLE);
             }
         });
