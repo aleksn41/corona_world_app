@@ -34,6 +34,8 @@ public class MapViewModel extends ViewModel {
 
     private static LocalDateTime worldCacheAge;
 
+    private static LocalDateTime germanyCacheAge;
+
     public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
 
     public void init(boolean cacheDisabled, boolean longTermDisabled) {
@@ -52,11 +54,12 @@ public class MapViewModel extends ViewModel {
     @SuppressWarnings("unchecked")
     public List<Country> getCachedDataWorld() throws IOException, ClassNotFoundException {
         Log.v(TAG, "Getting cached world data...");
-        FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/world_cache.ser");
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        List<Country> returnList = (List<Country>) in.readObject();
-        in.close();
-        fileIn.close();
+        List<Country> returnList;
+        try(FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/world_cache.ser")) {
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            returnList = (List<Country>) in.readObject();
+            in.close();
+        }
         return returnList;
     }
 
@@ -69,27 +72,29 @@ public class MapViewModel extends ViewModel {
         fileOut.close();
     }
 
+    @SuppressWarnings("unchecked")
     public List<Country> getCachedGermany() throws IOException, ClassNotFoundException {
+        List<Country> returnList;
         Log.v(TAG, "Getting cached germany data...");
-        FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_cache.ser");
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        List<Country> returnList = (List<Country>) in.readObject();
-        in.close();
-        fileIn.close();
+        try(FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_cache.ser")) {
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            returnList = (List<Country>) in.readObject();
+            in.close();
+        }
         return returnList;
     }
 
     public void initGermany() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         List<Country> apiGottenList;
         Log.v(TAG, "Initiating country list...");
-        if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+        if (!APIManager.isCacheEnabled() || germanyCacheAge == null || germanyCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
             apiGottenList = APIManager.getDataGermany(API.ARCGIS);
             if (!(apiGottenList.size() > 0)) {
                 throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
             }
             if (APIManager.isCacheEnabled()) {
                 cacheGermany(apiGottenList);
-                worldCacheAge = LocalDateTime.now();
+                germanyCacheAge = LocalDateTime.now();
             }
         } else {
             apiGottenList = getCachedGermany();
