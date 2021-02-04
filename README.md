@@ -41,6 +41,7 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
@@ -74,6 +75,10 @@ Main Features:
 ## Getting Started
 
 You can either get the APK by going to the [releases](https://github.com/aleksn41/corona_world_app/releases) or by cloning this Repository and building a debug APK for yourself
+
+### Prerequisites
+
+This Application can only run on Android 10 or greater (API level 29 or greater)
 
 ### Installation
 
