@@ -1,6 +1,8 @@
-package de.dhbw.corona_world_app.datastructure;
+package de.dhbw.corona_world_app.datastructure.displayables;
 
-public enum ISOCountry {
+import de.dhbw.corona_world_app.datastructure.Displayable;
+
+public enum ISOCountry implements Displayable {
 
     Afghanistan("AF","Afghanistan", com.michaelfotiadis.androidflags.R.drawable.ic_list_country_af),
     Aland_Islands("AX","Åland Islands",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_ax),
@@ -251,7 +253,8 @@ public enum ISOCountry {
     Republic_of_Kosovo("XK","Kosovo",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_kosovo),
     Yemen("YE","Yemen",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_ye),
     Zambia("ZM","Zambia",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_zm),
-    Zimbabwe("ZW","Zimbabwe",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_zw);
+    Zimbabwe("ZW","Zimbabwe",com.michaelfotiadis.androidflags.R.drawable.ic_list_country_zw),
+    World("WW", "World", com.michaelfotiadis.androidflags.R.drawable.ic_list_country_unknown);
 
     private final String ISOCode;
     private final String displayName;

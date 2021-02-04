@@ -13,15 +13,15 @@ import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 import static org.junit.Assert.*;
 
 public class APIManagerTests {
 
     @Before
-    public void getAPIManger(){
+    public void getAPIManger() {
         APIManager.setSettings(false, false);
     }
 
@@ -45,7 +45,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist,criteriaList);
+        List<Country> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -62,7 +62,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<TimeFramedCountry> returnList = APIManager.getData(clist,criteriaList, LocalDate.of(2020,6,3), LocalDate.of(2020,6,3));
+        List<TimeFramedCountry> returnList = APIManager.getData(clist, criteriaList, LocalDate.of(2020, 6, 3), LocalDate.of(2020, 6, 3));
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -87,7 +87,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist,criteriaList);
+        List<Country> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -108,5 +108,13 @@ public class APIManagerTests {
         Map<ISOCountry, Long> returnMap = APIManager.getAllCountriesPopData();
         assertNotNull(returnMap);
         System.out.println(returnMap);
+    }
+
+    @Test
+    public void testGetDataGermany() throws Throwable {
+        APIManager.disableLogsForTesting();
+        List<Country> countries = APIManager.getDataGermany(API.ARCGIS);
+        assertNotNull(countries);
+        System.out.println(countries);
     }
 }

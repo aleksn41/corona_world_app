@@ -7,12 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_world"
-        android:name="de.dhbw.corona_world_app.ui.map.MapFragment"
+        android:name="de.dhbw.corona_world_app.ui.map.WorldMapFragment"
         android:label="@string/title_world"
         tools:layout="@layout/fragment_map" >
         <action
             android:id="@+id/goToStatistic"
             app:destination="@id/navigation_statistic" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_germany"
+        android:name="de.dhbw.corona_world_app.ui.map.GermanyMapFragment"
+        android:label="@string/title_germany"
+        tools:layout="@layout/fragment_map">
     </fragment>
 
     <fragment

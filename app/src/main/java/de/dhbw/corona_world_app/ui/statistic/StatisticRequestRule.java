@@ -8,7 +8,7 @@ import java.util.List;
 
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 //this is used in order to disallow certain Items in the UI of StatisticRequest when certain conditions are met
 public class StatisticRequestRule {

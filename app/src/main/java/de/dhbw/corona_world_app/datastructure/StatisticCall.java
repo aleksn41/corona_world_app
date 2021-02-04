@@ -5,12 +5,13 @@ import androidx.annotation.NonNull;
 import java.time.LocalDate;
 
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Objects;
 
 
 import java.io.Serializable;
+
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 public class StatisticCall implements Serializable {
     public static final LocalDate MIN_DATE = LocalDate.of(2020, 1, 22);

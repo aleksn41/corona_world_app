@@ -4,8 +4,10 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,15 +15,34 @@ import java.util.Map;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();
 
+    public static List<Country<GermanyState>> parseFromArcgisMultiCountry(String toParse) throws JSONException {
+        List<Country<GermanyState>> countries = new ArrayList<>();
+        JSONObject object = new JSONObject(toParse);
+        JSONArray jsonArray = object.getJSONArray("features");
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Country<GermanyState> country = new Country<>();
+            JSONObject properties = jsonArray.getJSONObject(i).getJSONObject("properties");
+            country.setName(GermanyState.valueOf(properties.getString("LAN_ew_GEN").replace("-", "_").replace("ü", "ue").toUpperCase()));
+            country.setInfected(properties.getInt("Fallzahl"));
+            country.setDeaths(properties.getInt("Death"));
+            country.setPopulation((long) (properties.getInt("Fallzahl") / (properties.getDouble("faelle_100000_EW") / 100000)));
+            countries.add(country);
+            if (country.getName() == null)
+                Log.e(TAG, properties.getString("LAN_ew_GEN").replace("-", "_").replace("ü", "ue").toUpperCase() + "has not been matched!");
+        }
+        return countries;
+    }
+
     public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException, TooManyRequestsException {
-        if(toParse.toLowerCase().startsWith("{\"message\":\"too many requests")){
+        if (toParse.toLowerCase().startsWith("{\"message\":\"too many requests")) {
             throw new TooManyRequestsException("Too many requests were made!");
         }
         TimeFramedCountry country = new TimeFramedCountry();
@@ -60,58 +81,65 @@ public class StringToCountryParser {
             country.setRecovered(recovered);
             country.setInfected(infected);
             country.setActive(active);
-        } catch (JSONException e){
-            Log.e(TAG, "Error while parsing this JSON:\n"+toParse, e);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error while parsing this JSON:\n" + toParse, e);
             throw e;
         }
 
         return country;
     }
 
-    public static Country parseFromHeroOneCountry(String toParse){
-        Country country = new Country();
+    public static Country<ISOCountry> parseFromHeroOneCountry(String toParse) {
+        Country<ISOCountry> country = new Country<>();
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
             switch (tuple[0]) {
-                case"{\"country\"":String normalizedName = Mapper.normalizeCountryName(tuple[1].replace("\"",""));
-                                   if(Mapper.isInMap(API.HEROKU, normalizedName)) {
-                                       country.setISOCountry(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName));
-                                   } else if(!Mapper.isInBlacklist(normalizedName)){
-                                       country.setISOCountry(ISOCountry.valueOf(normalizedName));
-                                   }
-                                   break;
-                case"\"deaths\"":country.setDeaths(Integer.parseInt(collectNullToZero(tuple[1])));break;
-                case"\"cases\"":country.setInfected(Integer.parseInt(collectNullToZero(tuple[1])));break;
-                case"\"recovered\"":country.setRecovered(Integer.parseInt(collectNullToZero(tuple[1])));break;
-                case"\"active\"":country.setActive(Integer.parseInt(collectNullToZero(tuple[1])));
+                case "{\"country\"":
+                    String normalizedName = Mapper.normalizeCountryName(tuple[1].replace("\"", ""));
+                    if (Mapper.isInMap(API.HEROKU, normalizedName)) {
+                        country.setName(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName));
+                    } else if (!Mapper.isInBlacklist(normalizedName)) {
+                        country.setName(ISOCountry.valueOf(normalizedName));
+                    }
+                    break;
+                case "\"deaths\"":
+                    country.setDeaths(Integer.parseInt(collectNullToZero(tuple[1])));
+                    break;
+                case "\"cases\"":
+                    country.setInfected(Integer.parseInt(collectNullToZero(tuple[1])));
+                    break;
+                case "\"recovered\"":
+                    country.setRecovered(Integer.parseInt(collectNullToZero(tuple[1])));
+                    break;
+                case "\"active\"":
+                    country.setActive(Integer.parseInt(collectNullToZero(tuple[1])));
             }
         }
         return country;
     }
 
-    public static List<Country> parseFromHeroMultiCountry(String toParse){
-        Log.v(TAG, "Parsing multiple countries from api "+API.HEROKU.getName()+"...");
-        List<Country> countryList = new LinkedList<>();
+    public static List<Country<ISOCountry>> parseFromHeroMultiCountry(String toParse) {
+        Log.v(TAG, "Parsing multiple countries from api " + API.HEROKU.getName() + "...");
+        List<Country<ISOCountry>> countryList = new LinkedList<>();
         try {
             JSONArray jsonArray = new JSONArray(toParse);
-            for(int i = 0; i < jsonArray.length(); i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 countryList.add(parseFromHeroOneCountry(jsonArray.get(i).toString()));
             }
         } catch (JSONException e) {
-            Logger.logE(TAG, "Error parsing JSON: "+e);
+            Logger.logE(TAG, "Error parsing JSON: " + e);
         }
-        Log.v(TAG, "Finished parsing multiple countries from "+API.HEROKU.getName()+"!");
+        Log.v(TAG, "Finished parsing multiple countries from " + API.HEROKU.getName() + "!");
         return countryList;
     }
 
-    //todo use JSONObject
-    public static Country parsePopCount(String toParse, String name){
-        Country country = new Country(ISOCountry.valueOf(name));
+    public static Country<ISOCountry> parsePopCount(String toParse, String name) {
+        Country<ISOCountry> country = new Country<>(ISOCountry.valueOf(name));
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
-            if(tuple[0].equals("\"population\"")){
+            if (tuple[0].equals("\"population\"")) {
                 country.setPopulation(Integer.parseInt(collectNullToZero(tuple[1])));
             }
         }
@@ -119,9 +147,10 @@ public class StringToCountryParser {
     }
 
     public static Map<ISOCountry, Long> parseMultiPopCount(String toParse) throws JSONException {
-        Log.v(TAG,"Parsing multiple population counts of countries from String...");
+        Log.v(TAG, "Parsing multiple population counts of countries from String...");
         Map<ISOCountry, Long> returnMap = new HashMap<>();
         JSONArray jsonArray = new JSONArray(toParse);
+        long sum = 0;
         for (int i = 0; i < jsonArray.length(); i++) {
             String name = jsonArray.getJSONObject(i).getString("name");
             if (Mapper.isInMap(API.RESTCOUNTRIES, name)) {
@@ -132,12 +161,14 @@ public class StringToCountryParser {
                     returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
                 }
             }
+            sum += jsonArray.getJSONObject(i).getLong("population");
         }
-        Log.v(TAG,"Finished parsing the population count from String!");
+        returnMap.put(ISOCountry.World, sum);
+        Log.v(TAG, "Finished parsing the population count from String!");
         return returnMap;
     }
 
-    private static String collectNullToZero(String in){
-        return in.replace("null","0");
+    private static String collectNullToZero(String in) {
+        return in.replace("null", "0");
     }
 }

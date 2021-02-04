@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,24 +34,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
-import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
+import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
-public class MapFragment extends Fragment {
+public class WorldMapFragment extends Fragment {
 
-    private static final String TAG = MapFragment.class.getSimpleName();
+    private static final String TAG = WorldMapFragment.class.getSimpleName();
 
     private MapViewModel mapViewModel;
 
@@ -64,9 +66,7 @@ public class MapFragment extends Fragment {
 
     ImageView bottomSheetExpandImage;
 
-    boolean bottomSheetDirectionUp = true;
-
-    Country selectedCountry;
+    Country<ISOCountry> selectedCountry;
 
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
 
@@ -93,9 +93,7 @@ public class MapFragment extends Fragment {
         }
     };
 
-    //todo WebView is not final -> more zoom, clickable tooltips with routing to statistics
-    //todo establish order
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "SetTextI18n"})
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
@@ -107,7 +105,7 @@ public class MapFragment extends Fragment {
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
         percentageFormat.setMaximumFractionDigits(3);
-        ((Button) root.findViewById(R.id.bottomSheetButton)).setOnClickListener((View.OnClickListener) this::goToStatistic);
+        root.findViewById(R.id.bottomSheetButton).setOnClickListener(this::goToStatistic);
         //setup bottomsheet
         RelativeLayout bottomSheet = root.findViewById(R.id.bottomSheet);
         BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -123,15 +121,14 @@ public class MapFragment extends Fragment {
             public void onClick(View view) {
                 switch (bottomSheetBehavior.getState()) {
                     case BottomSheetBehavior.STATE_EXPANDED:
-                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                        break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
                         break;
                     case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        if (!bottomSheetDirectionUp) {
+                        if (!up) {
                             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                         } else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                        up ^= true;
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
                     case BottomSheetBehavior.STATE_HIDDEN:
@@ -147,11 +144,9 @@ public class MapFragment extends Fragment {
                 switch (newState) {
                     case BottomSheetBehavior.STATE_EXPANDED:
                         bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_more_24));
-                        bottomSheetDirectionUp = false;
                         break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_less_24));
-                        bottomSheetDirectionUp = true;
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
                     case BottomSheetBehavior.STATE_HALF_EXPANDED:
@@ -159,7 +154,7 @@ public class MapFragment extends Fragment {
                     case BottomSheetBehavior.STATE_SETTLING:
                         break;
                 }
-                if (selectedCountry != null)
+                if (selectedCountry != null && mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD))
                     root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
             }
 
@@ -176,32 +171,46 @@ public class MapFragment extends Fragment {
         WebSettings webSettings = myWebView.getSettings();
 
         myWebView.setWebViewClient(new WebViewClient() {
+            @SuppressLint("ClickableViewAccessibility")
             public void onPageFinished(WebView view, String url) {
                 loadingScreen.endLoadingScreen();
+                myWebView.setOnTouchListener(null);
                 TextView mapBox = root.findViewById(R.id.mapBox);
-                setDataOfBox(mapBox, 7000000000L, 1000000L, 100000L, 10000L);
+                Country<ISOCountry> world = mapViewModel.mBoxValue.getValue();
+                setDataOfBox(mapBox, world.getPopulation(), world.getInfected(), world.getRecovered(), world.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
+                bottomSheet.post(() -> {
+                    float ratio;
+
+                    if ((float) 152 / pxToDp(bottomSheet.getHeight()) < 0f || (float) 152 / pxToDp(bottomSheet.getHeight()) > 1f) {
+                        ratio = 0.25f;
+                    } else {
+                        ratio = (float) 152 / pxToDp(bottomSheet.getHeight());
+                    }
+                    bottomSheetBehavior.setHalfExpandedRatio(ratio);
+                });
                 mapBox.setVisibility(View.VISIBLE);
             }
         });
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(false);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-        webSettings.setSupportZoom(true);
+        if (mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD)) {
+            webSettings.setBuiltInZoomControls(true);
+            webSettings.setDisplayZoomControls(false);
+            webSettings.setSupportZoom(true);
+        }
         JavaScriptInterface jsInterface = new JavaScriptInterface();
         myWebView.addJavascriptInterface(jsInterface, "jsinterface");
         ExecutorService service = ThreadPoolHandler.getInstance();
 
         jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
             if (isoCountry != null) {
-                List<Country> countryList = mapViewModel.mCountryList.getValue();
+                List<Country<ISOCountry>> countryList = mapViewModel.mCountryList.getValue();
                 if (countryList == null)
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
-                    if (countryList.get(i).getISOCountry().equals(isoCountry)) {
+                    if (countryList.get(i).getName().equals(isoCountry)) {
                         ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
                         selectedCountry = countryList.get(i);
                         bottomSheetTitle.setText(isoCountry.toString());
@@ -218,50 +227,11 @@ public class MapFragment extends Fragment {
 
         Log.v(TAG, "Requesting all countries...");
         loadingScreen.setProgressBar(25);
-        service.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mapViewModel.initCountryList();
-                } catch (InterruptedException | ExecutionException e) {
-                    Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
-                    requireActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
-                        }
-                    });
-                } catch (ClassNotFoundException e) {
-                    Logger.logE(TAG, "Exception during loading cache!", e);
-                    requireActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null);
-                        }
-                    });
-                    //todo call a method that kills cache
-                } catch (JSONException e) {
-                    Logger.logE(TAG, "Exception while parsing data!", e);
-                } catch (IOException e) {
-                    Logger.logE(TAG, "Exception during request!", e);
-                    try {
-                        APIManager.createAPICall("8.8.8.8");
-                        requireActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null);
-                            }
-                        });
-                    } catch (IOException e1) {
-                        requireActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null);
-                            }
-                        });
-                    }
-
-                }
+        service.execute(() -> {
+            try {
+                mapViewModel.initCountryList();
+            } catch (InterruptedException | ExecutionException | IOException | JSONException | ClassNotFoundException e) {
+                handleException(e);
             }
         });
         mapViewModel.mCountryList.observe(
@@ -278,9 +248,40 @@ public class MapFragment extends Fragment {
         return root;
     }
 
+    private void handleException(Exception e) {
+        if(getContext()!=null) {
+            if (e instanceof InterruptedException || e instanceof ExecutionException) {
+                Logger.logE(TAG, "Unexpected exception during initialization of country list!", e);
+                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null));
+            } else if (e instanceof ClassNotFoundException) {
+                Logger.logE(TAG, "Exception during loading cache!", e);
+                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null));
+                //todo call a method that kills cache
+            } else if (e instanceof JSONException) {
+                Logger.logE(TAG, "Exception while parsing data!", e);
+                //todo inform user
+            } else if (e instanceof IOException) {
+                Logger.logE(TAG, "Exception during request!", e);
+                try {
+                    Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
+                    if (APIManager.pingGoogleDNS()) {
+                        Logger.logE(TAG, "Success!");
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
+                    } else {
+                        Logger.logE(TAG, "Failure!");
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
+                    }
+                } catch (IOException e1) {
+                    Logger.logE(TAG, "Failure with Exception!", e1);
+                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
+                }
+            }
+        }
+    }
+
     public void goToStatistic(final View view) {
-        StatisticCall request = new StatisticCall(Collections.singletonList(selectedCountry.getISOCountry()), ChartType.PIE, Arrays.asList(Criteria.values()), StatisticCall.NOW, StatisticCall.NOW);
-        MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
+        StatisticCall request = new StatisticCall(Collections.singletonList(selectedCountry.getName()), ChartType.PIE, Arrays.asList(Criteria.values()), StatisticCall.NOW, StatisticCall.NOW);
+        WorldMapFragmentDirections.GoToStatistic action = WorldMapFragmentDirections.goToStatistic(request, true);
         NavHostFragment navHostFragment =
                 (NavHostFragment) requireActivity().getSupportFragmentManager()
                         .findFragmentById(R.id.nav_host_fragment);
@@ -288,13 +289,19 @@ public class MapFragment extends Fragment {
     }
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
-        NumberFormat percentFormat = NumberFormat.getPercentInstance();
-        percentFormat.setMaximumFractionDigits(3);
-        textView.setText(getString(R.string.map_box_content, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld * 100 / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld * 100 / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld * 100 / populationWorld)));
+        if(getContext()!=null) {
+            NumberFormat percentFormat = NumberFormat.getPercentInstance();
+            percentFormat.setMaximumFractionDigits(3);
+            textView.setText(getString(R.string.map_box_content_world, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
+        }
     }
 
     private int pxToDp(int px) {
-        DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
-        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        if(getContext()!=null) {
+            DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
+            return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        } else {
+            return 0;
+        }
     }
 }

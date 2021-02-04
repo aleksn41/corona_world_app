@@ -1,35 +1,5 @@
 package de.dhbw.corona_world_app;
 
-import androidx.core.util.Pair;
-
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
-import androidx.lifecycle.Observer;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import de.dhbw.corona_world_app.api.APIManager;
-import de.dhbw.corona_world_app.datastructure.ChartType;
-import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
-import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
