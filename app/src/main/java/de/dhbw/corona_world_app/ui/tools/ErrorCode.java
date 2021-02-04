@@ -15,7 +15,7 @@ public enum ErrorCode {
     CONNECTION_TIMEOUT(8, "A timeout occurred while querying data. Please try again later."),
     UNEXPECTED_ANSWER(9,"The requested data has an unexpected format."),
     TOO_MANY_REQUESTS(10, "Too many requests were made, please retry querying in a few seconds."),
-    NO_DATA_FOUND(11, "There was no data found. Please try reloading your request."),
+    NO_DATA_FOUND(11, "There was no data found. Please try reloading the map."),
     ;
 
     int code;
