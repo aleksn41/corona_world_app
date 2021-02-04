@@ -5,13 +5,11 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -25,7 +23,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.json.JSONException;
@@ -45,17 +42,17 @@ import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
-public class MapFragment extends Fragment {
+public class WorldMapFragment extends Fragment {
 
-    private static final String TAG = MapFragment.class.getSimpleName();
+    private static final String TAG = WorldMapFragment.class.getSimpleName();
 
     private MapViewModel mapViewModel;
 
@@ -70,8 +67,6 @@ public class MapFragment extends Fragment {
     Country selectedCountry;
 
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
-
-    FloatingActionButton button;
 
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override
@@ -114,8 +109,6 @@ public class MapFragment extends Fragment {
         BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetExpandImage =root.findViewById(R.id.bottom_sheet_expand);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        button = root.findViewById(R.id.floatingActionButton);
-        button.setVisibility(View.INVISIBLE);
         bottomSheetBehavior.setFitToContents(false);
         //listeners for bottom sheet
         //click event for show-dismiss bottom sheet
@@ -174,37 +167,11 @@ public class MapFragment extends Fragment {
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
 
-        button.setOnClickListener(v -> {
-            if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD)){
-                root.findViewById(R.id.bottomSheetButton).setVisibility(View.GONE);
-                mapViewModel.switchResolution(MapData.Resolution.GERMANY);
-                try {
-                    mapViewModel.initGermany();
-                } catch (IOException | ClassNotFoundException | InterruptedException | ExecutionException | JSONException e) {
-                    handleException(e);
-                }
-            } else {
-                root.findViewById(R.id.bottomSheetButton).setVisibility(View.INVISIBLE);
-                mapViewModel.switchResolution(MapData.Resolution.WOLRD);
-                try {
-                    mapViewModel.initCountryList();
-                } catch (InterruptedException | ExecutionException | IOException | JSONException | ClassNotFoundException e) {
-                    handleException(e);
-                }
-            }
-        });
-
         myWebView.setWebViewClient(new WebViewClient() {
             @SuppressLint("ClickableViewAccessibility")
             public void onPageFinished(WebView view, String url) {
                 loadingScreen.endLoadingScreen();
-                if(mapViewModel.getCurrentResolution().equals(MapData.Resolution.GERMANY)){
-                    myWebView.zoomBy(2.15f);
-                    myWebView.setOnTouchListener((v, event) -> (event.getAction() == MotionEvent.ACTION_MOVE));
-                } else {
-                    myWebView.setOnTouchListener(null);
-                }
-                button.setVisibility(View.VISIBLE);
+                myWebView.setOnTouchListener(null);
                 TextView mapBox = root.findViewById(R.id.mapBox);
                 setDataOfBox(mapBox, 7000000000L, 1000000L, 100000L, 10000L);
                 bottomSheet.setVisibility(View.VISIBLE);
@@ -296,7 +263,7 @@ public class MapFragment extends Fragment {
 
     public void goToStatistic(final View view){
         StatisticCall request=new StatisticCall(Collections.singletonList((ISOCountry) selectedCountry.getName()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
-        MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
+        WorldMapFragmentDirections.GoToStatistic action = WorldMapFragmentDirections.goToStatistic(request, true);
         NavHostFragment navHostFragment =
                 (NavHostFragment) requireActivity().getSupportFragmentManager()
                         .findFragmentById(R.id.nav_host_fragment);

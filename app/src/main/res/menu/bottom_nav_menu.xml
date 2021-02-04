@@ -7,6 +7,11 @@
         android:title="@string/title_world" />
 
     <item
+        android:id="@+id/navigation_germany"
+        android:icon="@drawable/germany_flag_white_n_black"
+        android:title="@string/title_germany"/>
+
+    <item
         android:id="@+id/navigation_statistic_request"
         android:icon="@drawable/ic_bar_chart_24dp"
         android:title="@string/title_statistic" />
