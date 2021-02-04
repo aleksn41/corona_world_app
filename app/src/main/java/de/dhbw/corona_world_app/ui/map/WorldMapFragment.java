@@ -179,13 +179,16 @@ public class WorldMapFragment extends Fragment {
                 Country<ISOCountry> world = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, world.getPopulation(), world.getInfected(), world.getRecovered(), world.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-                float ratio;
-                if((float) 152 / pxToDp(bottomSheet.getHeight()) < 0 || (float) 152 / pxToDp(bottomSheet.getHeight()) > 1){
-                    ratio = 0.25f;
-                } else {
-                    ratio = (float) 152 / pxToDp(bottomSheet.getHeight());
-                }
-                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio(ratio));
+                bottomSheet.post(() -> {
+                    float ratio;
+
+                    if ((float) 152 / pxToDp(bottomSheet.getHeight()) < 0f || (float) 152 / pxToDp(bottomSheet.getHeight()) > 1f) {
+                        ratio = 0.25f;
+                    } else {
+                        ratio = (float) 152 / pxToDp(bottomSheet.getHeight());
+                    }
+                    bottomSheetBehavior.setHalfExpandedRatio(ratio);
+                });
                 mapBox.setVisibility(View.VISIBLE);
             }
         });

@@ -183,13 +183,17 @@ public class GermanyMapFragment extends Fragment {
                 Country<ISOCountry> germany = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, germany.getPopulation(), germany.getInfected(), germany.getRecovered(), germany.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-                float ratio;
-                if((float) 152 / pxToDp(bottomSheet.getHeight()) < 0 || (float) 152 / pxToDp(bottomSheet.getHeight()) > 1){
-                    ratio = 0.25f;
-                } else {
-                    ratio = (float) 152 / pxToDp(bottomSheet.getHeight());
-                }
-                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio(ratio));
+
+                bottomSheet.post(() -> {
+                    float ratio;
+
+                    if ((float) 152 / pxToDp(bottomSheet.getHeight()) < 0f || (float) 152 / pxToDp(bottomSheet.getHeight()) > 1f) {
+                        ratio = 0.25f;
+                    } else {
+                        ratio = (float) 152 / pxToDp(bottomSheet.getHeight());
+                    }
+                    bottomSheetBehavior.setHalfExpandedRatio(ratio);
+                });
                 mapBox.setVisibility(View.VISIBLE);
             }
         });
@@ -259,7 +263,7 @@ public class GermanyMapFragment extends Fragment {
             Logger.logE(TAG, "Exception during request!", e);
             try {
                 Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
-                if(APIManager.pingGoogleDNS()){
+                if (APIManager.pingGoogleDNS()) {
                     Logger.logE(TAG, "Success!");
                     requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
                 } else {
@@ -282,7 +286,7 @@ public class GermanyMapFragment extends Fragment {
     }
 
     private int pxToDp(int px) {
-        if(getContext()!=null) {
+        if (getContext() != null) {
             DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
             return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
         } else {
