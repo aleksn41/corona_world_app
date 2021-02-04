@@ -42,10 +42,13 @@ public class StringToCountryParser {
     }
 
     public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException {
+        if(toParse.toLowerCase().startsWith("{\"message\":\"too many requests")){
+            throw new TooManyRequestsException("Too many requests were made!");
+        }
         TimeFramedCountry country = new TimeFramedCountry();
+
         try {
             JSONArray jsonArray = new JSONArray(toParse);
-
             int dateRange = jsonArray.length();
             if (skipFirstDate) dateRange--;
 
@@ -82,6 +85,7 @@ public class StringToCountryParser {
             Log.e(TAG, "Error while parsing this JSON:\n"+toParse, e);
             throw e;
         }
+
         return country;
     }
 
