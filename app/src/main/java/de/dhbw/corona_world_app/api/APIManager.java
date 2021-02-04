@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -52,49 +54,63 @@ public class APIManager {
     }
 
     //gets the data of the whole world through the specified api
-    public static List<Country<ISOCountry>> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
+    public static List<Country<ISOCountry>> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException, IOException {
         Logger.logV(TAG, "Getting data for every Country from api " + api.getName() + "...");
-
         List<Country<ISOCountry>> returnList;
+        try {
+            Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
-        Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
+            int cnt = 0;
 
-        int cnt = 0;
+            String apiReturn = future.get();
+            returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
 
-        String apiReturn = future.get();
-        returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
+            Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
-        Map<ISOCountry, Long> popMap = getAllCountriesPopData();
-
-        for (Country<ISOCountry> country : returnList) {
-            ISOCountry isoCountry = country.getName();
-            if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
-                if (popMap.containsKey(isoCountry)) {
-                    country.setPopulation(popMap.get(isoCountry));
-                } else {
-                    cnt += 1;
-                    Logger.logD("APIManager.getDataWorld", "country \"" + isoCountry.name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+            for (Country<ISOCountry> country : returnList) {
+                ISOCountry isoCountry = country.getName();
+                if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
+                    if (popMap.containsKey(isoCountry)) {
+                        country.setPopulation(popMap.get(isoCountry));
+                    } else {
+                        cnt += 1;
+                        Logger.logD("APIManager.getDataWorld", "country \"" + isoCountry.name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                    }
                 }
             }
-        }
 
-        Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
-        returnList = returnList.stream().filter(c -> c.getName() != null).collect(Collectors.toList());
-        Logger.logV(TAG, "Returning data list...");
+            Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
+            returnList = returnList.stream().filter(c -> c.getName() != null).collect(Collectors.toList());
+            Logger.logV(TAG, "Returning data list...");
+        } catch (ExecutionException e){
+            if(e.getCause() instanceof IOException){
+                throw (IOException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
         return returnList;
     }
 
-    public static List<Country<GermanyState>> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException, JSONException {
+    public static List<Country<GermanyState>> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException, JSONException, IOException {
         Logger.logV(TAG, "Getting data for every state of germany...");
 
         List<Country<GermanyState>> returnList;
+        try {
+            Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
-        Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
+            String apiReturn = future.get();
+            returnList = StringToCountryParser.parseFromArcgisMultiCountry(apiReturn);
 
-        String apiReturn = future.get();
-        returnList = StringToCountryParser.parseFromArcgisMultiCountry(apiReturn);
+            Logger.logV(TAG, "Returning data list...");
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
 
-        Logger.logV(TAG, "Returning data list...");
         return returnList;
     }
 
@@ -230,9 +246,12 @@ public class APIManager {
         final Request request = new Request.Builder()
                 .url(url)
                 .build();
-        String toReturn;
-        toReturn = Objects.requireNonNull(client.newCall(request).execute().body()).string();
-        return toReturn;
+        return Objects.requireNonNull(client.newCall(request).execute().body()).string();
+    }
+
+    public static boolean pingGoogleDNS() throws IOException {
+            InetAddress address = InetAddress.getByName("8.8.8.8");
+            return address.isReachable(10000);
     }
 
     private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) {

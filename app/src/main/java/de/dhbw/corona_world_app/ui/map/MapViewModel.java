@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.Displayable;
@@ -32,6 +33,8 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.MapData;
 
 public class MapViewModel extends ViewModel {
+
+    private static boolean alreadyRunning = false;
 
     private static final String TAG = MapViewModel.class.getSimpleName();
 
@@ -112,46 +115,79 @@ public class MapViewModel extends ViewModel {
     public void initGermany() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         List<Country<GermanyState>> apiGottenList;
         Country<ISOCountry> germanySummary;
-        Log.v(TAG, "Initiating country list...");
-        if (!APIManager.isCacheEnabled() || germanyCacheAge == null || germanyCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
-            apiGottenList = APIManager.getDataGermany(API.ARCGIS);
-            if (!(apiGottenList.size() > 0)) {
-                throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
-            }
-            germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
-            if (APIManager.isCacheEnabled()) {
-                cacheGermany(apiGottenList, germanySummary);
-                germanyCacheAge = LocalDateTime.now();
+        if (!alreadyRunning) {
+            try {
+                alreadyRunning = true;
+                Log.v(TAG, "Initiating country list...");
+                if (!APIManager.isCacheEnabled() || germanyCacheAge == null || germanyCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+                    apiGottenList = APIManager.getDataGermany(API.ARCGIS);
+                    if (!(apiGottenList.size() > 0)) {
+                        throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
+                    }
+                    germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
+                    if (APIManager.isCacheEnabled()) {
+                        cacheGermany(apiGottenList, germanySummary);
+                        germanyCacheAge = LocalDateTime.now();
+                    }
+                } else {
+                    apiGottenList = getCachedGermany().first;
+                    germanySummary = getCachedGermany().second;
+                }
+                mBoxValue.postValue(germanySummary);
+                mStatesList.postValue(apiGottenList);
+                alreadyRunning = false;
+            } catch (Exception e){
+                alreadyRunning = false;
+                throw e;
             }
         } else {
             apiGottenList = getCachedGermany().first;
             germanySummary = getCachedGermany().second;
+            mBoxValue.postValue(germanySummary);
+            mStatesList.postValue(apiGottenList);
+            Thread.currentThread().interrupt();
         }
-        mBoxValue.postValue(germanySummary);
-        mStatesList.postValue(apiGottenList);
     }
 
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         List<Country<ISOCountry>> apiGottenList;
-        Log.v(TAG, "Initiating country list...");
-        if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
-            apiGottenList = APIManager.getDataWorld(API.HEROKU);
-            if (apiGottenList == null || !(apiGottenList.size() > 0)) {
-                throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
-            }
-            if (APIManager.isCacheEnabled()) {
-                cacheDataWorld(apiGottenList);
-                worldCacheAge = LocalDateTime.now();
+        if (!alreadyRunning) {
+            try {
+                alreadyRunning = true;
+                Log.v(TAG, "Initiating country list...");
+                if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+                    apiGottenList = APIManager.getDataWorld(API.HEROKU);
+                    if (apiGottenList == null || !(apiGottenList.size() > 0)) {
+                        throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
+                    }
+                    if (APIManager.isCacheEnabled()) {
+                        cacheDataWorld(apiGottenList);
+                        worldCacheAge = LocalDateTime.now();
+                    }
+                } else {
+                    apiGottenList = getCachedDataWorld();
+                }
+                for (Country<ISOCountry> country : apiGottenList) {
+                    if (country.getName().equals(ISOCountry.World)) {
+                        mBoxValue.postValue(country);
+                    }
+                }
+                mCountryList.postValue(apiGottenList);
+                alreadyRunning = false;
+            } catch (Exception e){
+                alreadyRunning = false;
+                throw e;
             }
         } else {
             apiGottenList = getCachedDataWorld();
-        }
-        for (Country<ISOCountry> country : apiGottenList) {
-            if (country.getName().equals(ISOCountry.World)) {
-                mBoxValue.postValue(country);
+            for (Country<ISOCountry> country : apiGottenList) {
+                if (country.getName().equals(ISOCountry.World)) {
+                    mBoxValue.postValue(country);
+                }
             }
+            mCountryList.postValue(apiGottenList);
+            Thread.currentThread().interrupt();
         }
-        mCountryList.postValue(apiGottenList);
     }
 
     public void switchResolution(MapData.Resolution resolution) {
