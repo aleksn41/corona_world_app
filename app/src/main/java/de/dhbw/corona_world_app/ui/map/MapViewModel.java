@@ -116,25 +116,30 @@ public class MapViewModel extends ViewModel {
         List<Country<GermanyState>> apiGottenList;
         Country<ISOCountry> germanySummary;
         if (!alreadyRunning) {
-            alreadyRunning = true;
-            Log.v(TAG, "Initiating country list...");
-            if (!APIManager.isCacheEnabled() || germanyCacheAge == null || germanyCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
-                apiGottenList = APIManager.getDataGermany(API.ARCGIS);
-                if (!(apiGottenList.size() > 0)) {
-                    throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
+            try {
+                alreadyRunning = true;
+                Log.v(TAG, "Initiating country list...");
+                if (!APIManager.isCacheEnabled() || germanyCacheAge == null || germanyCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+                    apiGottenList = APIManager.getDataGermany(API.ARCGIS);
+                    if (!(apiGottenList.size() > 0)) {
+                        throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
+                    }
+                    germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
+                    if (APIManager.isCacheEnabled()) {
+                        cacheGermany(apiGottenList, germanySummary);
+                        germanyCacheAge = LocalDateTime.now();
+                    }
+                } else {
+                    apiGottenList = getCachedGermany().first;
+                    germanySummary = getCachedGermany().second;
                 }
-                germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
-                if (APIManager.isCacheEnabled()) {
-                    cacheGermany(apiGottenList, germanySummary);
-                    germanyCacheAge = LocalDateTime.now();
-                }
-            } else {
-                apiGottenList = getCachedGermany().first;
-                germanySummary = getCachedGermany().second;
+                mBoxValue.postValue(germanySummary);
+                mStatesList.postValue(apiGottenList);
+                alreadyRunning = false;
+            } catch (Exception e){
+                alreadyRunning = false;
+                throw e;
             }
-            mBoxValue.postValue(germanySummary);
-            mStatesList.postValue(apiGottenList);
-            alreadyRunning = false;
         } else {
             apiGottenList = getCachedGermany().first;
             germanySummary = getCachedGermany().second;
@@ -146,28 +151,33 @@ public class MapViewModel extends ViewModel {
 
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
         if (!alreadyRunning) {
-            alreadyRunning = true;
-            List<Country<ISOCountry>> apiGottenList;
-            Log.v(TAG, "Initiating country list...");
-            if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
-                apiGottenList = APIManager.getDataWorld(API.HEROKU);
-                if (apiGottenList == null || !(apiGottenList.size() > 0)) {
-                    throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
+            try {
+                alreadyRunning = true;
+                List<Country<ISOCountry>> apiGottenList;
+                Log.v(TAG, "Initiating country list...");
+                if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
+                    apiGottenList = APIManager.getDataWorld(API.HEROKU);
+                    if (apiGottenList == null || !(apiGottenList.size() > 0)) {
+                        throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
+                    }
+                    if (APIManager.isCacheEnabled()) {
+                        cacheDataWorld(apiGottenList);
+                        worldCacheAge = LocalDateTime.now();
+                    }
+                } else {
+                    apiGottenList = getCachedDataWorld();
                 }
-                if (APIManager.isCacheEnabled()) {
-                    cacheDataWorld(apiGottenList);
-                    worldCacheAge = LocalDateTime.now();
+                for (Country<ISOCountry> country : apiGottenList) {
+                    if (country.getName().equals(ISOCountry.World)) {
+                        mBoxValue.postValue(country);
+                    }
                 }
-            } else {
-                apiGottenList = getCachedDataWorld();
+                mCountryList.postValue(apiGottenList);
+                alreadyRunning = false;
+            } catch (Exception e){
+                alreadyRunning = false;
+                throw e;
             }
-            for (Country<ISOCountry> country : apiGottenList) {
-                if (country.getName().equals(ISOCountry.World)) {
-                    mBoxValue.postValue(country);
-                }
-            }
-            mCountryList.postValue(apiGottenList);
-            alreadyRunning = false;
         } else {
             Thread.currentThread().interrupt();
         }

@@ -254,11 +254,15 @@ public class WorldMapFragment extends Fragment {
             Logger.logE(TAG, "Exception during request!", e);
             try {
                 Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
-                APIManager.createAPICall("8.8.8.8");
-                Logger.logE(TAG, "Success!");
-                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
+                if(APIManager.pingGoogleDNS()){
+                    Logger.logE(TAG, "Success!");
+                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
+                } else {
+                    Logger.logE(TAG, "Failure!");
+                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
+                }
             } catch (IOException e1) {
-                Logger.logE(TAG, "Failure!", e1);
+                Logger.logE(TAG, "Failure with Exception!", e1);
                 requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
             }
         }
