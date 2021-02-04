@@ -23,6 +23,7 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -51,10 +52,10 @@ public class APIManager {
     }
 
     //gets the data of the whole world through the specified api
-    public static List<Country> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
+    public static List<Country<ISOCountry>> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
         Logger.logV(TAG, "Getting data for every Country from api " + api.getName() + "...");
 
-        List<Country> returnList;
+        List<Country<ISOCountry>> returnList;
 
         Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
@@ -65,8 +66,8 @@ public class APIManager {
 
         Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
-        for (Country country : returnList) {
-            ISOCountry isoCountry = (ISOCountry) country.getName();
+        for (Country<ISOCountry> country : returnList) {
+            ISOCountry isoCountry = country.getName();
             if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
                 if (popMap.containsKey(isoCountry)) {
                     country.setPopulation(popMap.get(isoCountry));
@@ -83,10 +84,10 @@ public class APIManager {
         return returnList;
     }
 
-    public static List<Country> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException, JSONException {
+    public static List<Country<GermanyState>> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException, JSONException {
         Logger.logV(TAG, "Getting data for every state of germany...");
 
-        List<Country> returnList;
+        List<Country<GermanyState>> returnList;
 
         Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
@@ -98,11 +99,11 @@ public class APIManager {
     }
 
     //this method creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of country-objects
-    public static List<Country> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList) throws IllegalArgumentException, ExecutionException, InterruptedException {
+    public static List<Country<ISOCountry>> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList) throws IllegalArgumentException, ExecutionException, InterruptedException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
-        List<Country> returnList = new ArrayList<>();
+        List<Country<ISOCountry>> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
-        List<Future<Country>> futurePopData = new ArrayList<>();
+        List<Future<Country<ISOCountry>>> futurePopData = new ArrayList<>();
 
         boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
 
@@ -123,14 +124,14 @@ public class APIManager {
                 );
                 futureCoronaData.add(future);
                 if (popNeeded) {
-                    Future<Country> future1 = service.submit(() -> StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name()));
+                    Future<Country<ISOCountry>> future1 = service.submit(() -> StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name()));
                     futurePopData.add(future1);
                 }
             }
             Logger.logV(TAG, "All requests have been sent...");
             for (int i = 0; i < futureCoronaData.size(); i++) {
                 String currentString = futureCoronaData.get(i).get();
-                Country country = StringToCountryParser.parseFromHeroOneCountry(currentString);
+                Country<ISOCountry> country = StringToCountryParser.parseFromHeroOneCountry(currentString);
                 if (popNeeded) country.setPopulation(futurePopData.get(i).get().getPopulation());
                 returnList.add(country);
             }
@@ -148,7 +149,7 @@ public class APIManager {
             throw new IllegalArgumentException("Ending date is before starting date!");
         List<TimeFramedCountry> returnList = new ArrayList<>();
         List<Future<String>> futureCoronaData = new ArrayList<>();
-        List<Future<Country>> futurePopData = new ArrayList<>();
+        List<Future<Country<ISOCountry>>> futurePopData = new ArrayList<>();
         if (startDate == null) startDate = LocalDate.now();
         if (endDate == null) endDate = LocalDate.now();
 
@@ -165,9 +166,9 @@ public class APIManager {
 
         boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
         if (startAndEndEqual && startDate.equals(LocalDate.now())) {
-            List<Country> countries = getData(countryList, criteriaList);
+            List<Country<ISOCountry>> countries = getData(countryList, criteriaList);
             List<TimeFramedCountry> timeframedCountries = new ArrayList<>();
-            for (Country country : countries) {
+            for (Country<ISOCountry> country : countries) {
                 TimeFramedCountry countryToAdd = new TimeFramedCountry();
                 countryToAdd.setInfected(new int[]{country.getInfected()});
                 countryToAdd.setDates(new LocalDate[]{startDate});
@@ -176,7 +177,7 @@ public class APIManager {
                 countryToAdd.setPop_inf_ratio(new double[1]);
                 countryToAdd.setActive(new int[]{country.getActive()});
                 countryToAdd.setPopulation(country.getPopulation());
-                countryToAdd.setCountry((ISOCountry) country.getName());
+                countryToAdd.setCountry(country.getName());
                 timeframedCountries.add(countryToAdd);
             }
             return timeframedCountries;
@@ -194,7 +195,7 @@ public class APIManager {
                     futureCoronaData.add(future);
 
                     if (popNeeded) {
-                        Future<Country> future1 = service.submit(() -> StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name()));
+                        Future<Country<ISOCountry>> future1 = service.submit(() -> StringToCountryParser.parsePopCount(createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getOneCountry() + isoCountry.getISOCode()), isoCountry.name()));
                         futurePopData.add(future1);
                     }
                 }

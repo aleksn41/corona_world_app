@@ -25,6 +25,8 @@ import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.Displayable;
+import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.MapData;
 
@@ -40,15 +42,17 @@ public class MapViewModel extends ViewModel {
 
     private static LocalDateTime germanyCacheAge;
 
-    public MutableLiveData<List<Country>> mCountryList = new MutableLiveData<>();
+    public MutableLiveData<List<Country<ISOCountry>>> mCountryList = new MutableLiveData<>();
 
-    public MutableLiveData<Country> mBoxValue = new MutableLiveData<>();
+    public MutableLiveData<List<Country<GermanyState>>> mStatesList = new MutableLiveData<>();
+
+    public MutableLiveData<Country<ISOCountry>> mBoxValue = new MutableLiveData<>();
 
     public void init(boolean cacheDisabled, boolean longTermDisabled) {
         APIManager.setSettings(!cacheDisabled, !longTermDisabled);
     }
 
-    public void cacheDataWorld(@NonNull List<Country> worldData) throws IOException {
+    public void cacheDataWorld(@NonNull List<Country<ISOCountry>> worldData) throws IOException {
         Log.v(TAG, "Caching world data...");
         FileOutputStream fileOut = new FileOutputStream(pathToCacheDir + "/world_cache.ser");
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -58,18 +62,18 @@ public class MapViewModel extends ViewModel {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Country> getCachedDataWorld() throws IOException, ClassNotFoundException {
+    public List<Country<ISOCountry>> getCachedDataWorld() throws IOException, ClassNotFoundException {
         Log.v(TAG, "Getting cached world data...");
-        List<Country> returnList;
+        List<Country<ISOCountry>> returnList;
         try(FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/world_cache.ser")) {
             ObjectInputStream in = new ObjectInputStream(fileIn);
-            returnList = (List<Country>) in.readObject();
+            returnList = (List<Country<ISOCountry>>) in.readObject();
             in.close();
         }
         return returnList;
     }
 
-    public void cacheGermany(@NonNull List<Country> germanyData) throws IOException {
+    public void cacheGermany(@NonNull List<Country<GermanyState>> germanyData) throws IOException {
         Log.v(TAG, "Caching germany data...");
         FileOutputStream fileOut = new FileOutputStream(pathToCacheDir + "/germany_cache.ser");
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -79,19 +83,19 @@ public class MapViewModel extends ViewModel {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Country> getCachedGermany() throws IOException, ClassNotFoundException {
-        List<Country> returnList;
+    public List<Country<GermanyState>> getCachedGermany() throws IOException, ClassNotFoundException {
+        List<Country<GermanyState>> returnList;
         Log.v(TAG, "Getting cached germany data...");
         try(FileInputStream fileIn = new FileInputStream(pathToCacheDir + "/germany_cache.ser")) {
             ObjectInputStream in = new ObjectInputStream(fileIn);
-            returnList = (List<Country>) in.readObject();
+            returnList = (List<Country<GermanyState>>) in.readObject();
             in.close();
         }
         return returnList;
     }
 
     public void initGermany() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
-        List<Country> apiGottenList;
+        List<Country<GermanyState>> apiGottenList;
         Log.v(TAG, "Initiating country list...");
         if (!APIManager.isCacheEnabled() || germanyCacheAge == null || germanyCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
             apiGottenList = APIManager.getDataGermany(API.ARCGIS);
@@ -105,13 +109,13 @@ public class MapViewModel extends ViewModel {
         } else {
             apiGottenList = getCachedGermany();
         }
-        Country germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
+        Country<ISOCountry> germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
         mBoxValue.postValue(germanySummary);
-        mCountryList.postValue(apiGottenList);
+        mStatesList.postValue(apiGottenList);
     }
 
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
-        List<Country> apiGottenList;
+        List<Country<ISOCountry>> apiGottenList;
         Log.v(TAG, "Initiating country list...");
         if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
             apiGottenList = APIManager.getDataWorld(API.HEROKU);
@@ -125,7 +129,7 @@ public class MapViewModel extends ViewModel {
         } else {
             apiGottenList = getCachedDataWorld();
         }
-        for (Country country:apiGottenList) {
+        for (Country<ISOCountry> country:apiGottenList) {
             if(country.getName().equals(ISOCountry.World)){
                 mBoxValue.postValue(country);
             }
@@ -141,7 +145,7 @@ public class MapViewModel extends ViewModel {
         return services.getResolution();
     }
 
-    public String getWebViewStringCustom(List<Country> countryList) {
+    public <T extends Displayable> String getWebViewStringCustom(List<Country<T>> countryList) {
         return services.putEntries(countryList);
     }
 

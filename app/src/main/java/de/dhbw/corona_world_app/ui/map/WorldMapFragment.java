@@ -65,7 +65,7 @@ public class WorldMapFragment extends Fragment {
 
     ImageView bottomSheetExpandImage;
 
-    Country selectedCountry;
+    Country<ISOCountry> selectedCountry;
 
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
 
@@ -174,7 +174,7 @@ public class WorldMapFragment extends Fragment {
                 loadingScreen.endLoadingScreen();
                 myWebView.setOnTouchListener(null);
                 TextView mapBox = root.findViewById(R.id.mapBox);
-                Country world = mapViewModel.mBoxValue.getValue();
+                Country<ISOCountry> world = mapViewModel.mBoxValue.getValue();
                 mapBox.setText("World:");
                 setDataOfBox(mapBox, world.getPopulation(), world.getInfected(), world.getRecovered(), world.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
@@ -196,7 +196,7 @@ public class WorldMapFragment extends Fragment {
 
         jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
             if (isoCountry != null) {
-                List<Country> countryList = mapViewModel.mCountryList.getValue();
+                List<Country<ISOCountry>> countryList = mapViewModel.mCountryList.getValue();
                 if (countryList == null)
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
@@ -265,7 +265,7 @@ public class WorldMapFragment extends Fragment {
     }
 
     public void goToStatistic(final View view){
-        StatisticCall request=new StatisticCall(Collections.singletonList((ISOCountry) selectedCountry.getName()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
+        StatisticCall request=new StatisticCall(Collections.singletonList(selectedCountry.getName()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
         WorldMapFragmentDirections.GoToStatistic action = WorldMapFragmentDirections.goToStatistic(request, true);
         NavHostFragment navHostFragment =
                 (NavHostFragment) requireActivity().getSupportFragmentManager()

@@ -23,12 +23,12 @@ public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();
 
-    public static List<Country> parseFromArcgisMultiCountry(String toParse) throws JSONException {
-        List<Country> countries = new ArrayList<>();
+    public static List<Country<GermanyState>> parseFromArcgisMultiCountry(String toParse) throws JSONException {
+        List<Country<GermanyState>> countries = new ArrayList<>();
         JSONObject object = new JSONObject(toParse);
         JSONArray jsonArray = object.getJSONArray("features");
         for (int i = 0; i < jsonArray.length(); i++) {
-            Country country = new Country();
+            Country<GermanyState> country = new Country<>();
             JSONObject properties = jsonArray.getJSONObject(i).getJSONObject("properties");
             country.setName(GermanyState.valueOf(properties.getString("LAN_ew_GEN").replace("-", "_").replace("ü", "ue").toUpperCase()));
             country.setInfected(properties.getInt("Fallzahl"));
@@ -89,8 +89,8 @@ public class StringToCountryParser {
         return country;
     }
 
-    public static Country parseFromHeroOneCountry(String toParse) {
-        Country country = new Country();
+    public static Country<ISOCountry> parseFromHeroOneCountry(String toParse) {
+        Country<ISOCountry> country = new Country<>();
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");
@@ -119,9 +119,9 @@ public class StringToCountryParser {
         return country;
     }
 
-    public static List<Country> parseFromHeroMultiCountry(String toParse) {
+    public static List<Country<ISOCountry>> parseFromHeroMultiCountry(String toParse) {
         Log.v(TAG, "Parsing multiple countries from api " + API.HEROKU.getName() + "...");
-        List<Country> countryList = new LinkedList<>();
+        List<Country<ISOCountry>> countryList = new LinkedList<>();
         try {
             JSONArray jsonArray = new JSONArray(toParse);
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -135,8 +135,8 @@ public class StringToCountryParser {
     }
 
     //todo use JSONObject
-    public static Country parsePopCount(String toParse, String name) {
-        Country country = new Country(ISOCountry.valueOf(name));
+    public static Country<ISOCountry> parsePopCount(String toParse, String name) {
+        Country<ISOCountry> country = new Country<>(ISOCountry.valueOf(name));
         String[] splitArray = toParse.split(",");
         for (String string : splitArray) {
             String[] tuple = string.split(":");

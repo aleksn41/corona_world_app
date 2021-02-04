@@ -6,6 +6,7 @@ import java.util.List;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
+import de.dhbw.corona_world_app.datastructure.Displayable;
 
 public class MapData {
 
@@ -34,14 +35,14 @@ public class MapData {
         this.resolution = resolution;
     }
 
-    public String putEntries(List<Country> entryList) {
+    public <T extends Displayable> String putEntries(List<Country<T>> entryList) {
         StringBuilder builder = new StringBuilder(entryList.size() * 100);
         Logger.logV(TAG, "Putting entries into StringBuilder...");
         if (entryList.size() > 0) {
-            Country country = entryList.get(0);
+            Country<T> country = entryList.get(0);
             builder.append("['").append(country.getName().getISOCode()).append("',").append(getPercentValueOfDouble(country.getPop_inf_ratio())).append("]");
             for (int i = 1; i < entryList.size(); i++) {
-                Country country1 = entryList.get(i);
+                Country<T> country1 = entryList.get(i);
                 builder.append(",['").append(country1.getName().getISOCode()).append("',").append(getPercentValueOfDouble(country1.getPop_inf_ratio())).append("]");
             }
             Logger.logV(TAG, "Encoding and returning finished WebString...");

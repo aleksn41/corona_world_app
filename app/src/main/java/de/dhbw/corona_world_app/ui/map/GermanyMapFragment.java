@@ -45,6 +45,7 @@ import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.map.MapData;
@@ -66,7 +67,7 @@ public class GermanyMapFragment extends Fragment {
 
     ImageView bottomSheetExpandImage;
 
-    Country selectedCountry;
+    Country<GermanyState> selectedCountry;
 
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
 
@@ -178,7 +179,7 @@ public class GermanyMapFragment extends Fragment {
                 myWebView.setOnTouchListener((v, event) -> (event.getAction() == MotionEvent.ACTION_MOVE));
                 TextView mapBox = root.findViewById(R.id.mapBox);
                 mapBox.setText("Germany:");
-                Country germany = mapViewModel.mBoxValue.getValue();
+                Country<ISOCountry> germany = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, germany.getPopulation(), germany.getInfected(), germany.getRecovered(), germany.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
                 bottomSheet.post(()->bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
@@ -194,7 +195,7 @@ public class GermanyMapFragment extends Fragment {
 
         jsInterface.current.observe(getViewLifecycleOwner(), isoCountry -> {
             if (isoCountry != null) {
-                List<Country> countryList = mapViewModel.mCountryList.getValue();
+                List<Country<GermanyState>> countryList = mapViewModel.mStatesList.getValue();
                 if (countryList == null)
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
@@ -222,7 +223,7 @@ public class GermanyMapFragment extends Fragment {
                 handleException(e);
             }
         });
-        mapViewModel.mCountryList.observe(
+        mapViewModel.mStatesList.observe(
                 getViewLifecycleOwner(), countries ->
                 {
                     loadingScreen.setProgressBar(50);

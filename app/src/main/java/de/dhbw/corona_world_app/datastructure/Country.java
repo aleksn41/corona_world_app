@@ -2,9 +2,9 @@ package de.dhbw.corona_world_app.datastructure;
 
 import java.io.Serializable;
 
-public class Country implements Serializable {
+public class Country<T extends Displayable> implements Serializable {
 
-    private Displayable name;
+    private T name;
 
     private int deaths;
 
@@ -33,7 +33,7 @@ public class Country implements Serializable {
         this.pop_inf_ratio = pop_inf_ratio;
     }
 
-    public Country(Displayable name) {
+    public Country(T name) {
         this.name = name;
     }
 
@@ -78,11 +78,11 @@ public class Country implements Serializable {
         this.active = active;
     }
 
-    public Displayable getName() {
+    public T getName() {
         return name;
     }
 
-    public void setName(Displayable name) {
+    public void setName(T name) {
         this.name = name;
     }
 
