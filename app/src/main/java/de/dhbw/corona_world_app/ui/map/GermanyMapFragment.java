@@ -41,6 +41,7 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
@@ -182,7 +183,7 @@ public class GermanyMapFragment extends Fragment {
                 Country<ISOCountry> germany = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, germany.getPopulation(), germany.getInfected(), germany.getRecovered(), germany.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
+                if(getContext()!=null) bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
                 mapBox.setVisibility(View.VISIBLE);
             }
         });
@@ -264,13 +265,19 @@ public class GermanyMapFragment extends Fragment {
     }
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
-        NumberFormat percentFormat = NumberFormat.getPercentInstance();
-        percentFormat.setMaximumFractionDigits(3);
-        textView.setText(getString(R.string.map_box_content_germany, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
+        if (getContext() != null) {
+            NumberFormat percentFormat = NumberFormat.getPercentInstance();
+            percentFormat.setMaximumFractionDigits(3);
+            textView.setText(getString(R.string.map_box_content_germany, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
+        }
     }
 
     private int pxToDp(int px) {
-        DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
-        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        if(getContext()!=null) {
+            DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
+            return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        } else {
+            return 0;
+        }
     }
 }

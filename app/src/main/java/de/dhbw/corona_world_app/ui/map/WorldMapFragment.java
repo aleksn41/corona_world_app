@@ -40,6 +40,7 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.APIManager;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
@@ -178,8 +179,7 @@ public class WorldMapFragment extends Fragment {
                 Country<ISOCountry> world = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, world.getPopulation(), world.getInfected(), world.getRecovered(), world.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-                //todo @Aleks this can cause crashes if user quickly changes fragments!
-                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
+                if(getContext()!=null)bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
                 mapBox.setVisibility(View.VISIBLE);
             }
         });
@@ -261,7 +261,6 @@ public class WorldMapFragment extends Fragment {
                 Logger.logE(TAG, "Failure!", e1);
                 requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
             }
-
         }
     }
 
@@ -283,7 +282,11 @@ public class WorldMapFragment extends Fragment {
     }
 
     private int pxToDp(int px) {
-        DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
-        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        if(getContext()!=null) {
+            DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
+            return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        } else {
+            return 0;
+        }
     }
 }

@@ -54,33 +54,31 @@ public class APIManager {
     //gets the data of the whole world through the specified api
     public static List<Country<ISOCountry>> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException {
         Logger.logV(TAG, "Getting data for every Country from api " + api.getName() + "...");
-
         List<Country<ISOCountry>> returnList;
+            Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
 
-        Future<String> future = service.submit(() -> createAPICall(api.getUrl() + api.getAllCountries()));
+            int cnt = 0;
 
-        int cnt = 0;
+            String apiReturn = future.get();
+            returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
 
-        String apiReturn = future.get();
-        returnList = StringToCountryParser.parseFromHeroMultiCountry(apiReturn);
+            Map<ISOCountry, Long> popMap = getAllCountriesPopData();
 
-        Map<ISOCountry, Long> popMap = getAllCountriesPopData();
-
-        for (Country<ISOCountry> country : returnList) {
-            ISOCountry isoCountry = country.getName();
-            if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
-                if (popMap.containsKey(isoCountry)) {
-                    country.setPopulation(popMap.get(isoCountry));
-                } else {
-                    cnt += 1;
-                    Logger.logD("APIManager.getDataWorld", "country \"" + isoCountry.name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+            for (Country<ISOCountry> country : returnList) {
+                ISOCountry isoCountry = country.getName();
+                if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
+                    if (popMap.containsKey(isoCountry)) {
+                        country.setPopulation(popMap.get(isoCountry));
+                    } else {
+                        cnt += 1;
+                        Logger.logD("APIManager.getDataWorld", "country \"" + isoCountry.name() + "\" has no popCount\nINFO: Try adding an entry into the according Map");
+                    }
                 }
             }
-        }
 
-        Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
-        returnList = returnList.stream().filter(c -> c.getName() != null).collect(Collectors.toList());
-        Logger.logV(TAG, "Returning data list...");
+            Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
+            returnList = returnList.stream().filter(c -> c.getName() != null).collect(Collectors.toList());
+            Logger.logV(TAG, "Returning data list...");
         return returnList;
     }
 
@@ -230,9 +228,7 @@ public class APIManager {
         final Request request = new Request.Builder()
                 .url(url)
                 .build();
-        String toReturn;
-        toReturn = Objects.requireNonNull(client.newCall(request).execute().body()).string();
-        return toReturn;
+        return Objects.requireNonNull(client.newCall(request).execute().body()).string();
     }
 
     private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) {
