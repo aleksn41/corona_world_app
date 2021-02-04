@@ -120,25 +120,21 @@ public class GermanyMapFragment extends Fragment {
         bottomSheetBehavior.setFitToContents(false);
         //listeners for bottom sheet
         //click event for show-dismiss bottom sheet
-        bottomSheet.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                switch (bottomSheetBehavior.getState()) {
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                        break;
-                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        if (!bottomSheetDirectionUp) {
-                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                        } else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                    case BottomSheetBehavior.STATE_HIDDEN:
-                    case BottomSheetBehavior.STATE_SETTLING:
-                        break;
-                }
+        bottomSheet.setOnClickListener(view -> {
+            switch (bottomSheetBehavior.getState()) {
+                case BottomSheetBehavior.STATE_EXPANDED:
+                case BottomSheetBehavior.STATE_COLLAPSED:
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                    break;
+                case BottomSheetBehavior.STATE_HALF_EXPANDED:
+                    if (!bottomSheetDirectionUp) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    } else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    break;
+                case BottomSheetBehavior.STATE_DRAGGING:
+                case BottomSheetBehavior.STATE_HIDDEN:
+                case BottomSheetBehavior.STATE_SETTLING:
+                    break;
             }
         });
 

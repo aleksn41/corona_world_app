@@ -67,6 +67,8 @@ public class WorldMapFragment extends Fragment {
 
     ImageView bottomSheetExpandImage;
 
+    boolean bottomSheetDirectionUp = true;
+
     Country<ISOCountry> selectedCountry;
 
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
@@ -115,27 +117,21 @@ public class WorldMapFragment extends Fragment {
         bottomSheetBehavior.setFitToContents(false);
         //listeners for bottom sheet
         //click event for show-dismiss bottom sheet
-        bottomSheet.setOnClickListener(new View.OnClickListener() {
-            boolean up = true;
-
-            @Override
-            public void onClick(View view) {
-                switch (bottomSheetBehavior.getState()) {
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                        break;
-                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        if (!up) {
-                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                        } else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        up ^= true;
-                        break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                    case BottomSheetBehavior.STATE_HIDDEN:
-                    case BottomSheetBehavior.STATE_SETTLING:
-                        break;
-                }
+        bottomSheet.setOnClickListener(view -> {
+            switch (bottomSheetBehavior.getState()) {
+                case BottomSheetBehavior.STATE_EXPANDED:
+                case BottomSheetBehavior.STATE_COLLAPSED:
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                    break;
+                case BottomSheetBehavior.STATE_HALF_EXPANDED:
+                    if (!bottomSheetDirectionUp) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    } else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    break;
+                case BottomSheetBehavior.STATE_DRAGGING:
+                case BottomSheetBehavior.STATE_HIDDEN:
+                case BottomSheetBehavior.STATE_SETTLING:
+                    break;
             }
         });
 
@@ -145,9 +141,11 @@ public class WorldMapFragment extends Fragment {
                 switch (newState) {
                     case BottomSheetBehavior.STATE_EXPANDED:
                         bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_more_24));
+                        bottomSheetDirectionUp = false;
                         break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_less_24));
+                        bottomSheetDirectionUp = true;
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
                     case BottomSheetBehavior.STATE_HALF_EXPANDED:
