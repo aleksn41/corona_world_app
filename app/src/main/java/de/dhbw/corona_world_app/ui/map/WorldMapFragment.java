@@ -275,9 +275,11 @@ public class WorldMapFragment extends Fragment {
     }
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
-        NumberFormat percentFormat = NumberFormat.getPercentInstance();
-        percentFormat.setMaximumFractionDigits(3);
-        textView.setText(getString(R.string.map_box_content_world, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
+        if(getContext()!=null) {
+            NumberFormat percentFormat = NumberFormat.getPercentInstance();
+            percentFormat.setMaximumFractionDigits(3);
+            textView.setText(getString(R.string.map_box_content_world, populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
+        }
     }
 
     private int pxToDp(int px) {
