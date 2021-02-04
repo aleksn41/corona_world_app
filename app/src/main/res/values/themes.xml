@@ -17,6 +17,7 @@
         <!-- Customize your theme here. -->
         <item name="bottom_sheet_background">@color/white</item>
     </style>
+    <drawable name="germany_flag">@drawable/germany_flag_black_n_white</drawable>
     <array name="chartColors">
         <!-- 60 Colors should be more than sufficient -->
         <item>@color/dark_grey</item>
