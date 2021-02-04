@@ -150,10 +150,10 @@ public class MapViewModel extends ViewModel {
     }
 
     public void initCountryList() throws IOException, InterruptedException, ExecutionException, JSONException, ClassNotFoundException {
+        List<Country<ISOCountry>> apiGottenList;
         if (!alreadyRunning) {
             try {
                 alreadyRunning = true;
-                List<Country<ISOCountry>> apiGottenList;
                 Log.v(TAG, "Initiating country list...");
                 if (!APIManager.isCacheEnabled() || worldCacheAge == null || worldCacheAge.isBefore(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
                     apiGottenList = APIManager.getDataWorld(API.HEROKU);
@@ -179,6 +179,13 @@ public class MapViewModel extends ViewModel {
                 throw e;
             }
         } else {
+            apiGottenList = getCachedDataWorld();
+            for (Country<ISOCountry> country : apiGottenList) {
+                if (country.getName().equals(ISOCountry.World)) {
+                    mBoxValue.postValue(country);
+                }
+            }
+            mCountryList.postValue(apiGottenList);
             Thread.currentThread().interrupt();
         }
     }

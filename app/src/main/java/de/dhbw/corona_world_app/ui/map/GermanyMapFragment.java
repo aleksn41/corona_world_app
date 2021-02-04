@@ -183,7 +183,13 @@ public class GermanyMapFragment extends Fragment {
                 Country<ISOCountry> germany = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, germany.getPopulation(), germany.getInfected(), germany.getRecovered(), germany.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
+                float ratio;
+                if((float) 152 / pxToDp(bottomSheet.getHeight()) < 0 || (float) 152 / pxToDp(bottomSheet.getHeight()) > 1){
+                    ratio = 0.25f;
+                } else {
+                    ratio = (float) 152 / pxToDp(bottomSheet.getHeight());
+                }
+                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio(ratio));
                 mapBox.setVisibility(View.VISIBLE);
             }
         });
