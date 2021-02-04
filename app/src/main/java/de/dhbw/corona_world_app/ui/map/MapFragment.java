@@ -64,6 +64,8 @@ public class MapFragment extends Fragment {
 
     ImageView bottomSheetExpandImage;
 
+    boolean bottomSheetDirectionUp = true;
+
     Country selectedCountry;
 
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
@@ -105,30 +107,31 @@ public class MapFragment extends Fragment {
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
         percentageFormat.setMaximumFractionDigits(3);
-        ((Button)root.findViewById(R.id.bottomSheetButton)).setOnClickListener((View.OnClickListener) this::goToStatistic);
+        ((Button) root.findViewById(R.id.bottomSheetButton)).setOnClickListener((View.OnClickListener) this::goToStatistic);
         //setup bottomsheet
         RelativeLayout bottomSheet = root.findViewById(R.id.bottomSheet);
         BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        bottomSheetExpandImage =root.findViewById(R.id.bottom_sheet_expand);
+        bottomSheetExpandImage = root.findViewById(R.id.bottom_sheet_expand);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setFitToContents(false);
         //listeners for bottom sheet
         //click event for show-dismiss bottom sheet
         bottomSheet.setOnClickListener(new View.OnClickListener() {
-            boolean up=true;
+            boolean up = true;
+
             @Override
             public void onClick(View view) {
                 switch (bottomSheetBehavior.getState()) {
                     case BottomSheetBehavior.STATE_EXPANDED:
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                        break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
                         break;
                     case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        if (!up) {
+                        if (!bottomSheetDirectionUp) {
                             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                        }
-                        else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        up ^= true;
+                        } else bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
                     case BottomSheetBehavior.STATE_HIDDEN:
@@ -144,9 +147,11 @@ public class MapFragment extends Fragment {
                 switch (newState) {
                     case BottomSheetBehavior.STATE_EXPANDED:
                         bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_more_24));
+                        bottomSheetDirectionUp = false;
                         break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         bottomSheetExpandImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_expand_less_24));
+                        bottomSheetDirectionUp = true;
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
                     case BottomSheetBehavior.STATE_HALF_EXPANDED:
@@ -154,7 +159,8 @@ public class MapFragment extends Fragment {
                     case BottomSheetBehavior.STATE_SETTLING:
                         break;
                 }
-                if(selectedCountry!=null)root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
+                if (selectedCountry != null)
+                    root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -175,7 +181,7 @@ public class MapFragment extends Fragment {
                 TextView mapBox = root.findViewById(R.id.mapBox);
                 setDataOfBox(mapBox, 7000000000L, 1000000L, 100000L, 10000L);
                 bottomSheet.setVisibility(View.VISIBLE);
-                bottomSheet.post(()->bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
+                bottomSheet.post(() -> bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight())));
                 mapBox.setVisibility(View.VISIBLE);
             }
         });
@@ -199,7 +205,7 @@ public class MapFragment extends Fragment {
                         ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
                         selectedCountry = countryList.get(i);
                         bottomSheetTitle.setText(isoCountry.toString());
-                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description, selectedCountry.getPopulation(),"100%", selectedCountry.getHealthy(),percentageFormat.format((double)selectedCountry.getHealthy()/selectedCountry.getPopulation()), selectedCountry.getInfected(),percentageFormat.format((double)selectedCountry.getInfected()/selectedCountry.getPopulation()), selectedCountry.getRecovered(),percentageFormat.format((double)selectedCountry.getRecovered()/selectedCountry.getPopulation()), selectedCountry.getDeaths(),percentageFormat.format((double)selectedCountry.getDeaths()/selectedCountry.getPopulation()), percentageFormat.format(selectedCountry.getPop_inf_ratio()), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getInfected())));
+                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getString(R.string.bottom_sheet_description, selectedCountry.getPopulation(), "100%", selectedCountry.getHealthy(), percentageFormat.format((double) selectedCountry.getHealthy() / selectedCountry.getPopulation()), selectedCountry.getInfected(), percentageFormat.format((double) selectedCountry.getInfected() / selectedCountry.getPopulation()), selectedCountry.getRecovered(), percentageFormat.format((double) selectedCountry.getRecovered() / selectedCountry.getPopulation()), selectedCountry.getDeaths(), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getPopulation()), percentageFormat.format(selectedCountry.getPop_inf_ratio()), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getInfected())));
                     }
                 }
                 if (bottomSheetTitle.getText().length() == 0) {
@@ -272,8 +278,8 @@ public class MapFragment extends Fragment {
         return root;
     }
 
-    public void goToStatistic(final View view){
-        StatisticCall request=new StatisticCall(Collections.singletonList(selectedCountry.getISOCountry()), ChartType.PIE,Arrays.asList(Criteria.values()),StatisticCall.NOW,StatisticCall.NOW);
+    public void goToStatistic(final View view) {
+        StatisticCall request = new StatisticCall(Collections.singletonList(selectedCountry.getISOCountry()), ChartType.PIE, Arrays.asList(Criteria.values()), StatisticCall.NOW, StatisticCall.NOW);
         MapFragmentDirections.GoToStatistic action = MapFragmentDirections.goToStatistic(request, true);
         NavHostFragment navHostFragment =
                 (NavHostFragment) requireActivity().getSupportFragmentManager()
