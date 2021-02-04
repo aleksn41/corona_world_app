@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -10,7 +9,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -42,8 +40,8 @@ import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 //TODO put data in View Model
 public class StatisticRequestFragment extends Fragment {
@@ -199,19 +197,16 @@ public class StatisticRequestFragment extends Fragment {
                     endDateChooser.setEnabled(false);
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
-                    startDatePicker.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
-                        @Override
-                        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                            start = LocalDate.of(year, month + 1, dayOfMonth);
-                            startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                            endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                            endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
-                            endDatePicker.getDatePicker().updateDate(year, month + 1, dayOfMonth);
-                            end = start;
-                            endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-                            if (startDateChange != null) startDateChange.onItemChange();
-                            if (endDateChange != null) endDateChange.onItemChange();
-                        }
+                    startDatePicker.setOnDateSetListener((view, year13, month13, dayOfMonth) -> {
+                        start = LocalDate.of(year13, month13 + 1, dayOfMonth);
+                        startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
+                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+                        endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
+                        endDatePicker.getDatePicker().updateDate(year13, month13 + 1, dayOfMonth);
+                        end = start;
+                        endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
+                        if (startDateChange != null) startDateChange.onItemChange();
+                        if (endDateChange != null) endDateChange.onItemChange();
                     });
                     changed = true;
                 }
@@ -285,32 +280,29 @@ public class StatisticRequestFragment extends Fragment {
         textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         textView.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
         //only works for non virtual keyboards
-        textView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (event == null) {
-                    if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
-                        if (adapter.filteredItems.size() > 0) {
-                            if (!textView.isPopupShowing()) textView.showDropDown();
-                            textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
-                        } else {
-                            showErrorWithCompletion(textView);
-                            return false;
-                        }
-                    } else return false;
-                } else if (actionId == EditorInfo.IME_NULL) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                        if (adapter.filteredItems.size() > 0) {
-                            if (!textView.isPopupShowing()) textView.showDropDown();
-                            textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
-                        } else {
-                            showErrorWithCompletion(textView);
-                            return true;
-                        }
-                    } else return false;
+        textView.setOnEditorActionListener((v, actionId, event) -> {
+            if (event == null) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                    if (adapter.filteredItems.size() > 0) {
+                        if (!textView.isPopupShowing()) textView.showDropDown();
+                        textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
+                    } else {
+                        showErrorWithCompletion(textView);
+                        return false;
+                    }
                 } else return false;
-                return true;
-            }
+            } else if (actionId == EditorInfo.IME_NULL) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (adapter.filteredItems.size() > 0) {
+                        if (!textView.isPopupShowing()) textView.showDropDown();
+                        textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
+                    } else {
+                        showErrorWithCompletion(textView);
+                        return true;
+                    }
+                } else return false;
+            } else return false;
+            return true;
         });
         textView.setAdapter(adapter);
     }

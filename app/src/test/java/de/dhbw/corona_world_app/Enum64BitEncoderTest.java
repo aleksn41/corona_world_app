@@ -1,6 +1,5 @@
 package de.dhbw.corona_world_app;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -13,7 +12,7 @@ import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.Enum64BitEncoder;
-import de.dhbw.corona_world_app.datastructure.ISOCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
