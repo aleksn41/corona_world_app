@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -185,16 +186,12 @@ public class GermanyMapFragment extends Fragment {
                 Country<ISOCountry> germany = mapViewModel.mBoxValue.getValue();
                 setDataOfBox(mapBox, germany.getPopulation(), germany.getInfected(), germany.getRecovered(), germany.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
-
-                bottomSheet.post(() -> {
-                    float ratio;
-
-                    if ((float) 152 / pxToDp(bottomSheet.getHeight()) < 0f || (float) 152 / pxToDp(bottomSheet.getHeight()) > 1f) {
-                        ratio = 0.25f;
-                    } else {
-                        ratio = (float) 152 / pxToDp(bottomSheet.getHeight());
+                bottomSheet.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
                     }
-                    bottomSheetBehavior.setHalfExpandedRatio(ratio);
                 });
                 mapBox.setVisibility(View.VISIBLE);
             }
