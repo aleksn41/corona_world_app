@@ -1,0 +1,35 @@
+package de.dhbw.corona_world_app.statistic;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+
+public class StatisticCacheObject implements Serializable {
+
+    LocalDateTime creationTime;
+
+    StatisticCall statisticCall;
+
+    List<TimeFramedCountry> data;
+
+    public StatisticCacheObject(LocalDateTime creationTime, StatisticCall statisticCall, List<TimeFramedCountry> data) {
+        this.creationTime = creationTime;
+        this.statisticCall = statisticCall;
+        this.data = data;
+    }
+
+    public LocalDateTime getCreationTime() {
+        return creationTime;
+    }
+
+    public StatisticCall getStatisticCall() {
+        return statisticCall;
+    }
+
+    public List<TimeFramedCountry> getData() {
+        return data;
+    }
+}

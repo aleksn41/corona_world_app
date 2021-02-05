@@ -2,6 +2,7 @@ package de.dhbw.corona_world_app.ui.statistic;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.util.Log;
 
 import androidx.lifecycle.ViewModel;
 
@@ -18,28 +19,44 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
+import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
+import de.dhbw.corona_world_app.datastructure.DataException;
+import de.dhbw.corona_world_app.datastructure.Displayable;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
+import de.dhbw.corona_world_app.statistic.StatisticCacheObject;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class StatisticViewModel extends ViewModel {
 
     private static final String TAG = StatisticViewModel.class.getName();
+
+    private final String CACHE_FILENAME = "/statistics.ser";
 
     private List<Criteria> criteriaOrder;
 
@@ -59,7 +76,86 @@ public class StatisticViewModel extends ViewModel {
         criteriaOrder.addAll(Arrays.asList(Criteria.POPULATION, Criteria.HEALTHY, Criteria.INFECTED, Criteria.ACTIVE, Criteria.RECOVERED, Criteria.DEATHS, Criteria.IH_RATION, Criteria.ID_RATION));
     }
 
-    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException {
+    public void deleteCache(){
+        Log.v(TAG, "Deleting cache...");
+        File file = new File(pathToCacheDir + CACHE_FILENAME);
+
+        if(file.delete())
+        {
+            Log.v(TAG, "Cache was successfully deleted.");
+        }
+        else
+        {
+            throw new DataException("Local cache could not be deleted!");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void cacheStatisticCall(StatisticCall statisticCall, List<TimeFramedCountry> readiedData) throws IOException, ClassNotFoundException {
+        Log.v(TAG, "Caching " + statisticCall + "...");
+        if (this.pathToCacheDir == null)
+            throw new IllegalStateException("Path to cache directory is not set!");
+
+        File cacheFile = new File(pathToCacheDir + CACHE_FILENAME);
+        List<StatisticCacheObject> cacheList = null;
+
+        StatisticCacheObject cacheToAdd = new StatisticCacheObject(LocalDateTime.now(), statisticCall, readiedData);
+
+        if (cacheFile.exists() && !cacheFile.isDirectory()) {
+            try (FileInputStream fileIn = new FileInputStream(cacheFile)) {
+                ObjectInputStream in = new ObjectInputStream(fileIn);
+                cacheList = (List<StatisticCacheObject>) in.readObject();
+            }
+            if (cacheList == null)
+                throw new IllegalStateException("Cache file exists but could not be read!");
+            cacheList = cacheList.stream().filter(co -> !co.getStatisticCall().equals(cacheToAdd.getStatisticCall())).collect(Collectors.toList());
+        }
+
+
+        if(cacheList == null){
+            cacheList = new ArrayList<>();
+        } else if (cacheList.size() >= APIManager.MAX_CACHED_STATISTIC_CALLS) {
+            cacheList.remove(0);
+        }
+
+        cacheList.add(cacheToAdd);
+
+        try (FileOutputStream fileOut = new FileOutputStream(cacheFile)) {
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(cacheList);
+            out.close();
+            Log.v(TAG, "Successfully cached " + statisticCall);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<TimeFramedCountry> getCachedDataIfContains(StatisticCall statisticCall) throws IOException, ClassNotFoundException {
+        File cacheFile = new File(pathToCacheDir + CACHE_FILENAME);
+        List<StatisticCacheObject> cachedList;
+
+        StatisticCacheObject toReturn = null;
+
+        if (cacheFile.exists() && !cacheFile.isDirectory()) {
+            try (FileInputStream fileIn = new FileInputStream(cacheFile)) {
+                ObjectInputStream in = new ObjectInputStream(fileIn);
+                cachedList = (List<StatisticCacheObject>) in.readObject();
+            }
+            if (cachedList == null)
+                throw new IllegalStateException("Cache file exists but could not be read!");
+            cachedList = cachedList.stream().filter(co -> (co.getStatisticCall().getStartDate()!=null && co.getStatisticCall().getEndDate() != null) || co.getCreationTime().isAfter(LocalDateTime.now().minusMinutes(APIManager.MAX_LIVE_STATISTICS_CACHE_AGE))).collect(Collectors.toList());
+
+            for (StatisticCacheObject cacheObject : cachedList) {
+                if (cacheObject.getStatisticCall().equals(statisticCall)) {
+                    toReturn = cacheObject;
+                }
+            }
+        }
+
+        if(toReturn==null) return null;
+        return toReturn.getData();
+    }
+
+    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -71,7 +167,11 @@ public class StatisticViewModel extends ViewModel {
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
 
         BarData barData = new BarData();
-        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+        apiGottenList = getCachedDataIfContains(statisticCall);
+        if(apiGottenList == null) {
+            apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+            cacheStatisticCall(statisticCall, apiGottenList);
+        }
         LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
         if (startDate == null) startDate = LocalDate.now();
@@ -80,23 +180,23 @@ public class StatisticViewModel extends ViewModel {
         int activeavg = 0;
         int recoveredavg = 0;
         int deathsavg = 0;
-        for (TimeFramedCountry country:apiGottenList) {
-             activeavg += getIntArrayAvg(country.getActive());
-             recoveredavg += getIntArrayAvg(country.getRecovered());
-             deathsavg += getIntArrayAvg(country.getDeaths());
+        for (TimeFramedCountry country : apiGottenList) {
+            activeavg += getIntArrayAvg(country.getActive());
+            recoveredavg += getIntArrayAvg(country.getRecovered());
+            deathsavg += getIntArrayAvg(country.getDeaths());
         }
-        if(activeavg > recoveredavg){
-            if(activeavg < deathsavg){
+        if (activeavg > recoveredavg) {
+            if (activeavg < deathsavg) {
                 criteriaOrder.remove(Criteria.DEATHS);
                 criteriaOrder.add(3, Criteria.DEATHS);
             }
         } else {
-            if(activeavg < deathsavg){
+            if (activeavg < deathsavg) {
                 criteriaOrder.remove(Criteria.ACTIVE);
                 criteriaOrder.add(5, Criteria.ACTIVE);
             } else {
                 criteriaOrder.remove(Criteria.ACTIVE);
-                criteriaOrder.add(4,Criteria.ACTIVE);
+                criteriaOrder.add(4, Criteria.ACTIVE);
             }
         }
         if (dates2D) {
@@ -145,7 +245,7 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(barData);
     }
 
-    private int getIntArrayAvg(int[] array){
+    private int getIntArrayAvg(int[] array) {
         int avg = 0;
         for (int value : array) {
             avg += value;
@@ -174,7 +274,7 @@ public class StatisticViewModel extends ViewModel {
         });
     }
 
-    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException {
+    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException {
         Logger.logV(TAG, "Getting pie chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -186,8 +286,11 @@ public class StatisticViewModel extends ViewModel {
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
 
         PieData pieData = new PieData();
-        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-
+        apiGottenList = getCachedDataIfContains(statisticCall);
+        if(apiGottenList == null) {
+            apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+            cacheStatisticCall(statisticCall, apiGottenList);
+        }
         if (dates2D) {
             if (countryList2D) {
                 for (Criteria criteria : statisticCall.getCriteriaList()) {
@@ -236,7 +339,7 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(pieData);
     }
 
-    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException {
+    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException {
         Logger.logV(TAG, "Getting line chart for " + statisticCall);
         init();
 
@@ -249,8 +352,11 @@ public class StatisticViewModel extends ViewModel {
         if (countryList2D && criteriaList2D && dates2D)
             throw new IllegalArgumentException("Invalid combination of criteria, countries and time. Remember: Only TWO of those can have multiple values.");
 
-        apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-        LocalDate startDate = statisticCall.getStartDate();
+        apiGottenList = getCachedDataIfContains(statisticCall);
+        if(apiGottenList == null) {
+            apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
+            cacheStatisticCall(statisticCall, apiGottenList);
+        }        LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
         if (startDate == null) startDate = LocalDate.now();
         if (endDate == null) endDate = LocalDate.now();
