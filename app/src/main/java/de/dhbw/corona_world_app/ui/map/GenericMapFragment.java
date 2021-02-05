@@ -180,7 +180,8 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     @Override
                     public void onGlobalLayout() {
                         bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
+                        //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
+                        if(bottomSheet.getHeight()!=0)bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
                     }
                 });
                 mapBox.setVisibility(View.VISIBLE);
