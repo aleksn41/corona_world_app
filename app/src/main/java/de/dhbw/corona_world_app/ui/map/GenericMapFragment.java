@@ -68,8 +68,6 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
 
     Country<T> selectedCountry;
 
-    int count=0;
-
     NumberFormat percentageFormat = NumberFormat.getPercentInstance();
 
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
@@ -172,7 +170,6 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
             @SuppressLint("ClickableViewAccessibility")
             public void onPageFinished(WebView view, String url) {
                 loadingScreen.setProgressBar(100);
-                count +=1;
                 myWebView.setOnTouchListener(null);
                 setAdditionalWebViewSettingsOnPageFinished(myWebView);
                 TextView mapBox = root.findViewById(R.id.mapBox);
