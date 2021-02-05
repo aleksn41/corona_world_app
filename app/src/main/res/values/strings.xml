@@ -26,8 +26,9 @@
     <string name="fab_content_desc">Create Statistic</string>
     <string name="error_title">Error Code: %1$d (%2$s)</string>
     <string name="map_box_title">World:</string>
-    <string name="map_box_content_world">World:\nPopulation:&#160;%1$d (%2$s)\nInfected:&#160;&#160;&#160;&#160;&#160;%3$d (%4$s)\nRecovered:&#160;%5$d (%6$s)\nDeaths:&#160;&#160;&#160;&#160;&#160;&#160;&#160;%7$d (%8$s)</string>
-    <string name="map_box_content_germany">Germany:\nPopulation:&#160;%1$d (%2$s)\nInfected:&#160;&#160;&#160;&#160;&#160;%3$d (%4$s)\nRecovered:&#160;%5$d (%6$s)\nDeaths:&#160;&#160;&#160;&#160;&#160;&#160;&#160;%7$d (%8$s)</string>
-    <string name="bottom_sheet_description">Population: %1$d (%2$s)\nHealthy: %3$d (%4$s)\nInfected: %5$d (%6$s)\nRecovered: %7$d (%8$s)\nDeaths: %9$d (%10$s)\nPopulation-Infected Ratio: %11$s\nInfected-Deaths Ratio: %12$s</string>
+    <string name="map_box_content_world">World:\nPopulation:&#160;%1$d (%2$s)\nInfected:&#160;&#160;&#160;&#160;&#160;&#160;%3$d (%4$s)\nActive:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;%5$d (%6$s)\nRecovered:&#160;&#160;%7$d (%8$s)\nDeaths:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;%9$d (%10$s)</string>
+    <string name="map_box_content_germany">Germany:\nPopulation:&#160;%1$d (%2$s)\nInfected:&#160;&#160;&#160;&#160;&#160;&#160;%3$d (%4$s)\nActive:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;%5$d (%6$s)\nRecovered:&#160;&#160;%7$d (%8$s)\nDeaths:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;%9$d (%10$s)</string>
+    <string name="bottom_sheet_description_world">Population: %1$d (%2$s)\nHealthy: %3$d (%4$s)\nInfected: %5$d (%6$s)\nActive: %7$d (%8$s)\nRecovered: %9$d (%10$s)\nDeaths: %11$d (%12$s)\nPopulation-Infected Ratio: %13$s\nInfected-Deaths Ratio: %14$s</string>
+    <string name="bottom_sheet_description_germany">Population: %1$d (%2$s)\nHealthy: %3$d (%4$s)\nInfected: %5$d (%6$s)\nDeaths: %7$d (%8$s)\nPopulation-Infected Ratio: %9$s\nInfected-Deaths Ratio: %10$s</string>
     <string name="bottomSheetButtonText">Go to Statistic</string>
 </resources>
