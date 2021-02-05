@@ -310,8 +310,11 @@ public class StatisticRequestFragment extends Fragment {
     private <T extends Enum<T>> Chip getChip(T item) {
         Chip chip = new Chip(requireContext());
         chip.setCloseIconVisible(true);
-        chip.setChipIconVisible(true);
-        chip.setChipIcon(ContextCompat.getDrawable(requireContext(), R.drawable.ic_home_black_24dp));
+        if(item instanceof ISOCountry) {
+            chip.setChipIconVisible(true);
+            chip.setIconStartPadding(10f);
+            chip.setChipIcon(ContextCompat.getDrawable(requireContext(), ((ISOCountry)item).getFlagDrawableID()));
+        }
         chip.setText(item.toString());
         chip.setTextIsSelectable(false);
         return chip;
