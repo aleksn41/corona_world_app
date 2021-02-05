@@ -69,7 +69,6 @@ public class StatisticFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
-        //TODO change this
         if (statisticCallViewModel.isNotInit()) {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
@@ -106,7 +105,7 @@ public class StatisticFragment extends Fragment {
         barChart.setVisibility(View.GONE);
         pieChart.setVisibility(View.GONE);
         lineChart.setVisibility(View.GONE);
-
+        statisticViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         Bundle bundle = getArguments();
         assert bundle != null;
         StatisticCall statisticCall = StatisticFragmentArgs.fromBundle(bundle).getStatisticCall();
@@ -188,6 +187,30 @@ public class StatisticFragment extends Fragment {
                         try {
                             synchronized (currentThread) {
                                 currentThread.wait();
+                            }
+                        } catch (InterruptedException interruptedException) {
+                            Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
+                        }
+                    } catch (IOException e) {
+                        Log.v(TAG, "Exception while creating statistic!", e);
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        Log.wtf(TAG,"There are problems reading the serialized data!");
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
+                            retry.set(true);
+                            synchronized (currentThread) {
+                                currentThread.notify();
+                            }
+                        }, "Ok"));
+                        try {
+                            synchronized (currentThread) {
+                                currentThread.wait();
+                            }
+                            try{
+                                statisticViewModel.deleteCache();
+                            } catch(DataException dataException){
+                                Log.e(TAG, "Could not delete local statistics cache!", dataException);
+                                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_DELETE_FILE, null, "Ok"));
                             }
                         } catch (InterruptedException interruptedException) {
                             Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);

@@ -8,7 +8,7 @@ public enum ErrorCode {
     DATA_CORRUPT(1, "Your data is corrupt, all corrupt files will be deleted."),
     CANNOT_READ_FILE(2, "Cannot access file."),
     CANNOT_SAVE_FILE(3, "Cannot write into file."),
-    CANNOT_DELETE_FILE(4, "Cannot access file."),
+    CANNOT_DELETE_FILE(4, "Could not delete file."),
     CANNOT_RESTORE_FILE(5, "No backup has been found, all corrupt files will be deleted."),
     CREATE_STATISTIC_FAILED(6, "An unexpected error occurred while creating the statistic."),
     NO_CONNECTION(7, "The Internet could not be accessed."),

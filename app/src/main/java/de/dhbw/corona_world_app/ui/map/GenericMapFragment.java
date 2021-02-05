@@ -174,8 +174,16 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                 setAdditionalWebViewSettingsOnPageFinished(myWebView);
                 TextView mapBox = root.findViewById(R.id.mapBox);
                 Country<ISOCountry> boxCountry = mapViewModel.mBoxValue.getValue();
-                setDataOfBox(mapBox, boxCountry.getPopulation(), boxCountry.getInfected(), boxCountry.getRecovered(), boxCountry.getDeaths());
+                setDataOfBox(mapBox, boxCountry.getPopulation(), boxCountry.getInfected(), boxCountry.getActive(), boxCountry.getRecovered(), boxCountry.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
+                bottomSheet.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
+                        if(bottomSheet.getHeight()!=0)bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
+                    }
+                });
                 mapBox.setVisibility(View.VISIBLE);
                 loadingScreen.endLoadingScreen();
             }
@@ -230,14 +238,6 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     Log.v(getTAG(), "Loading WebView with WebString...");
                     loadingScreen.setProgressBar(100);
                     myWebView.loadData(webViewString.getValue(), "text/html", "base64");
-                    bottomSheet.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
-                            if(bottomSheet.getHeight()!=0)bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
-                        }
-                    });
                 });
         return root;
     }
@@ -290,12 +290,12 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     protected String getTAG(){
         return this.getClass().getSimpleName();
     }
-
-    private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
+    
+    private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
         if(getContext()!=null) {
             NumberFormat percentFormat = NumberFormat.getPercentInstance();
             percentFormat.setMaximumFractionDigits(3);
-            textView.setText(getString(getMapBoxFormattedString(), populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
+            textView.setText(getString(getMapBoxFormattedString(), populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), activeWorld, percentFormat.format((double) activeWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
         }
     }
 
