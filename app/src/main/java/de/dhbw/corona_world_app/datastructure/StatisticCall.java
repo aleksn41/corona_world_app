@@ -89,11 +89,11 @@ public class StatisticCall implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StatisticCall that = (StatisticCall) o;
-        return getCountryList().equals(that.getCountryList()) &&
+        return Objects.equals(countryList, that.countryList) &&
                 chartType == that.chartType &&
-                getCriteriaList().equals(that.getCriteriaList()) &&
-                getStartDate().equals(that.getStartDate()) &&
-                Objects.equals(getEndDate(), that.getEndDate());
+                Objects.equals(criteriaList, that.criteriaList) &&
+                Objects.equals(startDate, that.startDate) &&
+                Objects.equals(endDate, that.endDate);
     }
 
     @Override
