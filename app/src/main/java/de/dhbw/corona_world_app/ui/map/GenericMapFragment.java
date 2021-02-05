@@ -174,7 +174,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                 setAdditionalWebViewSettingsOnPageFinished(myWebView);
                 TextView mapBox = root.findViewById(R.id.mapBox);
                 Country<ISOCountry> boxCountry = mapViewModel.mBoxValue.getValue();
-                setDataOfBox(mapBox, boxCountry.getPopulation(), boxCountry.getInfected(), boxCountry.getRecovered(), boxCountry.getDeaths());
+                setDataOfBox(mapBox, boxCountry.getPopulation(), boxCountry.getInfected(), boxCountry.getActive(), boxCountry.getRecovered(), boxCountry.getDeaths());
                 bottomSheet.setVisibility(View.VISIBLE);
                 bottomSheet.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
@@ -290,11 +290,11 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         return this.getClass().getSimpleName();
     }
     
-    private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long recoveredWorld, long deathsWorld) {
+    private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
         if(getContext()!=null) {
             NumberFormat percentFormat = NumberFormat.getPercentInstance();
             percentFormat.setMaximumFractionDigits(3);
-            textView.setText(getString(getMapBoxFormattedString(), populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
+            textView.setText(getString(getMapBoxFormattedString(), populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), activeWorld, percentFormat.format((double) activeWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
         }
     }
 

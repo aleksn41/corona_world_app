@@ -80,7 +80,7 @@ public class WorldMapFragment extends GenericMapFragment<ISOCountry> {
 
     @Override
     protected void goToStatistic(final View view) {
-        StatisticCall request = new StatisticCall(Collections.singletonList(selectedCountry.getName()), ChartType.PIE, Arrays.asList(Criteria.values()), StatisticCall.NOW, StatisticCall.NOW);
+        StatisticCall request = new StatisticCall(Collections.singletonList(selectedCountry.getName()), ChartType.PIE, Arrays.asList(Criteria.HEALTHY, Criteria.INFECTED, Criteria.RECOVERED, Criteria.DEATHS), StatisticCall.NOW, StatisticCall.NOW);
         WorldMapFragmentDirections.GoToStatistic action = WorldMapFragmentDirections.goToStatistic(request, true);
         NavHostFragment navHostFragment =
                 (NavHostFragment) requireActivity().getSupportFragmentManager()
@@ -90,7 +90,7 @@ public class WorldMapFragment extends GenericMapFragment<ISOCountry> {
 
     @Override
     protected String getBottomSheetText() {
-        return getString(R.string.bottom_sheet_description, selectedCountry.getPopulation(), "100%", selectedCountry.getHealthy(), percentageFormat.format((double) selectedCountry.getHealthy() / selectedCountry.getPopulation()), selectedCountry.getInfected(), percentageFormat.format((double) selectedCountry.getInfected() / selectedCountry.getPopulation()), selectedCountry.getRecovered(), percentageFormat.format((double) selectedCountry.getRecovered() / selectedCountry.getPopulation()), selectedCountry.getDeaths(), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getPopulation()), percentageFormat.format(selectedCountry.getPop_inf_ratio()), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getInfected()));
+        return getString(R.string.bottom_sheet_description_world, selectedCountry.getPopulation(), "100%", selectedCountry.getHealthy(), percentageFormat.format((double) selectedCountry.getHealthy() / selectedCountry.getPopulation()), selectedCountry.getInfected(), percentageFormat.format((double) selectedCountry.getInfected() / selectedCountry.getPopulation()), selectedCountry.getActive(),  percentageFormat.format((double) selectedCountry.getActive() / selectedCountry.getPopulation()), selectedCountry.getRecovered(), percentageFormat.format((double) selectedCountry.getRecovered() / selectedCountry.getPopulation()), selectedCountry.getDeaths(), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getPopulation()), percentageFormat.format(selectedCountry.getPop_inf_ratio()), percentageFormat.format((double) selectedCountry.getDeaths() / selectedCountry.getInfected()));
     }
 
     @Override
