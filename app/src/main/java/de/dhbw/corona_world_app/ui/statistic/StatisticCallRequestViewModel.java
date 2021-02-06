@@ -27,17 +27,20 @@ import de.dhbw.corona_world_app.ui.tools.Pair;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 
 public class StatisticCallRequestViewModel extends ViewModel {
-        MutableLiveData<LinkedHashSet<ISOCountry>> selectedISOCountries;
-        MutableLiveData<LinkedHashSet<Criteria>> selectedCriteriaCountries;
-        MutableLiveData<LinkedHashSet<ChartType>> selectedChartTypeCountries;
-        MutableLiveData<LocalDate> startDate;
-        MutableLiveData<LocalDate> endDate;
-        public StatisticCallRequestViewModel(){
-            selectedISOCountries=new MutableLiveData<>();
-            selectedISOCountries.setValue(new LinkedHashSet<>());
-            selectedCriteriaCountries=new MutableLiveData<>();
-            selectedCriteriaCountries.setValue(new LinkedHashSet<>());
-            selectedChartTypeCountries=new MutableLiveData<>();
-            selectedChartTypeCountries.setValue(new LinkedHashSet<>());
-        }
+    MutableLiveData<LinkedHashSet<ISOCountry>> selectedISOCountries;
+    MutableLiveData<LinkedHashSet<Criteria>> selectedCriteriaCountries;
+    MutableLiveData<LinkedHashSet<ChartType>> selectedChartTypeCountries;
+    MutableLiveData<LocalDate> startDate;
+    MutableLiveData<LocalDate> endDate;
+
+    public StatisticCallRequestViewModel() {
+        selectedISOCountries = new MutableLiveData<>();
+        selectedISOCountries.setValue(new LinkedHashSet<>());
+        selectedCriteriaCountries = new MutableLiveData<>();
+        selectedCriteriaCountries.setValue(new LinkedHashSet<>());
+        selectedChartTypeCountries = new MutableLiveData<>();
+        selectedChartTypeCountries.setValue(new LinkedHashSet<>());
+        startDate = new MutableLiveData<>();
+        endDate = new MutableLiveData<>();
+    }
 }
