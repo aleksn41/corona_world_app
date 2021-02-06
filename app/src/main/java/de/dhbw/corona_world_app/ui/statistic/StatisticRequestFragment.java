@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -32,6 +33,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,9 +45,11 @@ import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
+import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
-//TODO put data in View Model
 public class StatisticRequestFragment extends Fragment {
+
+    StatisticCallRequestViewModel statisticCallRequestViewModel;
 
     //setup DatePicker
     private LocalDate start;
@@ -60,18 +65,8 @@ public class StatisticRequestFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        //TODO delete after debugging is done
-        //Logger.disableLogging();
-        if (Logger.getDebbuging()) {
-            List<ISOCountry> clist = new ArrayList<>();
-            clist.add(ISOCountry.Germany);
-            //clist.add(ISOCountry.Belize);
-            List<Criteria> crlist = new ArrayList<>();
-            //crlist.add(Criteria.HEALTHY);
-            crlist.add(Criteria.INFECTED);
-            //crlist.add(Criteria.DEATHS);
-            requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now().minusDays(89), LocalDate.now()));
-        }
+        statisticCallRequestViewModel =
+                new ViewModelProvider(this).get(StatisticCallRequestViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic_request, container, false);
 
         ExtendedFloatingActionButton floatingActionButton = root.findViewById(R.id.floating_action_button);
@@ -84,7 +79,6 @@ public class StatisticRequestFragment extends Fragment {
                 floatingActionButton.extend();
             } else floatingActionButton.shrink();
         });
-        //TODO change with post
         //init floatingActionButtonPosition once it is known if the scrollview is at the end when initialized
         ViewTreeObserver vto = scrollView.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -98,18 +92,58 @@ public class StatisticRequestFragment extends Fragment {
             }
         });
 
-        //TODO visually show that limit is reached
         CustomAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
+        ChipGroup isoCountryChips=root.findViewById(R.id.isoCountryChips);
         AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country"));
         //special rule, user cannot select World for a statistic as it is not supported by the API
         isoCountryAdapter.addToBlackList(ISOCountry.World);
-        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, root.findViewById(R.id.isoCountryChips));
+        isoCountryNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
+            statisticCallRequestViewModel.selectedISOCountries.getValue().add(isoCountryAdapter.getItem(position));
+            statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
+        });
+        statisticCallRequestViewModel.selectedISOCountries.observe(getViewLifecycleOwner(), new Observer<LinkedHashSet<ISOCountry>>() {
+            @Override
+            public void onChanged(LinkedHashSet<ISOCountry> isoCountries) {
+                isoCountryAdapter.submitSelectedItems(isoCountries);
+                isoCountryNachoTextView.setText("");
+                for (ISOCountry isoCountry:isoCountries) {
+                    Chip itemChip = getChip(isoCountry);
+                    itemChip.setOnCloseIconClickListener(v -> {
+                        statisticCallRequestViewModel.selectedISOCountries.getValue().remove(isoCountry);
+                        statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
+                    });
+                    isoCountryChips.addView(itemChip);
+                }
+            }
+        });
+        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, isoCountryChips);
 
         CustomAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
+        ChipGroup criteriaChips=root.findViewById(R.id.criteriaChips);
         AutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new AutoCompleteTextViewAdapter<>(getContext(), Criteria.class, AutoCompleteTextViewAdapter.NO_LIMIT, null);
-        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, root.findViewById(R.id.criteriaChips));
+        criteriaNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
+            statisticCallRequestViewModel.selectedCriteriaCountries.getValue().add(criteriaAdapter.getItem(position));
+            statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
+        });
+        statisticCallRequestViewModel.selectedCriteriaCountries.observe(getViewLifecycleOwner(), new Observer<LinkedHashSet<Criteria>>() {
+            @Override
+            public void onChanged(LinkedHashSet<Criteria> criteriaItems) {
+                criteriaAdapter.submitSelectedItems(criteriaItems);
+                criteriaNachoTextView.setText("");
+                for (Criteria criteria:criteriaItems) {
+                    Chip itemChip = getChip(criteria);
+                    itemChip.setOnCloseIconClickListener(v -> {
+                        statisticCallRequestViewModel.selectedCriteriaCountries.getValue().remove(criteria);
+                        statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
+                    });
+                    criteriaChips.addView(itemChip);
+                }
+            }
+        });
+        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, criteriaChips);
 
         CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
+        ChipGroup chartTypeChips=root.findViewById(R.id.chartTypeChips);
         AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, getLimitListener("Chart-Type")) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
@@ -118,7 +152,26 @@ public class StatisticRequestFragment extends Fragment {
                 super.conditionApplies(allowOnlyOneItem);
             }
         };
-        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter, root.findViewById(R.id.chartTypeChips));
+        chartTypeNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
+            statisticCallRequestViewModel.selectedChartTypeCountries.getValue().add(chartTypeAdapter.getItem(position));
+            statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
+        });
+        statisticCallRequestViewModel.selectedChartTypeCountries.observe(getViewLifecycleOwner(), new Observer<LinkedHashSet<ChartType>>() {
+            @Override
+            public void onChanged(LinkedHashSet<ChartType> chartTypeItems) {
+                chartTypeAdapter.submitSelectedItems(chartTypeItems);
+                chartTypeNachoTextView.setText("");
+                for (ChartType chartType:chartTypeItems) {
+                    Chip itemChip = getChip(chartType);
+                    itemChip.setOnCloseIconClickListener(v -> {
+                        statisticCallRequestViewModel.selectedChartTypeCountries.getValue().remove(chartType);
+                        statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
+                    });
+                    chartTypeChips.addView(itemChip);
+                }
+            }
+        });
+        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter, chartTypeChips);
 
         //get current Date
         final Calendar c = Calendar.getInstance();
@@ -270,17 +323,6 @@ public class StatisticRequestFragment extends Fragment {
     }
 
     private <T extends Enum<T>> void setupMultiAutoCompleteTextView(AutoCompleteTextView textView, AutoCompleteTextViewAdapter<T> adapter, ChipGroup chipGroup) {
-        textView.setOnItemClickListener((parent, view, position, id) -> {
-            adapter.selectItem(position);
-            T selectedItem = adapter.getItem(position);
-            textView.setText("");
-            Chip itemChip = getChip(selectedItem);
-            itemChip.setOnCloseIconClickListener(v -> {
-                adapter.unSelectItem(selectedItem);
-                chipGroup.removeView(v);
-            });
-            chipGroup.addView(itemChip);
-        });
         //when the user presses enter, use top suggestion
         textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         textView.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);

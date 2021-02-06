@@ -129,6 +129,11 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
         itemsChangeListener.onItemChange();
     }
 
+    public void submitSelectedItems(HashSet<T> items){
+        selectedItems=items;
+        notifyDataSetChanged();
+    }
+
     public boolean anySelected() {
         return !selectedItems.isEmpty();
     }
