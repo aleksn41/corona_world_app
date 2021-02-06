@@ -32,20 +32,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 
-import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
-import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 public class StatisticRequestFragment extends Fragment {
 
@@ -98,23 +93,20 @@ public class StatisticRequestFragment extends Fragment {
             statisticCallRequestViewModel.selectedISOCountries.getValue().add(isoCountryAdapter.getItem(position));
             statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
         });
-        statisticCallRequestViewModel.selectedISOCountries.observe(getViewLifecycleOwner(), new Observer<LinkedHashSet<ISOCountry>>() {
-            @Override
-            public void onChanged(LinkedHashSet<ISOCountry> isoCountries) {
-                isoCountryAdapter.submitSelectedItems(isoCountries);
-                isoCountryNachoTextView.setText("");
-                isoCountryChips.removeAllViews();
-                for (ISOCountry isoCountry : isoCountries) {
-                    Chip itemChip = getChip(isoCountry);
-                    itemChip.setOnCloseIconClickListener(v -> {
-                        statisticCallRequestViewModel.selectedISOCountries.getValue().remove(isoCountry);
-                        statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
-                    });
-                    isoCountryChips.addView(itemChip);
-                }
+        statisticCallRequestViewModel.selectedISOCountries.observe(getViewLifecycleOwner(), isoCountries -> {
+            isoCountryAdapter.submitSelectedItems(isoCountries);
+            isoCountryNachoTextView.setText("");
+            isoCountryChips.removeAllViews();
+            for (ISOCountry isoCountry : isoCountries) {
+                Chip itemChip = getChip(isoCountry);
+                itemChip.setOnCloseIconClickListener(v -> {
+                    statisticCallRequestViewModel.selectedISOCountries.getValue().remove(isoCountry);
+                    statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
+                });
+                isoCountryChips.addView(itemChip);
             }
         });
-        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, isoCountryChips);
+        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter);
 
         CustomAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
         ChipGroup criteriaChips = root.findViewById(R.id.criteriaChips);
@@ -123,23 +115,20 @@ public class StatisticRequestFragment extends Fragment {
             statisticCallRequestViewModel.selectedCriteriaCountries.getValue().add(criteriaAdapter.getItem(position));
             statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
         });
-        statisticCallRequestViewModel.selectedCriteriaCountries.observe(getViewLifecycleOwner(), new Observer<LinkedHashSet<Criteria>>() {
-            @Override
-            public void onChanged(LinkedHashSet<Criteria> criteriaItems) {
-                criteriaAdapter.submitSelectedItems(criteriaItems);
-                criteriaNachoTextView.setText("");
-                criteriaChips.removeAllViews();
-                for (Criteria criteria : criteriaItems) {
-                    Chip itemChip = getChip(criteria);
-                    itemChip.setOnCloseIconClickListener(v -> {
-                        statisticCallRequestViewModel.selectedCriteriaCountries.getValue().remove(criteria);
-                        statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
-                    });
-                    criteriaChips.addView(itemChip);
-                }
+        statisticCallRequestViewModel.selectedCriteriaCountries.observe(getViewLifecycleOwner(), criteriaItems -> {
+            criteriaAdapter.submitSelectedItems(criteriaItems);
+            criteriaNachoTextView.setText("");
+            criteriaChips.removeAllViews();
+            for (Criteria criteria : criteriaItems) {
+                Chip itemChip = getChip(criteria);
+                itemChip.setOnCloseIconClickListener(v -> {
+                    statisticCallRequestViewModel.selectedCriteriaCountries.getValue().remove(criteria);
+                    statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
+                });
+                criteriaChips.addView(itemChip);
             }
         });
-        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, criteriaChips);
+        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter);
 
         CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
         ChipGroup chartTypeChips = root.findViewById(R.id.chartTypeChips);
@@ -155,23 +144,20 @@ public class StatisticRequestFragment extends Fragment {
             statisticCallRequestViewModel.selectedChartTypeCountries.getValue().add(chartTypeAdapter.getItem(position));
             statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
         });
-        statisticCallRequestViewModel.selectedChartTypeCountries.observe(getViewLifecycleOwner(), new Observer<LinkedHashSet<ChartType>>() {
-            @Override
-            public void onChanged(LinkedHashSet<ChartType> chartTypeItems) {
-                chartTypeAdapter.submitSelectedItems(chartTypeItems);
-                chartTypeNachoTextView.setText("");
-                chartTypeChips.removeAllViews();
-                for (ChartType chartType : chartTypeItems) {
-                    Chip itemChip = getChip(chartType);
-                    itemChip.setOnCloseIconClickListener(v -> {
-                        statisticCallRequestViewModel.selectedChartTypeCountries.getValue().remove(chartType);
-                        statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
-                    });
-                    chartTypeChips.addView(itemChip);
-                }
+        statisticCallRequestViewModel.selectedChartTypeCountries.observe(getViewLifecycleOwner(), chartTypeItems -> {
+            chartTypeAdapter.submitSelectedItems(chartTypeItems);
+            chartTypeNachoTextView.setText("");
+            chartTypeChips.removeAllViews();
+            for (ChartType chartType : chartTypeItems) {
+                Chip itemChip = getChip(chartType);
+                itemChip.setOnCloseIconClickListener(v -> {
+                    statisticCallRequestViewModel.selectedChartTypeCountries.getValue().remove(chartType);
+                    statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
+                });
+                chartTypeChips.addView(itemChip);
             }
         });
-        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter, chartTypeChips);
+        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter);
 
         //get current Date
         final Calendar c = Calendar.getInstance();
@@ -183,38 +169,22 @@ public class StatisticRequestFragment extends Fragment {
         Button endDateChooser = root.findViewById(R.id.endDateChooser);
 
         startDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
-        statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), new Observer<LocalDate>() {
-            @Override
-            public void onChanged(LocalDate start) {
-                startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                if (!endDateChooser.isEnabled()) endDateChooser.setEnabled(true);
-                if (startDateChange != null) startDateChange.onItemChange();
-            }
+        statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
+            startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
+            endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+            if (!endDateChooser.isEnabled()) endDateChooser.setEnabled(true);
+            if (startDateChange != null) startDateChange.onItemChange();
         });
         endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
-        statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), new Observer<LocalDate>() {
-            @Override
-            public void onChanged(LocalDate end) {
-                endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-                startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-                if (endDateChange != null) endDateChange.onItemChange();
-            }
+        statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), end -> {
+            endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
+            startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
+            if (endDateChange != null) endDateChange.onItemChange();
         });
 
-        startDatePicker.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                statisticCallRequestViewModel.startDate.setValue(LocalDate.of(year, month + 1, dayOfMonth));
-            }
-        });
+        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> statisticCallRequestViewModel.startDate.setValue(LocalDate.of(year1, month1 + 1, dayOfMonth)));
 
-        endDatePicker.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                statisticCallRequestViewModel.endDate.setValue(LocalDate.of(year, month + 1, dayOfMonth));
-            }
-        });
+        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> statisticCallRequestViewModel.endDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth)));
 
         //sets the min date to the beginning of Corona
         startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
@@ -270,18 +240,15 @@ public class StatisticRequestFragment extends Fragment {
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
                     statisticCallRequestViewModel.startDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), new Observer<LocalDate>() {
-                        @Override
-                        public void onChanged(LocalDate start) {
-                            startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                            endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                            endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
-                            endDatePicker.getDatePicker().updateDate(start.getYear(), start.getMonthValue(), start.getDayOfMonth());
-                            statisticCallRequestViewModel.endDate.setValue(start);
-                            endDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                            if (startDateChange != null) startDateChange.onItemChange();
-                            if (endDateChange != null) endDateChange.onItemChange();
-                        }
+                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
+                        startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
+                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+                        endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
+                        endDatePicker.getDatePicker().updateDate(start.getYear(), start.getMonthValue(), start.getDayOfMonth());
+                        statisticCallRequestViewModel.endDate.setValue(start);
+                        endDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
+                        if (startDateChange != null) startDateChange.onItemChange();
+                        if (endDateChange != null) endDateChange.onItemChange();
                     });
                     changed = true;
                 }
@@ -291,22 +258,16 @@ public class StatisticRequestFragment extends Fragment {
             public void conditionDoesNotApply() {
                 if (changed) {
                     statisticCallRequestViewModel.startDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), new Observer<LocalDate>() {
-                        @Override
-                        public void onChanged(LocalDate start) {
-                            startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                            endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                            if (startDateChange != null) startDateChange.onItemChange();
-                        }
+                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
+                        startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
+                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+                        if (startDateChange != null) startDateChange.onItemChange();
                     });
                     statisticCallRequestViewModel.endDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), new Observer<LocalDate>() {
-                        @Override
-                        public void onChanged(LocalDate end) {
-                            endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-                            startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-                            if (endDateChange != null) endDateChange.onItemChange();
-                        }
+                    statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), end -> {
+                        endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
+                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
+                        if (endDateChange != null) endDateChange.onItemChange();
                     });
 
                     if (statisticCallRequestViewModel.endDate.getValue() != null)
@@ -351,7 +312,7 @@ public class StatisticRequestFragment extends Fragment {
         return date.atStartOfDay().toEpochSecond(ZoneId.systemDefault().getRules().getOffset(Instant.now())) * 1000;
     }
 
-    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(AutoCompleteTextView textView, AutoCompleteTextViewAdapter<T> adapter, ChipGroup chipGroup) {
+    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(AutoCompleteTextView textView, AutoCompleteTextViewAdapter<T> adapter) {
         //when the user presses enter, use top suggestion
         textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         textView.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
