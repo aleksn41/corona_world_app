@@ -25,6 +25,7 @@ import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
@@ -47,11 +48,28 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(this.getClass().getName(), "could not create new File during init", e);
+                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_SAVE_FILE, null);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                Throwable cause = e.getCause();
+                if (cause != null) {
+                    if (cause instanceof IOException) {
+                        Log.e(this.getClass().getName(), "could not read File during init", e);
+                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, null);
+                    } else {
+                        Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), e);
+                        ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
+                    }
+                } else {
+                    Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), e);
+                    ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
+                }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), e);
+                ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
+            } catch (DataException e) {
+                Log.e(this.getClass().getName(), ErrorCode.DATA_CORRUPT.toString(), e);
+                tryRepairingData();
             }
         }
         Log.d(this.getClass().getName(), "initiate RecycleView");
@@ -194,7 +212,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public abstract ShowStatisticInterface getShowStatisticInterface();
 
     protected void tryRepairingData() {
-        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, (dialog, which) -> {
+        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
             //TODO implement check to see if Data can be recovered
             boolean canBeRecovered = false;
             if (canBeRecovered) {
