@@ -364,6 +364,9 @@ public class StatisticRequestFragment extends Fragment {
     }
 
     private <T extends Enum<T>> AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name) {
-        return limit -> Toast.makeText(getContext(), getString(R.string.limit_reached, limit, name), Toast.LENGTH_SHORT).show();
+        return (limit) -> {
+            if (getContext() != null)
+                Toast.makeText(getContext(), getString(R.string.limit_reached, limit, name), Toast.LENGTH_SHORT).show();
+        };
     }
 }

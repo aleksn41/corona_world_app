@@ -179,7 +179,7 @@ public class StatisticFragment extends Fragment {
                         } catch (InterruptedException interruptedException) {
                             Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                         }
-                    } catch (TooManyRequestsException e){
+                    } catch (TooManyRequestsException e) {
                         Log.e(TAG, "Too many requests were made!", e);
                         requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.TOO_MANY_REQUESTS, (dialog, which) -> {
                             retry.set(true);
@@ -198,7 +198,7 @@ public class StatisticFragment extends Fragment {
                         Log.v(TAG, "Exception while creating statistic!", e);
                         e.printStackTrace();
                     } catch (ClassNotFoundException e) {
-                        Log.wtf(TAG,"There are problems reading the serialized data!");
+                        Log.wtf(TAG, "There are problems reading the serialized data!");
                         requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
                             retry.set(true);
                             synchronized (currentThread) {
@@ -209,9 +209,9 @@ public class StatisticFragment extends Fragment {
                             synchronized (currentThread) {
                                 currentThread.wait();
                             }
-                            try{
+                            try {
                                 statisticViewModel.deleteCache();
-                            } catch(DataException dataException){
+                            } catch (DataException dataException) {
                                 Log.e(TAG, "Could not delete local statistics cache!", dataException);
                                 requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_DELETE_FILE, null, "Ok"));
                             }
@@ -290,7 +290,7 @@ public class StatisticFragment extends Fragment {
         arr2.recycle();
     }
 
-    private void setStyle(PieChart chart, StatisticCall statisticCall,Context context) {
+    private void setStyle(PieChart chart, StatisticCall statisticCall, Context context) {
         boolean countryList2D = statisticCall.getCountryList().size() > 1;
         boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
@@ -321,7 +321,8 @@ public class StatisticFragment extends Fragment {
         String title = "";
         LocalDate startDate = statisticCall.getStartDate() != null ? statisticCall.getStartDate() : LocalDate.now();
         LocalDate endDate = statisticCall.getEndDate() != null ? statisticCall.getEndDate() : LocalDate.now();
-        if(dates2D) title = "Average between the "+StatisticViewModel.getDateFormatted(startDate)+ " and the "+StatisticViewModel.getDateFormatted(endDate);
+        if (dates2D)
+            title = "Average between the " + StatisticViewModel.getDateFormatted(startDate) + " and the " + StatisticViewModel.getDateFormatted(endDate);
         chart.setCenterText(title);
         chart.getLegend().setWordWrapEnabled(true);
 
