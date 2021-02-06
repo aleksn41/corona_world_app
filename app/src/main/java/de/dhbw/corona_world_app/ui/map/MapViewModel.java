@@ -102,13 +102,13 @@ public class MapViewModel extends ViewModel {
     }
 
     @SuppressWarnings("unchecked")
-    public MapWithBoxCacheObject<GermanyState> getCachedGermanyIfRelevant() throws IOException, ClassNotFoundException {
+    public MapWithBoxCacheObject<GermanyState, ISOCountry> getCachedGermanyIfRelevant() throws IOException, ClassNotFoundException {
         Log.v(TAG, "Getting cached germany data...");
         File file = new File(pathToCacheDir + GERMANY_CACHE_FILENAME);
         if (file.exists() && !file.isDirectory()) {
             try (FileInputStream fileIn = new FileInputStream(file)) {
                 ObjectInputStream in = new ObjectInputStream(fileIn);
-                MapWithBoxCacheObject<GermanyState> cacheObject = (MapWithBoxCacheObject<GermanyState>) in.readObject();
+                MapWithBoxCacheObject<GermanyState, ISOCountry> cacheObject = (MapWithBoxCacheObject<GermanyState, ISOCountry>) in.readObject();
                 if (cacheObject.getCreationTime().isAfter(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
                     return cacheObject;
                 }
@@ -125,7 +125,7 @@ public class MapViewModel extends ViewModel {
             try {
                 alreadyRunning = true;
                 Log.v(TAG, "Initiating country list...");
-                MapWithBoxCacheObject<GermanyState> cacheObject = null;
+                MapWithBoxCacheObject<GermanyState, ISOCountry> cacheObject = null;
                 if (APIManager.isCacheEnabled()) {
                     cacheObject = getCachedGermanyIfRelevant();
                 }
@@ -151,11 +151,6 @@ public class MapViewModel extends ViewModel {
                 throw e;
             }
         } else {
-            MapWithBoxCacheObject<GermanyState> cache = getCachedGermanyIfRelevant();
-            apiGottenList = cache.getDataList();
-            germanySummary = cache.getMapBoxValue();
-            mBoxValue.postValue(germanySummary);
-            mStatesList.postValue(apiGottenList);
             Thread.currentThread().interrupt();
         }
     }
@@ -190,13 +185,6 @@ public class MapViewModel extends ViewModel {
                 throw e;
             }
         } else {
-            apiGottenList = getCachedDataWorldIfRelevant();
-            for (Country<ISOCountry> country : apiGottenList) {
-                if (country.getName().equals(ISOCountry.World)) {
-                    mBoxValue.postValue(country);
-                }
-            }
-            mCountryList.postValue(apiGottenList);
             Thread.currentThread().interrupt();
         }
     }
