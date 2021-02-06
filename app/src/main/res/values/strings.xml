@@ -31,4 +31,6 @@
     <string name="bottom_sheet_description_world">Population: %1$d (%2$s)\nHealthy: %3$d (%4$s)\nInfected: %5$d (%6$s)\nActive: %7$d (%8$s)\nRecovered: %9$d (%10$s)\nDeaths: %11$d (%12$s)\nPopulation-Infected Ratio: %13$s\nInfected-Deaths Ratio: %14$s</string>
     <string name="bottom_sheet_description_germany">Population: %1$d (%2$s)\nHealthy: %3$d (%4$s)\nInfected: %5$d (%6$s)\nDeaths: %7$d (%8$s)\nPopulation-Infected Ratio: %9$s\nInfected-Deaths Ratio: %10$s</string>
     <string name="bottomSheetButtonText">Go to Statistic</string>
+    <string name="select_all">Select all</string>
+    <string name="un_select_all">Unselect all</string>
 </resources>

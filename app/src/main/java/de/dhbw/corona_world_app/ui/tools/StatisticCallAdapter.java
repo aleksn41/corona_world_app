@@ -9,29 +9,26 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.ui.statistic.StatisticRequestFragmentDirections;
 
 import static android.view.View.GONE;
 
-//TODO instead of Pairs use an extra Hashset for the selected Items
+
 public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean>, StatisticCallViewHolder> {
     private boolean multiSelectForDeleteActivated=false;
 
     //used in order to figure out fast if an item is to be deleted or not
-    private final HashSet<Integer> selectedItemsToDelete =new HashSet<>();
+    private final HashSet<Integer> selectedItems =new HashSet<>();
 
     //need to hold a reference to the ActionMode in order to manually close it if 0 items are selected
     private ActionMode mActionMode;
@@ -45,6 +42,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.top_action_bar_delete_menu,menu);
             mActionMode=mode;
+            multiSelectForDeleteActivated=true;
             return true;
         }
 
@@ -55,10 +53,19 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            //delete All Items
-            Log.d(this.getClass().getName(),"clicked on delete Item");
-            deleteSelectedItems();
-            mode.finish();
+            if(item.getItemId()==R.id.action_delete) {
+                //delete All Items
+                Log.d(this.getClass().getName(), "clicked on delete Item");
+                deleteSelectedItems();
+                mode.finish();
+            }else if (item.getItemId()==R.id.action_favourite){
+                toggleFavForSelected();
+            }else if(item.getItemId()==R.id.select_all){
+                selectAllItems();
+            }else if(item.getItemId()==R.id.un_select_all){
+                unSelectAllItems();
+                mode.finish();
+            }
             return false;
         }
 
@@ -66,8 +73,9 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         public void onDestroyActionMode(ActionMode mode) {
             Log.v(this.getClass().getName(),"exit delete Mode");
             multiSelectForDeleteActivated=false;
-            selectedItemsToDelete.clear();
+            selectedItems.clear();
             notifyDataSetChanged();
+            mActionMode=null;
         }
     };
 
@@ -76,7 +84,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
     private final StatisticCallAdapterItemOnActionCallback itemOnActionCallback;
 
     //used to Inform the List-Owner if an Item is supposed to be deleted
-    private final StatisticCallDeleteInterface deleteInterface;
+    private final StatisticCallActionModeInterface actionModeInterface;
 
     //used to add an Callback when the last item is loaded
     private final StatisticCallAdapterOnLastItemLoaded onLastItemLoaded;
@@ -84,7 +92,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
     //used to show Statistic when user wants to see a certain Statistic
     private final ShowStatisticInterface showStatisticInterface;
 
-    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallDeleteInterface deleteInterface,StatisticCallAdapterOnLastItemLoaded onLastItemLoaded,ShowStatisticInterface showStatisticInterface) {
+    public StatisticCallAdapter(StatisticCallAdapterItemOnActionCallback itemOnActionCallback, StatisticCallActionModeInterface actionModeInterfaceInterface, StatisticCallAdapterOnLastItemLoaded onLastItemLoaded, ShowStatisticInterface showStatisticInterface) {
         super(new DiffUtil.ItemCallback<Pair<StatisticCall,Boolean>>() {
 
             @Override
@@ -98,7 +106,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
             }
         });
         this.itemOnActionCallback=itemOnActionCallback;
-        this.deleteInterface = deleteInterface;
+        this.actionModeInterface = actionModeInterfaceInterface;
         this.onLastItemLoaded=onLastItemLoaded;
         this.showStatisticInterface=showStatisticInterface;
     }
@@ -132,9 +140,8 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         //tell Fragment and ViewModel that an Item should be marked for deletion and Deletion Mode should be activated if not already on
         holder.itemView.setOnLongClickListener(v -> {
             if(!multiSelectForDeleteActivated){
-                deleteInterface.enterDeleteMode(actionMode);
-                multiSelectForDeleteActivated=true;
-                selectItemToDelete(holder.getAdapterPosition(),holder);
+                actionModeInterface.enterDeleteMode(actionMode);
+                selectItem(holder.getAdapterPosition(),holder);
             }
             return true;
         });
@@ -142,30 +149,55 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         //if the item is clicked, go to Statistic with the call
         holder.itemView.setOnClickListener(v -> {
             if(multiSelectForDeleteActivated){
-                selectItemToDelete(holder.getAdapterPosition(),holder);
+                selectItem(holder.getAdapterPosition(),holder);
             }else{
                 //TODO  show pop up with more info and a confirmation he wants to see the statistic
                 goToStatistic(getItem(holder.getAdapterPosition()).first);
             }
         });
-        setMarkedItem(holder,selectedItemsToDelete.contains(holder.getAdapterPosition()));
+        setMarkedItem(holder, selectedItems.contains(holder.getAdapterPosition()));
     }
 
-    private void selectItemToDelete(int itemID,@NonNull StatisticCallViewHolder holder){
-        Log.d(this.getClass().getName(),"selecting Item to be deleted");
-        boolean alreadyInDeleted=selectedItemsToDelete.contains(itemID);
-        if(alreadyInDeleted) {
-            selectedItemsToDelete.remove(itemID);
-            if(selectedItemsToDelete.isEmpty())mActionMode.finish();
-        }else{
-            selectedItemsToDelete.add(itemID);
+    public void selectAllItems(){
+        List<Integer> allNonBlacklistedIndices=new ArrayList<>(getItemCount());
+        for (int i = 0; i < getItemCount(); i++) {
+            if(!blackListedIndices.contains(i)){
+                allNonBlacklistedIndices.add(i);
+            }
         }
-        setMarkedItem(holder,!alreadyInDeleted);
-        Log.d(this.getClass().getName(),"currentList of Items selected: "+selectedItemsToDelete.toString());
+        selectedItems.addAll(allNonBlacklistedIndices);
+        if(mActionMode==null)actionModeInterface.enterDeleteMode(actionMode);
+        notifyDataSetChanged();
+    }
+
+    public void unSelectAllItems(){
+        selectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    public int getBlacklistedItemsSize(){
+        return blackListedIndices.size();
+    }
+
+    private void selectItem(int itemID, @NonNull StatisticCallViewHolder holder){
+        Log.d(this.getClass().getName(),"selecting Item to be deleted");
+        boolean alreadySelected= selectedItems.contains(itemID);
+        if(alreadySelected) {
+            selectedItems.remove(itemID);
+            if(selectedItems.isEmpty())mActionMode.finish();
+        }else{
+            selectedItems.add(itemID);
+        }
+        setMarkedItem(holder,!alreadySelected);
+        Log.d(this.getClass().getName(),"currentList of Items selected: "+ selectedItems.toString());
     }
 
     private void deleteSelectedItems(){
-        deleteInterface.deleteItems(selectedItemsToDelete);
+        actionModeInterface.deleteItems(selectedItems);
+    }
+
+    private void toggleFavForSelected(){
+        actionModeInterface.favouriteItems(selectedItems);
     }
 
     private void setMarkedItem(StatisticCallViewHolder holder,boolean mark){
