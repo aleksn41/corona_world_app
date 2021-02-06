@@ -133,6 +133,7 @@ public class StatisticRequestFragment extends Fragment {
             start = LocalDate.of(year12, month12 + 1, dayOfMonth);
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+            if(!endDateChooser.isEnabled())endDateChooser.setEnabled(true);
             if (startDateChange != null) startDateChange.onItemChange();
         }, year, month, day);
 
@@ -156,6 +157,9 @@ public class StatisticRequestFragment extends Fragment {
         startDateChooser.setText("Now");
         end = StatisticCall.NOW;
         endDateChooser.setText("Now");
+
+        //not allowed to change end Date until start date is changed
+        endDateChooser.setEnabled(false);
 
         startDateChooser.setOnClickListener(v -> startDatePicker.show());
         endDateChooser.setOnClickListener(v -> endDatePicker.show());
