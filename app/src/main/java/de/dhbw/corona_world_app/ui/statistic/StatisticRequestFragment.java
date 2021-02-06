@@ -100,7 +100,7 @@ public class StatisticRequestFragment extends Fragment {
 
         //TODO visually show that limit is reached
         CustomAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
-        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, null);
+        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country"));
         //special rule, user cannot select World for a statistic as it is not supported by the API
         isoCountryAdapter.addToBlackList(ISOCountry.World);
         setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, root.findViewById(R.id.isoCountryChips));
@@ -110,7 +110,7 @@ public class StatisticRequestFragment extends Fragment {
         setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, root.findViewById(R.id.criteriaChips));
 
         CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
-        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, null) {
+        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, getLimitListener("Chart-Type")) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
@@ -283,6 +283,7 @@ public class StatisticRequestFragment extends Fragment {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                     if (adapter.filteredItems.size() > 0) {
                         if (!textView.isPopupShowing()) textView.showDropDown();
+                        textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
                     } else {
                         showErrorWithCompletion(textView);
@@ -293,6 +294,7 @@ public class StatisticRequestFragment extends Fragment {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (adapter.filteredItems.size() > 0) {
                         if (!textView.isPopupShowing()) textView.showDropDown();
+                        textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
                     } else {
                         showErrorWithCompletion(textView);
@@ -320,5 +322,9 @@ public class StatisticRequestFragment extends Fragment {
 
     private void showErrorWithCompletion(TextView textView) {
         textView.setError("No Matching Item");
+    }
+
+    private <T extends Enum<T>>AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name){
+        return limit -> Toast.makeText(getContext(),getString(R.string.limit_reached,limit,name),Toast.LENGTH_SHORT).show();
     }
 }
