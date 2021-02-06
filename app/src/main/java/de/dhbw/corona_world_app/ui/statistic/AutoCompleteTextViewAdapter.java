@@ -28,6 +28,7 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
     HashSet<T> blackListItems;
     int originalLimit;
     int limit;
+    public static final int NO_LIMIT = -1;
     LimitListener limitListener;
     StatisticRequestRule.OnItemsChangeListener itemsChangeListener;
 
@@ -52,7 +53,7 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
-                if (limit != -1 && selectedItems.size() == limit) {
+                if (limit != NO_LIMIT && selectedItems.size() == limit) {
                     results.values = new ArrayList<>();
                     if (limitListener != null) limitListener.onLimitReached(limit);
                 }

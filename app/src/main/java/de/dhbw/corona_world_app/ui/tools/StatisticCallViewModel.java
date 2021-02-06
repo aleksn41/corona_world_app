@@ -1,5 +1,7 @@
 package de.dhbw.corona_world_app.ui.tools;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import androidx.lifecycle.LifecycleOwner;
@@ -15,23 +17,26 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.function.BiConsumer;
 
+import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public class StatisticCallViewModel extends ViewModel {
     private File dataFile;
     private StatisticCallDataManager dataManager;
 
-    public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException {
+    public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException, ExecutionException, InterruptedException, DataException {
         this.dataFile = dataFile;
         dataManager = new StatisticCallDataManager(threadHandler, dataFile);
-
+        getMoreData(StatisticCallDataManager.DataType.ALL_DATA).get();
+        getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA).get();
     }
     public boolean isNotInit() {
         return dataManager == null;
     }
 
-    public Future<Void> getMoreData(StatisticCallDataManager.DataType dataType) throws ExecutionException, InterruptedException {
+    public CompletableFuture<Void> getMoreData(StatisticCallDataManager.DataType dataType) {
         return dataManager.requestMoreData(dataType);
     }
 

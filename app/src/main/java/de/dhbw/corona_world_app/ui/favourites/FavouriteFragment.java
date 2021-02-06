@@ -52,32 +52,4 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
             navHostFragment.getNavController().navigate(action);
         };
     }
-
-    //TODO change this
-    @Override
-    public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
-        try {
-            statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
-        } catch (IOException e) {
-            Log.e(TAG,"could not load or create File",e);
-            //TODO inform user
-        }
-        try {
-            Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
-            Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
-            future.get();
-            future1.get();
-        } catch (ExecutionException e) {
-            Log.e(TAG,"error getting new Data",e);
-            Throwable error=e.getCause();
-            if(error instanceof IOException){
-                //check if error is undoable
-            }else if(error instanceof DataException){
-                //inform User that data is corrupt and must be remade
-            }
-        }catch (InterruptedException e){
-            Log.e(TAG,"Thread has been interrupted",e);
-            //future.cancel(true);
-        }
-    }
 }
