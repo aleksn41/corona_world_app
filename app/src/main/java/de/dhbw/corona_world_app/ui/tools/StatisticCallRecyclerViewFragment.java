@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
+import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
@@ -43,7 +44,16 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         setHasOptionsMenu(true);
         if (statisticCallViewModel.isNotInit()) {
             Log.d(this.getClass().getName(), "init ViewModel");
-            initViewModelData(statisticCallViewModel);
+            try {
+                statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
+            } catch (IOException e) {
+                Log.e(this.getClass().getName(),"could not load or create File",e);
+                //TODO inform user
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
         Log.d(this.getClass().getName(), "initiate RecycleView");
         statisticCallRecyclerView = root.findViewById(R.id.statisticCallRecyclerView);
@@ -175,8 +185,6 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public abstract StatisticCallDataManager.DataType getDataType();
 
     public abstract ShowStatisticInterface getShowStatisticInterface();
-
-    public abstract void initViewModelData(StatisticCallViewModel statisticCallViewModel);
 
     protected void tryRepairingData() {
         ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, (dialog, which) -> {

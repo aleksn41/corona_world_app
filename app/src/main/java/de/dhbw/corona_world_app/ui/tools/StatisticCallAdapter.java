@@ -54,7 +54,6 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if(item.getItemId()==R.id.action_delete) {
-                //delete All Items
                 Log.d(this.getClass().getName(), "clicked on delete Item");
                 deleteSelectedItems();
                 mode.finish();

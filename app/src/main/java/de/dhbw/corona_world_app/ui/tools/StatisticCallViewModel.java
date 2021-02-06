@@ -22,10 +22,11 @@ public class StatisticCallViewModel extends ViewModel {
     private File dataFile;
     private StatisticCallDataManager dataManager;
 
-    public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException {
+    public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException, ExecutionException, InterruptedException {
         this.dataFile = dataFile;
         dataManager = new StatisticCallDataManager(threadHandler, dataFile);
-
+        getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
+        getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
     }
     public boolean isNotInit() {
         return dataManager == null;
