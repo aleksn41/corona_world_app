@@ -33,4 +33,5 @@
     <string name="bottomSheetButtonText">Go to Statistic</string>
     <string name="select_all">Select all</string>
     <string name="un_select_all">Unselect all</string>
+    <string name="limit_reached">Limit of %1$d reached for %2$s</string>
 </resources>
