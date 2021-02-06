@@ -151,11 +151,6 @@ public class MapViewModel extends ViewModel {
                 throw e;
             }
         } else {
-            MapWithBoxCacheObject<GermanyState> cache = getCachedGermanyIfRelevant();
-            apiGottenList = cache.getDataList();
-            germanySummary = cache.getMapBoxValue();
-            mBoxValue.postValue(germanySummary);
-            mStatesList.postValue(apiGottenList);
             Thread.currentThread().interrupt();
         }
     }
@@ -190,13 +185,6 @@ public class MapViewModel extends ViewModel {
                 throw e;
             }
         } else {
-            apiGottenList = getCachedDataWorldIfRelevant();
-            for (Country<ISOCountry> country : apiGottenList) {
-                if (country.getName().equals(ISOCountry.World)) {
-                    mBoxValue.postValue(country);
-                }
-            }
-            mCountryList.postValue(apiGottenList);
             Thread.currentThread().interrupt();
         }
     }
