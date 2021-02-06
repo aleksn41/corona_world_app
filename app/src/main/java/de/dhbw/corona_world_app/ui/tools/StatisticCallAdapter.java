@@ -159,6 +159,10 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
 
     }
 
+    public int getBlacklistedItemsSize(){
+        return blackListedIndices.size();
+    }
+
     private void selectItemToDelete(int itemID,@NonNull StatisticCallViewHolder holder){
         Log.d(this.getClass().getName(),"selecting Item to be deleted");
         boolean alreadyInDeleted=selectedItemsToDelete.contains(itemID);

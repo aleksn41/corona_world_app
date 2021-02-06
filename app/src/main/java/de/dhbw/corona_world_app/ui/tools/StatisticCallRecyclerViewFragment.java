@@ -35,6 +35,8 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView.LayoutManager layoutManager;
     protected StatisticCallViewModel statisticCallViewModel;
     private ActionMode deleteMode;
+    private Menu menu;
+    private boolean customMenuShowing=false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -42,8 +44,8 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
         setHasOptionsMenu(true);
-        if(statisticCallViewModel.isNotInit()){
-            Log.d(this.getClass().getName(),"init ViewModel");
+        if (statisticCallViewModel.isNotInit()) {
+            Log.d(this.getClass().getName(), "init ViewModel");
             initViewModelData(statisticCallViewModel);
         }
         Log.d(this.getClass().getName(), "initiate RecycleView");
@@ -88,10 +90,20 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
                 statisticCallAdapter.setBlackListedIndices(statisticCallViewModel.getBlackListedIndices(getDataType()));
                 statisticCallAdapter.submitList(pairs);
+                //update menu if there are no items/ if items have been added
+                if(customMenuShowing&&pairs.size()-statisticCallAdapter.getBlacklistedItemsSize()<=0&&menu!=null) {
+                    menu.clear();
+                    requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_menu,menu);
+                    customMenuShowing=false;
+                }else if (!customMenuShowing&&pairs.size()-statisticCallAdapter.getBlacklistedItemsSize()>0&&menu!=null){
+                    menu.clear();
+                    requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_select_menu,menu);
+                    customMenuShowing=true;
+                }
                 statisticCallAdapter.notifyDataSetChanged();
                 Log.v(this.getClass().getName(), "updated List");
             }
-        },getDataType());
+        }, getDataType());
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
         Log.d(this.getClass().getName(), "finished RecycleView");
 
@@ -102,22 +114,26 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        //super.onCreateOptionsMenu(menu, inflater);
-        menu.clear();
-        inflater.inflate(R.menu.top_action_bar_select_menu,menu);
+        this.menu=menu;
+        if(statisticCallAdapter.getItemCount()-statisticCallAdapter.getBlacklistedItemsSize()>0){
+            menu.clear();
+            inflater.inflate(R.menu.top_action_bar_select_menu,menu);
+        }else{
+            super.onCreateOptionsMenu(menu, inflater);
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.select_all) {
-           statisticCallAdapter.selectAllItems();
+            statisticCallAdapter.selectAllItems();
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onPause() {
-        Log.d(this.getClass().getName()+"|"+getDataType(), "Pausing Fragment");
+        Log.d(this.getClass().getName() + "|" + getDataType(), "Pausing Fragment");
         if (deleteMode != null) {
             deleteMode.finish();
             deleteMode = null;
@@ -127,19 +143,19 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
     @Override
     public void onStop() {
-        Log.d(this.getClass().getName()+"|"+getDataType(),"Stopping Fragment");
-        Log.d(this.getClass().getName()+"|"+getDataType(),"saving All Data");
+        Log.d(this.getClass().getName() + "|" + getDataType(), "Stopping Fragment");
+        Log.d(this.getClass().getName() + "|" + getDataType(), "saving All Data");
         statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
             @Override
             public void accept(Void unused, Throwable throwable) {
-                if(throwable!=null) {
+                if (throwable != null) {
                     Throwable e = throwable.getCause();
                     if (e instanceof IOException) {
-                        Log.e(this.getClass().getName(),ErrorCode.CANNOT_SAVE_FILE.toString(),throwable);
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(requireContext(),ErrorCode.CANNOT_SAVE_FILE,null));
-                    } else{
-                        Log.wtf(this.getClass().getName(),ErrorCode.UNEXPECTED_ERROR.toString(),throwable);
-                        requireActivity().runOnUiThread(()->ErrorDialog.showBasicErrorDialog(requireContext(),ErrorCode.UNEXPECTED_ERROR,null));
+                        Log.e(this.getClass().getName(), ErrorCode.CANNOT_SAVE_FILE.toString(), throwable);
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.CANNOT_SAVE_FILE, null));
+                    } else {
+                        Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), throwable);
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null));
                     }
                 }
             }
@@ -155,21 +171,21 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
     public abstract void initViewModelData(StatisticCallViewModel statisticCallViewModel);
 
-    protected void tryRepairingData(){
+    protected void tryRepairingData() {
         ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, (dialog, which) -> {
             //TODO implement check to see if Data can be recovered
-            boolean canBeRecovered=false;
-            if(canBeRecovered){
+            boolean canBeRecovered = false;
+            if (canBeRecovered) {
                 //recover Data
-            }else{
-                ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.CANNOT_RESTORE_FILE , (dialog1, which1) -> {
+            } else {
+                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_RESTORE_FILE, (dialog1, which1) -> {
                     try {
                         statisticCallViewModel.deleteAllItems();
                     } catch (IOException e) {
-                        Log.e(this.getClass().getName(),ErrorCode.CANNOT_DELETE_FILE.toString(),e);
-                        ErrorDialog.showBasicErrorDialog(getContext(),ErrorCode.UNEXPECTED_ERROR,null);
+                        Log.e(this.getClass().getName(), ErrorCode.CANNOT_DELETE_FILE.toString(), e);
+                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
                     }
-                },"I understand");
+                }, "I understand");
             }
         });
     }
