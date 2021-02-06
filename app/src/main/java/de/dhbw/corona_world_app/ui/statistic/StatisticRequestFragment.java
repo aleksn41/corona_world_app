@@ -249,6 +249,9 @@ public class StatisticRequestFragment extends Fragment {
                 requestStatistic(new StatisticCall(isoCountryAdapter.getSelectedItems(), chartTypeAdapter.getSelectedItems().get(0), criteriaAdapter.getSelectedItems(), start, end));
             } else {
                 Toast.makeText(getContext(), "Please select everything before proceeding", Toast.LENGTH_SHORT).show();
+                if(!isoCountryAdapter.anySelected())isoCountryNachoTextView.setError("no item selected");
+                if(!criteriaAdapter.anySelected())criteriaNachoTextView.setError("no item selected");
+                if(!chartTypeAdapter.anySelected())chartTypeNachoTextView.setError("no item selected");
             }
         });
         return root;
