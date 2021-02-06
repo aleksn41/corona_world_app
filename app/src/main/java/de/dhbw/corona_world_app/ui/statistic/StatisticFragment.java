@@ -73,26 +73,29 @@ public class StatisticFragment extends Fragment {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
             } catch (IOException e) {
-                Log.e(this.getClass().getName(), ErrorCode.CANNOT_READ_FILE.toString(), e);
-                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, null);
+                Log.e(this.getClass().getName(), "could not create new File during init", e);
+                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_SAVE_FILE, null);
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause != null) {
+                    if (cause instanceof IOException) {
+                        Log.e(this.getClass().getName(), "could not read File during init", e);
+                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_READ_FILE, null);
+                    } else {
+                        Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), e);
+                        ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
+                    }
+                } else {
+                    Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), e);
+                    ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
+                }
+            } catch (InterruptedException e) {
+                Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), e);
+                ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
+            } catch (DataException e) {
+                Log.e(this.getClass().getName(), ErrorCode.DATA_CORRUPT.toString(), e);
+                tryRepairingData();
             }
-        }
-        try {
-            Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
-            Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
-            future.get();
-            future1.get();
-        } catch (ExecutionException e) {
-            Throwable error=e.getCause();
-            Log.e(TAG,"error getting new Data",e);
-            if(error instanceof IOException){
-                //check if error is undoable
-            }else if(error instanceof DataException){
-                //inform User that data is corrupt and must be remade
-            }
-        }catch (InterruptedException e){
-            Log.e(TAG,"Thread has been interrupted",e);
-            //future.cancel(true);
         }
 
         // ChartValueSetGenerator provider = new ChartValueSetGenerator();
@@ -358,28 +361,22 @@ public class StatisticFragment extends Fragment {
         arr2.recycle();
     }
 
-    //will be removed once Statistic is finished
-    private void testProgressBar() {
-        int milliSecondsToLoad = 10;
-        ThreadPoolHandler.getInstance().submit((Callable<Void>) () -> {
-            testDisplay.setVisibility(View.GONE);
-            progressBar.setVisibility(View.VISIBLE);
-            Thread.sleep(milliSecondsToLoad);
-            requireActivity().runOnUiThread(() -> progressBar.setProgress(20));
-            Thread.sleep(milliSecondsToLoad);
-            requireActivity().runOnUiThread(() -> progressBar.setProgress(40));
-            Thread.sleep(milliSecondsToLoad);
-            requireActivity().runOnUiThread(() -> progressBar.setProgress(80));
-            Thread.sleep(milliSecondsToLoad);
-            requireActivity().runOnUiThread(() -> {
-                progressBar.setProgress(100);
-                progressBar.setVisibility(View.GONE);
-                progressBar.setProgress(0);
-                testDisplay.setVisibility(View.GONE);
-                //barChart.setVisibility(View.VISIBLE);
-                //testDisplay.setVisibility(View.VISIBLE);
-            });
-            return null;
+    protected void tryRepairingData() {
+        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
+            //TODO implement check to see if Data can be recovered
+            boolean canBeRecovered = false;
+            if (canBeRecovered) {
+                //recover Data
+            } else {
+                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_RESTORE_FILE, (dialog1, which1) -> {
+                    try {
+                        statisticCallViewModel.deleteAllItems();
+                    } catch (IOException e) {
+                        Log.e(this.getClass().getName(), ErrorCode.CANNOT_DELETE_FILE.toString(), e);
+                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
+                    }
+                }, "I understand");
+            }
         });
     }
 }

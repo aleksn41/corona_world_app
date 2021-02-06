@@ -46,8 +46,6 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 //TODO put data in View Model
 public class StatisticRequestFragment extends Fragment {
 
-    private StatisticViewModel statisticViewModel;
-
     //setup DatePicker
     private LocalDate start;
     private LocalDate end;
@@ -74,8 +72,6 @@ public class StatisticRequestFragment extends Fragment {
             //crlist.add(Criteria.DEATHS);
             requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now().minusDays(89), LocalDate.now()));
         }
-        statisticViewModel =
-                new ViewModelProvider(this).get(StatisticViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic_request, container, false);
 
         ExtendedFloatingActionButton floatingActionButton = root.findViewById(R.id.floating_action_button);
@@ -105,10 +101,12 @@ public class StatisticRequestFragment extends Fragment {
         //TODO visually show that limit is reached
         CustomAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
         AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, null);
+        //special rule, user cannot select World for a statistic as it is not supported by the API
+        isoCountryAdapter.addToBlackList(ISOCountry.World);
         setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, root.findViewById(R.id.isoCountryChips));
 
         CustomAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
-        AutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new AutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1, null);
+        AutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new AutoCompleteTextViewAdapter<>(getContext(), Criteria.class, AutoCompleteTextViewAdapter.NO_LIMIT, null);
         setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, root.findViewById(R.id.criteriaChips));
 
         CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
