@@ -170,13 +170,12 @@ public class StatisticCallDataManager {
      * @param dataType describes the data that is supposed to be loaded
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> requestMoreData(@NonNull DataType dataType) {
+    public CompletableFuture<Void> requestMoreData(@NonNull DataType dataType) {
         Log.i(this.getClass().getName() + "|" + dataType, "loading more Data of " + dataType);
-        return executorService.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
+        return CompletableFuture.supplyAsync(()->{
+            try{
                 readLock.lock();
-                saveLock.acquire();
+                saveLock.acquireUninterruptibly();
                 try {
                     switch (dataType) {
                         case ALL_DATA:
@@ -218,8 +217,10 @@ public class StatisticCallDataManager {
                     saveLock.release();
                     readLock.unlock();
                 }
+            }catch (IOException e){
+                throw new CompletionException(e);
             }
-        });
+        },executorService);
     }
 
     private void readFromFileIntoAllData(int readLines) throws IOException {

@@ -34,7 +34,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected StatisticCallViewModel statisticCallViewModel;
     private ActionMode deleteMode;
     private Menu menu;
-    private boolean customMenuShowing=false;
+    private boolean customMenuShowing = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -47,11 +47,10 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             try {
                 statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
             } catch (IOException e) {
-                Log.e(this.getClass().getName(),"could not load or create File",e);
-                //TODO inform user
-            } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -82,9 +81,9 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             @Override
             public void favouriteItems(Set<Integer> ItemIds) {
                 for (Integer itemId : ItemIds) {
-                    statisticCallViewModel.toggleFav(itemId,getDataType());
+                    statisticCallViewModel.toggleFav(itemId, getDataType());
                 }
-                if(getDataType()== StatisticCallDataManager.DataType.FAVOURITE_DATA){
+                if (getDataType() == StatisticCallDataManager.DataType.FAVOURITE_DATA) {
                     deleteMode.finish();
                 }
             }
@@ -92,13 +91,21 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             @Override
             public void onLastItemLoaded() {
                 if (statisticCallViewModel.hasMoreData(getDataType())) {
-                    try {
-                        Log.d(this.getClass().getName(), "last item reached, loading more Data of " + getDataType());
-                        statisticCallViewModel.getMoreData(getDataType());
-                    } catch (InterruptedException | ExecutionException e) {
-                        Log.e(this.getClass().getName(), "error reading more Data", e);
-                        tryRepairingData();
-                    }
+                    statisticCallViewModel.getMoreData(getDataType()).whenComplete(new BiConsumer<Void, Throwable>() {
+                        @Override
+                        public void accept(Void unused, Throwable throwable) {
+                            if (throwable != null) {
+                                Throwable e = throwable.getCause();
+                                if (e instanceof IOException) {
+                                    Log.e(this.getClass().getName(), ErrorCode.CANNOT_READ_FILE.toString(), throwable);
+                                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.CANNOT_READ_FILE, null));
+                                } else {
+                                    Log.wtf(this.getClass().getName(), ErrorCode.UNEXPECTED_ERROR.toString(), throwable);
+                                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null));
+                                }
+                            }
+                        }
+                    });
                 }
             }
         }, getShowStatisticInterface());
@@ -108,14 +115,14 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                 statisticCallAdapter.setBlackListedIndices(statisticCallViewModel.getBlackListedIndices(getDataType()));
                 statisticCallAdapter.submitList(pairs);
                 //update menu if there are no items/ if items have been added
-                if(customMenuShowing&&pairs.size()-statisticCallAdapter.getBlacklistedItemsSize()<=0&&menu!=null) {
+                if (customMenuShowing && pairs.size() - statisticCallAdapter.getBlacklistedItemsSize() <= 0 && menu != null) {
                     menu.clear();
-                    requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_menu,menu);
-                    customMenuShowing=false;
-                }else if (!customMenuShowing&&pairs.size()-statisticCallAdapter.getBlacklistedItemsSize()>0&&menu!=null){
+                    requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_menu, menu);
+                    customMenuShowing = false;
+                } else if (!customMenuShowing && pairs.size() - statisticCallAdapter.getBlacklistedItemsSize() > 0 && menu != null) {
                     menu.clear();
-                    requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_select_menu,menu);
-                    customMenuShowing=true;
+                    requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_select_menu, menu);
+                    customMenuShowing = true;
                 }
                 statisticCallAdapter.notifyDataSetChanged();
                 Log.v(this.getClass().getName(), "updated List");
@@ -131,11 +138,11 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        this.menu=menu;
-        if(statisticCallAdapter.getItemCount()-statisticCallAdapter.getBlacklistedItemsSize()>0){
+        this.menu = menu;
+        if (statisticCallAdapter.getItemCount() - statisticCallAdapter.getBlacklistedItemsSize() > 0) {
             menu.clear();
-            inflater.inflate(R.menu.top_action_bar_select_menu,menu);
-        }else{
+            inflater.inflate(R.menu.top_action_bar_select_menu, menu);
+        } else {
             super.onCreateOptionsMenu(menu, inflater);
         }
     }
