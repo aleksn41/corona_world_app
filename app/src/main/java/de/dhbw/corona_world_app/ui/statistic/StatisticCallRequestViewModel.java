@@ -30,6 +30,8 @@ public class StatisticCallRequestViewModel extends ViewModel {
         MutableLiveData<LinkedHashSet<ISOCountry>> selectedISOCountries;
         MutableLiveData<LinkedHashSet<Criteria>> selectedCriteriaCountries;
         MutableLiveData<LinkedHashSet<ChartType>> selectedChartTypeCountries;
+        MutableLiveData<LocalDate> startDate;
+        MutableLiveData<LocalDate> endDate;
         public StatisticCallRequestViewModel(){
             selectedISOCountries=new MutableLiveData<>();
             selectedISOCountries.setValue(new LinkedHashSet<>());

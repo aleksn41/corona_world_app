@@ -106,6 +106,7 @@ public class StatisticRequestFragment extends Fragment {
             public void onChanged(LinkedHashSet<ISOCountry> isoCountries) {
                 isoCountryAdapter.submitSelectedItems(isoCountries);
                 isoCountryNachoTextView.setText("");
+                isoCountryChips.removeAllViews();
                 for (ISOCountry isoCountry:isoCountries) {
                     Chip itemChip = getChip(isoCountry);
                     itemChip.setOnCloseIconClickListener(v -> {
@@ -130,6 +131,7 @@ public class StatisticRequestFragment extends Fragment {
             public void onChanged(LinkedHashSet<Criteria> criteriaItems) {
                 criteriaAdapter.submitSelectedItems(criteriaItems);
                 criteriaNachoTextView.setText("");
+                criteriaChips.removeAllViews();
                 for (Criteria criteria:criteriaItems) {
                     Chip itemChip = getChip(criteria);
                     itemChip.setOnCloseIconClickListener(v -> {
@@ -161,6 +163,7 @@ public class StatisticRequestFragment extends Fragment {
             public void onChanged(LinkedHashSet<ChartType> chartTypeItems) {
                 chartTypeAdapter.submitSelectedItems(chartTypeItems);
                 chartTypeNachoTextView.setText("");
+                chartTypeChips.removeAllViews();
                 for (ChartType chartType:chartTypeItems) {
                     Chip itemChip = getChip(chartType);
                     itemChip.setOnCloseIconClickListener(v -> {
