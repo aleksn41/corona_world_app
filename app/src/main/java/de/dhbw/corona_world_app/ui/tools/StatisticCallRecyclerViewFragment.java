@@ -14,8 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,7 +25,6 @@ import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.ui.settings.SettingsFragmentDirections;
 
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
@@ -59,7 +56,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                 statisticCallViewModel.toggleFav(itemID, getDataType());
                 Log.d(this.getClass().getName(), "toggled Item number " + itemID);
             }
-        }, new StatisticCallDeleteInterface() {
+        }, new StatisticCallActionModeInterface() {
             @Override
             public void enterDeleteMode(ActionMode.Callback callback) {
                 Log.v(this.getClass().getName(), "entering Delete Mode");
@@ -70,6 +67,16 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             public void deleteItems(Set<Integer> ItemIds) {
                 Log.v(this.getClass().getName(), "deleting selected favourite Items");
                 statisticCallViewModel.deleteItems(ItemIds, getDataType());
+            }
+
+            @Override
+            public void favouriteItems(Set<Integer> ItemIds) {
+                for (Integer itemId : ItemIds) {
+                    statisticCallViewModel.toggleFav(itemId,getDataType());
+                }
+                if(getDataType()== StatisticCallDataManager.DataType.FAVOURITE_DATA){
+                    deleteMode.finish();
+                }
             }
         }, new StatisticCallAdapterOnLastItemLoaded() {
             @Override
