@@ -97,4 +97,9 @@ public class WorldMapFragment extends GenericMapFragment<ISOCountry> {
     protected int getMapBoxFormattedString() {
         return R.string.map_box_content_world;
     }
+
+    @Override
+    protected void deleteCache(MapViewModel viewModel) throws IOException {
+        viewModel.deleteWorldCache();
+    }
 }
