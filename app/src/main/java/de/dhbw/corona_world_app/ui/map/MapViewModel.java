@@ -37,6 +37,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.map.MapCacheObject;
 import de.dhbw.corona_world_app.map.MapWithBoxCacheObject;
+import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 public class MapViewModel extends ViewModel {
 
@@ -50,10 +51,12 @@ public class MapViewModel extends ViewModel {
 
     private final MapData services = new MapData();
 
-    private File pathToCacheDir;
-
     private final ExecutorService executorService = ThreadPoolHandler.getInstance();
 
+    private File pathToCacheDir;
+
+
+    public MutableLiveData<Integer> progress = new MutableLiveData<>();
 
     public MutableLiveData<List<Country<ISOCountry>>> mCountryList = new MutableLiveData<>();
 
@@ -155,7 +158,9 @@ public class MapViewModel extends ViewModel {
                     Future<List<Country<GermanyState>>> futureApiGottenList = executorService.submit(() -> APIManager.getDataGermany(API.ARCGIS));
                     try {
                         germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
+                        progress.postValue(55);
                         apiGottenList = futureApiGottenList.get();
+                        progress.postValue(75);
                         if (!(apiGottenList.size() > 0)) {
                             throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
                         }
@@ -209,6 +214,7 @@ public class MapViewModel extends ViewModel {
                         cacheDataWorld(apiGottenList);
                     }
                 }
+                progress.postValue(75);
                 if (apiGottenList == null || !(apiGottenList.size() > 0)) {
                     throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
                 }

@@ -234,12 +234,11 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                 handleException(e, executionThread);
             }
         });
+        mapViewModel.progress.observe(getViewLifecycleOwner(), loadingScreen::setProgressBar);
         getListFromViewModel(mapViewModel).observe(
                 getViewLifecycleOwner(), countries ->
                 {
-                    loadingScreen.setProgressBar(50);
                     Log.v(getTAG(), "Requested countries have arrived");
-                    loadingScreen.setProgressBar(70);
                     webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
                     Log.v(getTAG(), "Loading WebView with WebString...");
                     loadingScreen.setProgressBar(100);
