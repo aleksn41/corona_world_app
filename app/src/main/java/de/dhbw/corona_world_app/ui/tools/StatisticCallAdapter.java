@@ -151,6 +151,14 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         setMarkedItem(holder,selectedItemsToDelete.contains(holder.getAdapterPosition()));
     }
 
+    public void selectAllItems(){
+
+    }
+
+    public void unSelectAllItems(){
+
+    }
+
     private void selectItemToDelete(int itemID,@NonNull StatisticCallViewHolder holder){
         Log.d(this.getClass().getName(),"selecting Item to be deleted");
         boolean alreadyInDeleted=selectedItemsToDelete.contains(itemID);
