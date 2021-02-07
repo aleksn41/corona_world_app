@@ -33,6 +33,7 @@ import de.dhbw.corona_world_app.ui.history.HistoryFragmentDirections;
 
 /**
  * This abstract Fragment can be used to show either all favourites or all {@link StatisticCall} made by the user
+ *
  * @author Aleksandr Stankoski
  */
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
@@ -50,7 +51,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
-        emptyList=root.findViewById(R.id.empty_view);
+        emptyList = root.findViewById(R.id.empty_view);
         setHasOptionsMenu(true);
         if (statisticCallViewModel.isNotInit()) {
             Log.d(this.getClass().getName(), "init ViewModel");
@@ -78,7 +79,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                 ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
             } catch (DataException e) {
                 Log.e(this.getClass().getName(), ErrorCode.DATA_CORRUPT.toString(), e);
-                tryRepairingData();
+                deleteCorruptData();
             }
         }
         Log.d(this.getClass().getName(), "initiate RecycleView");
@@ -136,7 +137,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                 }
             }
         }, request -> {
-            HistoryFragmentDirections.ShowStatistic2 action = HistoryFragmentDirections.showStatistic2(request,false);
+            HistoryFragmentDirections.ShowStatistic2 action = HistoryFragmentDirections.showStatistic2(request, false);
             NavHostFragment navHostFragment =
                     (NavHostFragment) requireActivity().getSupportFragmentManager()
                             .findFragmentById(R.id.nav_host_fragment);
@@ -166,10 +167,10 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             }
         }, getDataType());
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
-        if(!statisticCallViewModel.hasData(getDataType())){
+        if (!statisticCallViewModel.hasData(getDataType())) {
             statisticCallRecyclerView.setVisibility(View.GONE);
             emptyList.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             statisticCallRecyclerView.setVisibility(View.VISIBLE);
             emptyList.setVisibility(View.GONE);
         }
@@ -230,22 +231,14 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
 
     public abstract StatisticCallDataManager.DataType getDataType();
 
-    protected void tryRepairingData() {
-        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
-            //TODO implement check to see if Data can be recovered
-            boolean canBeRecovered = false;
-            if (canBeRecovered) {
-                //recover Data
-            } else {
-                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_RESTORE_FILE, (dialog1, which1) -> {
-                    try {
-                        statisticCallViewModel.deleteAllItems();
-                    } catch (IOException e) {
-                        Log.e(this.getClass().getName(), ErrorCode.CANNOT_DELETE_FILE.toString(), e);
-                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
-                    }
-                }, "I understand");
+    protected void deleteCorruptData() {
+        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_RESTORE_FILE, (dialog1, which1) -> {
+            try {
+                statisticCallViewModel.deleteAllItems();
+            } catch (IOException e) {
+                Log.e(this.getClass().getName(), ErrorCode.CANNOT_DELETE_FILE.toString(), e);
+                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
             }
-        });
+        }, "I understand"));
     }
 }
