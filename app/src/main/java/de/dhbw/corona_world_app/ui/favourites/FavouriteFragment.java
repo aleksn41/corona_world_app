@@ -24,6 +24,10 @@ import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
+/**
+ * This Fragment is used to display the Favourite {@link StatisticCall} made by the User
+ * @author Aleksandr Stankoski
+ */
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
@@ -40,16 +44,5 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
     @Override
     public StatisticCallDataManager.DataType getDataType() {
         return StatisticCallDataManager.DataType.FAVOURITE_DATA;
-    }
-
-    @Override
-    public ShowStatisticInterface getShowStatisticInterface() {
-        return request -> {
-            FavouriteFragmentDirections.ShowStatistic action = FavouriteFragmentDirections.showStatistic(request,false);
-            NavHostFragment navHostFragment =
-                    (NavHostFragment) requireActivity().getSupportFragmentManager()
-                            .findFragmentById(R.id.nav_host_fragment);
-            navHostFragment.getNavController().navigate(action);
-        };
     }
 }

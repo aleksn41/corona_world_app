@@ -52,6 +52,14 @@ import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
+/**
+ * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
+ * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
+ * A {@link TextView} is placed in the top right to show summarized Data
+ * @param <T> The {@link Displayable} used to select Data
+ * @author Thomas Meier ({@link WebView})
+ * @author Aleksandr Stankoski ({@link BottomSheetBehavior})
+ */
 public abstract class GenericMapFragment<T extends Displayable> extends Fragment {
 
     private MapViewModel mapViewModel;
