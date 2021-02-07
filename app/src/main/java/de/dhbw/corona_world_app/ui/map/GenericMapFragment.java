@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -100,6 +101,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     };
 
     @SuppressLint("SetJavaScriptEnabled")
+    @SuppressWarnings("unchecked")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         Log.v(getTAG(), "Creating MapFragment view");
@@ -220,10 +222,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
                     if (countryList.get(i).getName().equals(isoCountry)) {
-                        ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
-                        selectedCountry = countryList.get(i);
-                        bottomSheetTitle.setText(isoCountry.toString());
-                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getBottomSheetText());
+                        selectCountry(countryList.get(i));
                     }
                 }
                 if (bottomSheetTitle.getText().length() == 0) {
@@ -232,6 +231,13 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_DATA_FOUND, null);
                 }
             }
+        });
+
+        mapViewModel.selectedCountry.observe(getViewLifecycleOwner(), selection -> {
+            bottomSheetTitle.setText(selection.getName().toString());
+            ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), selection.getName().getFlagDrawableID()));
+            selectedCountry = (Country<T>) selection;
+            ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getBottomSheetText());
         });
 
         Log.v(getTAG(), "Requesting all countries...");
@@ -323,6 +329,11 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     protected String getTAG() {
         return this.getClass().getSimpleName();
     }
+
+    private void selectCountry(Country<T> selectedCountry){
+        mapViewModel.selectedCountry.setValue(selectedCountry);
+    }
+
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
         if (getContext() != null) {

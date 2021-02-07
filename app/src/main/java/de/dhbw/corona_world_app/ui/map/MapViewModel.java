@@ -1,7 +1,6 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -20,11 +19,9 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.API;
@@ -55,6 +52,9 @@ public class MapViewModel extends ViewModel {
 
     private File pathToCacheDir;
 
+
+
+    public MutableLiveData<Country<? extends Displayable>> selectedCountry = new MutableLiveData<>();
 
     public MutableLiveData<Integer> progress = new MutableLiveData<>();
 
