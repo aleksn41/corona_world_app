@@ -10,7 +10,11 @@ import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
-//this is used in order to disallow certain Items in the UI of StatisticRequest when certain conditions are met
+/**
+ * This Class is used to disallow certain items to be picked in the {@link StatisticRequestFragment} when certain conditions are met
+ * @author Thomas Meier (implemented Rule)
+ * @author Aleksandr Stankoski (designed Class)
+ */
 public class StatisticRequestRule {
 
     public Rule rule;

@@ -42,6 +42,10 @@ import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
+/**
+ * This Fragment is used to choose and create a Statistic
+ * @author Aleksandr Stankoski
+ */
 public class StatisticRequestFragment extends Fragment {
 
     StatisticCallRequestViewModel statisticCallRequestViewModel;
@@ -86,7 +90,7 @@ public class StatisticRequestFragment extends Fragment {
 
         CustomAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
         ChipGroup isoCountryChips = root.findViewById(R.id.isoCountryChips);
-        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country"));
+        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country",isoCountryNachoTextView));
         //special rule, user cannot select World for a statistic as it is not supported by the API
         isoCountryAdapter.addToBlackList(ISOCountry.World);
         isoCountryNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
@@ -132,7 +136,7 @@ public class StatisticRequestFragment extends Fragment {
 
         CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
         ChipGroup chartTypeChips = root.findViewById(R.id.chartTypeChips);
-        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, getLimitListener("Chart-Type")) {
+        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, getLimitListener("Chart-Type",chartTypeNachoTextView)) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
@@ -321,6 +325,7 @@ public class StatisticRequestFragment extends Fragment {
             if (event == null) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                     if (adapter.filteredItems.size() > 0) {
+                        textView.setError(null);
                         if (!textView.isPopupShowing()) textView.showDropDown();
                         textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
@@ -332,6 +337,7 @@ public class StatisticRequestFragment extends Fragment {
             } else if (actionId == EditorInfo.IME_NULL) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (adapter.filteredItems.size() > 0) {
+                        textView.setError(null);
                         if (!textView.isPopupShowing()) textView.showDropDown();
                         textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
@@ -360,13 +366,15 @@ public class StatisticRequestFragment extends Fragment {
     }
 
     private void showErrorWithCompletion(TextView textView) {
-        textView.setError("No Matching Item");
+        if(textView.getError()==null)textView.setError("No Matching Item");
     }
 
-    private <T extends Enum<T>> AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name) {
+    private <T extends Enum<T>> AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name,TextView textView) {
         return (limit) -> {
-            if (getContext() != null)
+            if (getContext() != null) {
                 Toast.makeText(getContext(), getString(R.string.limit_reached, limit, name), Toast.LENGTH_SHORT).show();
+                requireActivity().runOnUiThread(()->textView.setError("reached Limit"));
+            }
         };
     }
 }

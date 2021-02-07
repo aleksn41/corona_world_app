@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -56,6 +57,15 @@ import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
+/**
+ * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
+ * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
+ * A {@link TextView} is placed in the top right to show summarized Data
+ *
+ * @param <T> The {@link Displayable} used to select Data
+ * @author Thomas Meier ({@link WebView} and Logic)
+ * @author Aleksandr Stankoski ({@link BottomSheetBehavior} and Layout)
+ */
 public abstract class GenericMapFragment<T extends Displayable> extends Fragment {
 
     private MapViewModel mapViewModel;
@@ -186,7 +196,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                         bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                         //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
                         if (bottomSheet.getHeight() != 0)
-                            bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
+                            bottomSheetBehavior.setHalfExpandedRatio((getResources().getDimension(R.dimen.bottom_sheet_expand_size) + getResources().getDimension(R.dimen.bottom_sheet_title_size) + (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 0 : getResources().getDimension(R.dimen.map_box_flag_height)) + getResources().getDimension(R.dimen.margin_big)) / (pxToDp(bottomSheet.getHeight()) * getResources().getDisplayMetrics().density));
                     }
                 });
                 mapBox.setVisibility(View.VISIBLE);

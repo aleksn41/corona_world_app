@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-//create own Pair Class it the other once do not allow setters
+//create own Pair Class since the standard implementation does not allow setter
 public class Pair<V,T> {
     public V first;
     public T second;

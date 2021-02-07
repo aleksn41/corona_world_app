@@ -25,8 +25,11 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -39,12 +42,18 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 
 import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
+/**
+ * This Class is used to show the Statistic
+ * @author Thomas Meier (Logic)
+ * @author Aleksandr Stankoski (Layout)
+ */
 public class StatisticFragment extends Fragment {
 
     private StatisticCallViewModel statisticCallViewModel;
