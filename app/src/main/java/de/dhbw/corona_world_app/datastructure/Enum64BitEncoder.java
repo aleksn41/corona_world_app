@@ -68,6 +68,7 @@ public class Enum64BitEncoder<T extends Enum<T>> {
     }
 
     private int decodeEncodedStringToInt(String s) throws DataException {
+        if(s.length()==0)throw new DataException("cannot decode empty String");
         int res = 0;
         for (int i = 0; i < s.length()-1; i++) {
             if (s.charAt(i) < DIGITS[0] || s.charAt(i) > DIGITS[BITS - 1])

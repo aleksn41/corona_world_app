@@ -94,10 +94,6 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
             progressBar.setProgress(progress);
         }
 
-        @Override
-        public float getProgress() {
-            return progressBar.getProgress();
-        }
     };
 
     @SuppressLint("SetJavaScriptEnabled")

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Used to inform the user if a certain Error occurred
+ *
  * @author Thomas Meier
  * @author Aleksandr Stankoski
  */
@@ -17,13 +18,12 @@ public enum ErrorCode {
     CREATE_STATISTIC_FAILED(6, "An unexpected error occurred while creating the statistic."),
     NO_CONNECTION(7, "The Internet could not be accessed."),
     CONNECTION_TIMEOUT(8, "A timeout occurred while querying data. Please try again later."),
-    UNEXPECTED_ANSWER(9,"The requested data has an unexpected format."),
+    UNEXPECTED_ANSWER(9, "The requested data has an unexpected format."),
     TOO_MANY_REQUESTS(10, "Too many requests were made, please retry querying in a few seconds."),
     NO_DATA_FOUND(11, "There was no data found. Please try reloading the map."),
     CACHE_CORRUPT(12, "There was an error reading local cache. All cache files will be deleted."),
     COULD_NOT_DELETE_CACHE(13, "An error occurred while deleting local cache. Try deleting your local cash."),
-    API_CURRENTLY_NOT_AVAILABLE(14, "Data service is currently unavailable. Please try again later.")
-    ;
+    API_CURRENTLY_NOT_AVAILABLE(14, "Data service is currently unavailable. Please try again later.");
 
     int code;
     String message;

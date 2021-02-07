@@ -2,6 +2,7 @@ package de.dhbw.corona_world_app.ui.statistic;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import de.dhbw.corona_world_app.R;
  * This Adapter is used to Filter and limit the amount of items displayed in the {@link android.widget.AutoCompleteTextView}
  * This Adapter also implements the {@link StatisticRequestRule.RuleEnumAdapter} in order to disallow certain items when a certain selection has been made
  * See {@link StatisticRequestRule} for more info on the Rule System
+ *
  * @param <T> the enum used in the {@link android.widget.AutoCompleteTextView}
  * @author Aleksandr Stankoski
  */
@@ -63,12 +65,12 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
                 if (limit != NO_LIMIT && selectedItems.size() == limit) {
                     results.values = new ArrayList<>();
                     if (limitListener != null) limitListener.onLimitReached(limit);
-                }
-                else {
+                } else {
                     List<T> tempFilteredItems;
                     if (constraint == null || constraint.length() == 0) {
-                        tempFilteredItems=originalItems.parallelStream().filter(p -> !selectedItems.contains(p)  && !blackListItems.contains(p)).collect(Collectors.toList());
-                    }else tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p) && containsIgnoreCase(p.toString(), String.valueOf(constraint)) && !blackListItems.contains(p)).collect(Collectors.toList());
+                        tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p) && !blackListItems.contains(p)).collect(Collectors.toList());
+                    } else
+                        tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p) && containsIgnoreCase(p.toString(), String.valueOf(constraint)) && !blackListItems.contains(p)).collect(Collectors.toList());
                     results.values = tempFilteredItems;
                     results.count = tempFilteredItems.size();
                 }
@@ -125,8 +127,8 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
         return convertView;
     }
 
-    public void submitSelectedItems(HashSet<T> items){
-        selectedItems=items;
+    public void submitSelectedItems(HashSet<T> items) {
+        selectedItems = items;
         notifyDataSetChanged();
         itemsChangeListener.onItemChange();
     }
@@ -144,9 +146,10 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
         return new ArrayList<>(selectedItems);
     }
 
-    public int getSelectedItemsSize(){
+    public int getSelectedItemsSize() {
         return selectedItems.size();
     }
+
     @Override
     public void conditionApplies(boolean allowOnlyOneItem) {
         if (allowOnlyOneItem) limit = 1;

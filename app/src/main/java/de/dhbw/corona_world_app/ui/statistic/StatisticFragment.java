@@ -182,7 +182,7 @@ public class StatisticFragment extends Fragment {
                         } catch (InterruptedException interruptedException) {
                             Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                         }
-                    } catch (UnavailableException e){
+                    } catch (UnavailableException e) {
                         Log.e(TAG, "The api is currently not available!", e);
                         requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, (dialog, which) -> {
                             retry.set(true);
@@ -257,6 +257,7 @@ public class StatisticFragment extends Fragment {
     }
 
     private void addToHistory(StatisticCall request) {
+        Log.i(this.getClass().getName(), "adding new request to history");
         statisticCallViewModel.addData(Collections.singletonList(request));
         statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
             @Override
@@ -309,8 +310,6 @@ public class StatisticFragment extends Fragment {
     }
 
     private void setStyle(PieChart chart, StatisticCall statisticCall, Context context) {
-        boolean countryList2D = statisticCall.getCountryList().size() > 1;
-        boolean criteriaList2D = statisticCall.getCriteriaList().size() > 1;
         boolean dates2D = statisticCall.getStartDate() != null ? statisticCall.getEndDate() == null || !statisticCall.getStartDate().isEqual(statisticCall.getEndDate()) : statisticCall.getEndDate() != null;
         //this is just to get the background-color...
         TypedValue typedValue = new TypedValue();
