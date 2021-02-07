@@ -41,7 +41,7 @@
                 app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle">
 
                 <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
-                    android:id="@+id/nachoIsoCountryTextView"
+                    android:id="@+id/isoCountryTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Countries"

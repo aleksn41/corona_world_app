@@ -125,17 +125,6 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
         return convertView;
     }
 
-    public void selectItem(int position) {
-        T currentItem = getItem(position);
-        selectedItems.add(currentItem);
-        itemsChangeListener.onItemChange();
-    }
-
-    public void unSelectItem(T item) {
-        selectedItems.remove(item);
-        itemsChangeListener.onItemChange();
-    }
-
     public void submitSelectedItems(HashSet<T> items){
         selectedItems=items;
         notifyDataSetChanged();
@@ -172,14 +161,5 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
 
     public void addToBlackList(T item) {
         blackListItems.add(item);
-    }
-
-    public void removeFromBlackList(T item) {
-        blackListItems.remove(item);
-    }
-
-    public T getFirstFilteredItem() {
-        if (filteredItems.size() > 0) return filteredItems.get(0);
-        else return null;
     }
 }
