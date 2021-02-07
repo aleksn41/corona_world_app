@@ -9,7 +9,7 @@
         android:id="@+id/navigation_world"
         android:name="de.dhbw.corona_world_app.ui.map.WorldMapFragment"
         android:label="@string/title_world"
-        tools:layout="@layout/fragment_map" >
+        tools:layout="@layout/fragment_map">
         <action
             android:id="@+id/goToStatistic"
             app:destination="@id/navigation_statistic" />
@@ -19,8 +19,7 @@
         android:id="@+id/navigation_germany"
         android:name="de.dhbw.corona_world_app.ui.map.GermanyMapFragment"
         android:label="@string/title_germany"
-        tools:layout="@layout/fragment_map">
-    </fragment>
+        tools:layout="@layout/fragment_map"></fragment>
 
     <fragment
         android:id="@+id/navigation_statistic_request"
@@ -50,7 +49,7 @@
         android:id="@+id/navigation_favourites"
         android:name="de.dhbw.corona_world_app.ui.favourites.FavouriteFragment"
         android:label="@string/title_favourites"
-        tools:layout="@layout/fragment_statistical_call_list" >
+        tools:layout="@layout/fragment_statistical_call_list">
         <action
             android:id="@+id/showStatistic"
             app:destination="@id/navigation_statistic"
@@ -61,7 +60,7 @@
         android:id="@+id/navigation_history"
         android:name="de.dhbw.corona_world_app.ui.history.HistoryFragment"
         android:label="@string/title_history"
-        tools:layout="@layout/fragment_statistical_call_list" >
+        tools:layout="@layout/fragment_statistical_call_list">
         <action
             android:id="@+id/showStatistic2"
             app:destination="@id/navigation_statistic"
@@ -76,6 +75,14 @@
         android:id="@+id/action_global_navigation_settings"
         app:destination="@id/navigation_settings"
         app:enterAnim="@anim/fragment_fade_enter" />
+
+    <fragment
+        android:id="@+id/navigation_info"
+        android:name="de.dhbw.corona_world_app.ui.info.InfoFragment"
+        android:label="Information" />
+    <action
+        android:id="@+id/action_global_navigation_info"
+        app:destination="@id/navigation_info" />
 
 
 </navigation>

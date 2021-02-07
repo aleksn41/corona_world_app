@@ -31,15 +31,9 @@ import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
  */
 public class HistoryFragment extends StatisticCallRecyclerViewFragment {
 
-    private static final String TAG = FavouriteFragment.class.getSimpleName();
 
     public HistoryFragment() {
         super();
-    }
-
-    @Override
-    public void setupOnCreateViewAfterInitOfRecyclerView() {
-
     }
 
     @Override

@@ -174,9 +174,6 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             emptyList.setVisibility(View.GONE);
         }
         Log.d(this.getClass().getName(), "finished RecycleView");
-
-        Log.d(this.getClass().getName(), "start Custom OnCreateView Function");
-        setupOnCreateViewAfterInitOfRecyclerView();
         return root;
     }
 
@@ -230,8 +227,6 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         });
         super.onStop();
     }
-
-    public abstract void setupOnCreateViewAfterInitOfRecyclerView();
 
     public abstract StatisticCallDataManager.DataType getDataType();
 

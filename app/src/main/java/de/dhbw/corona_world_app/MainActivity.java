@@ -15,6 +15,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import de.dhbw.corona_world_app.ui.info.InfoFragmentDirections;
 import de.dhbw.corona_world_app.ui.settings.SettingsFragment;
 import de.dhbw.corona_world_app.ui.settings.SettingsFragmentDirections;
 
@@ -65,6 +66,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {// User chose the "Settings" item, show the app settings UI...
             NavDirections action=SettingsFragmentDirections.actionGlobalNavigationSettings();
+            NavHostFragment navHostFragment =
+                    (NavHostFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.nav_host_fragment);
+            navHostFragment.getNavController().navigate(action);
+            return true;
+        }else if(item.getItemId()==R.id.info){
+            NavDirections action= InfoFragmentDirections.actionGlobalNavigationInfo();
             NavHostFragment navHostFragment =
                     (NavHostFragment) getSupportFragmentManager()
                             .findFragmentById(R.id.nav_host_fragment);
