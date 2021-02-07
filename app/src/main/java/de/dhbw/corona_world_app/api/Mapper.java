@@ -10,6 +10,8 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
  * This class takes care of the mapping of all country-names between app and API.
+ *
+ * @author Thomas Meier
  */
 public class Mapper {
 

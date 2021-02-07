@@ -31,6 +31,8 @@ import okhttp3.Request;
 
 /**
  * This class is used for getting the data and statistics from a specified API. It uses async calls to get corona and population data for every country.
+ *
+ * @author Thomas Meier
  */
 public class APIManager {
 

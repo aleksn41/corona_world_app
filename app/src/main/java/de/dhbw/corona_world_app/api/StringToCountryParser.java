@@ -21,6 +21,8 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
  * This class parses the Strings of an API to Country or TimeFramedCountry objects.
+ *
+ * @author Thomas Meier
  */
 public class StringToCountryParser {
 
