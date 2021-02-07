@@ -22,6 +22,10 @@ import java.util.function.BiConsumer;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
+/**
+ * This ViewModel uses the Datamanager to save and give data to the {@link StatisticCallRecyclerViewFragment}
+ * @author Aleksandr Stankoski
+ */
 public class StatisticCallViewModel extends ViewModel {
     private File dataFile;
     private StatisticCallDataManager dataManager;
@@ -29,8 +33,8 @@ public class StatisticCallViewModel extends ViewModel {
     public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException, ExecutionException, InterruptedException, DataException {
         this.dataFile = dataFile;
         dataManager = new StatisticCallDataManager(threadHandler, dataFile);
-        getMoreData(StatisticCallDataManager.DataType.ALL_DATA).get();
         getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA).get();
+        getMoreData(StatisticCallDataManager.DataType.ALL_DATA).get();
     }
     public boolean isNotInit() {
         return dataManager == null;
@@ -78,6 +82,10 @@ public class StatisticCallViewModel extends ViewModel {
                 dataManager.statisticCallFavouriteData.observe(owner, observer);
                 break;
         }
+    }
+
+    public boolean hasData(StatisticCallDataManager.DataType dataType){
+        return dataManager.hasData(dataType);
     }
 
 }

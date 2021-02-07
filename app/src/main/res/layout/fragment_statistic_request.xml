@@ -33,15 +33,15 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/isoCountryTextLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_huge"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/IsoCountryChooserTitle"
+                app:layout_constraintStart_toStartOf="@+id/IsoCountryChooserTitle"
                 app:layout_constraintTop_toBottomOf="@id/IsoCountryChooserTitle">
 
                 <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
-                    android:id="@+id/nachoIsoCountryTextView"
+                    android:id="@+id/isoCountryTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Countries"
@@ -51,8 +51,10 @@
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/isoCountryChips"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@+id/IsoCountryChooserTitle"
+                app:layout_constraintStart_toStartOf="@+id/IsoCountryChooserTitle"
                 app:layout_constraintTop_toBottomOf="@id/isoCountryTextLayout" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -70,11 +72,11 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/criteriaTextLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_huge"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/isoCountryTextLayout"
+                app:layout_constraintStart_toStartOf="@+id/isoCountryTextLayout"
                 app:layout_constraintTop_toBottomOf="@id/criteriaChooserTitle">
 
                 <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
@@ -88,8 +90,10 @@
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/criteriaChips"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@+id/criteriaTextLayout"
+                app:layout_constraintStart_toStartOf="@+id/criteriaTextLayout"
                 app:layout_constraintTop_toBottomOf="@id/criteriaTextLayout" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -108,11 +112,11 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/chartTypeTextLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_huge"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/isoCountryTextLayout"
+                app:layout_constraintStart_toStartOf="@+id/isoCountryTextLayout"
                 app:layout_constraintTop_toBottomOf="@id/chartTypeChooserTitle">
 
                 <de.dhbw.corona_world_app.ui.statistic.CustomAutoCompleteTextView
@@ -126,8 +130,10 @@
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chartTypeChips"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@+id/chartTypeTextLayout"
+                app:layout_constraintStart_toStartOf="@+id/chartTypeTextLayout"
                 app:layout_constraintTop_toBottomOf="@id/chartTypeTextLayout" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -165,7 +171,7 @@
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="90dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/endDateChooser" />

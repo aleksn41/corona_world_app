@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public interface StatisticCallActionModeInterface {
-    void enterDeleteMode(ActionMode.Callback callback);
+    void enterActionMode(ActionMode.Callback callback);
     void deleteItems(Set<Integer> ItemIds);
     void favouriteItems(Set<Integer> ItemIds);
 }

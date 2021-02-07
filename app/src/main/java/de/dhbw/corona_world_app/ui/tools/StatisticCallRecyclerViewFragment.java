@@ -9,11 +9,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,12 +29,18 @@ import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.history.HistoryFragmentDirections;
 
+/**
+ * This abstract Fragment can be used to show either all favourites or all {@link StatisticCall} made by the user
+ * @author Aleksandr Stankoski
+ */
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
     protected StatisticCallAdapter statisticCallAdapter;
     protected RecyclerView.LayoutManager layoutManager;
     protected StatisticCallViewModel statisticCallViewModel;
+    private TextView emptyList;
     private ActionMode deleteMode;
     private Menu menu;
     private boolean customMenuShowing = false;
@@ -42,6 +50,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
+        emptyList=root.findViewById(R.id.empty_view);
         setHasOptionsMenu(true);
         if (statisticCallViewModel.isNotInit()) {
             Log.d(this.getClass().getName(), "init ViewModel");
@@ -85,7 +94,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             }
         }, new StatisticCallActionModeInterface() {
             @Override
-            public void enterDeleteMode(ActionMode.Callback callback) {
+            public void enterActionMode(ActionMode.Callback callback) {
                 Log.v(this.getClass().getName(), "entering Delete Mode");
                 deleteMode = requireActivity().startActionMode(callback);
             }
@@ -126,7 +135,13 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                     });
                 }
             }
-        }, getShowStatisticInterface());
+        }, request -> {
+            HistoryFragmentDirections.ShowStatistic2 action = HistoryFragmentDirections.showStatistic2(request,false);
+            NavHostFragment navHostFragment =
+                    (NavHostFragment) requireActivity().getSupportFragmentManager()
+                            .findFragmentById(R.id.nav_host_fragment);
+            navHostFragment.getNavController().navigate(action);
+        });
         statisticCallViewModel.observeData(getViewLifecycleOwner(), new Observer<List<Pair<StatisticCall, Boolean>>>() {
             @Override
             public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
@@ -136,10 +151,14 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                 if (customMenuShowing && pairs.size() - statisticCallAdapter.getBlacklistedItemsSize() <= 0 && menu != null) {
                     menu.clear();
                     requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_menu, menu);
+                    statisticCallRecyclerView.setVisibility(View.GONE);
+                    emptyList.setVisibility(View.VISIBLE);
                     customMenuShowing = false;
                 } else if (!customMenuShowing && pairs.size() - statisticCallAdapter.getBlacklistedItemsSize() > 0 && menu != null) {
                     menu.clear();
                     requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_select_menu, menu);
+                    statisticCallRecyclerView.setVisibility(View.VISIBLE);
+                    emptyList.setVisibility(View.GONE);
                     customMenuShowing = true;
                 }
                 statisticCallAdapter.notifyDataSetChanged();
@@ -147,10 +166,14 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             }
         }, getDataType());
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
+        if(!statisticCallViewModel.hasData(getDataType())){
+            statisticCallRecyclerView.setVisibility(View.GONE);
+            emptyList.setVisibility(View.VISIBLE);
+        }else{
+            statisticCallRecyclerView.setVisibility(View.VISIBLE);
+            emptyList.setVisibility(View.GONE);
+        }
         Log.d(this.getClass().getName(), "finished RecycleView");
-
-        Log.d(this.getClass().getName(), "start Custom OnCreateView Function");
-        setupOnCreateViewAfterInitOfRecyclerView();
         return root;
     }
 
@@ -205,11 +228,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         super.onStop();
     }
 
-    public abstract void setupOnCreateViewAfterInitOfRecyclerView();
-
     public abstract StatisticCallDataManager.DataType getDataType();
-
-    public abstract ShowStatisticInterface getShowStatisticInterface();
 
     protected void tryRepairingData() {
         ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {

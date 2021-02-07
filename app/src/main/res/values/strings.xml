@@ -34,4 +34,8 @@
     <string name="select_all">Select all</string>
     <string name="un_select_all">Unselect all</string>
     <string name="limit_reached">Limit of %1$d reached for %2$s</string>
+    <string name="empty_list">There are no items in your history</string>
+    <string name="info">Info</string>
+    <string name="Information">This App was made by Thomas Meier and Aleksandr Stankoski as part of a student Project.\n\nIf you want to add to this Project or report a Bug you can do so on our <a href="https://github.com/aleksn41/corona_world_app">Github</a>.\n\nAPIs used:\n- HEROKU (https://coronavirus-19-api.herokuapp.com)\n- RESTCOUNTRIES(https://restcountries.eu/rest/v2)\n- POSTMANAPI(https://api.covid19api.com)\n- POSTMANAPI(https://api.covid19api.com)\n- ARCGIS(https://opendata.arcgis.com)\n\nLibraries used:\n- okhttp3\n- varunest:sparkbutton\n- PhilJay:MPAndroidChart\n- michaelfotiadis:android-country-flags\n\n Thank you for using our App\n\nMore Information can be found on our <a href="https://github.com/aleksn41/corona_world_app">Github</a></string>
+    <string name="no_data">\"No data available!\"</string>
 </resources>

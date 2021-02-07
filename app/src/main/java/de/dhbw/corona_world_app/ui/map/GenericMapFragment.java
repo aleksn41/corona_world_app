@@ -1,6 +1,8 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -48,6 +50,15 @@ import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
+/**
+ * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
+ * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
+ * A {@link TextView} is placed in the top right to show summarized Data
+ *
+ * @param <T> The {@link Displayable} used to select Data
+ * @author Thomas Meier ({@link WebView} and Logic)
+ * @author Aleksandr Stankoski ({@link BottomSheetBehavior} and Layout)
+ */
 public abstract class GenericMapFragment<T extends Displayable> extends Fragment {
 
     private MapViewModel mapViewModel;
@@ -89,20 +100,26 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         }
     };
 
+    @SuppressLint("SetJavaScriptEnabled")
     @SuppressWarnings("unchecked")
-    @SuppressLint({"SetJavaScriptEnabled", "SetTextI18n"})
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         Log.v(getTAG(), "Creating MapFragment view");
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
+
         progressBar = root.findViewById(R.id.progressBar);
         bottomSheetTitle = root.findViewById(R.id.bottomSheetTitle);
+
         Log.v(getTAG(), "Starting loading screen");
         loadingScreen.startLoadingScreen();
+
         mapViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         loadingScreen.setProgressBar(10);
+
         percentageFormat.setMaximumFractionDigits(3);
         root.findViewById(R.id.bottomSheetButton).setOnClickListener(this::goToStatistic);
+
         //setup bottomsheet
         RelativeLayout bottomSheet = root.findViewById(R.id.bottomSheet);
         BottomSheetBehavior<RelativeLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -128,7 +145,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     break;
             }
         });
-
+        //change image based on state
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -156,9 +173,11 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
 
             }
         });
+
         boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated", false);
         boolean storageDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("storage_deactivated", false);
         Log.d(getTAG(), "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + " and storage " + (storageDisabled ? "disabled" : "enabled") + "...");
+
         mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
@@ -179,13 +198,15 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                         bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                         //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
                         if (bottomSheet.getHeight() != 0)
-                            bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
+                            //calculate how big the half expanded state must be to only show the name and the flag
+                            bottomSheetBehavior.setHalfExpandedRatio((getResources().getDimension(R.dimen.bottom_sheet_expand_size) + getResources().getDimension(R.dimen.bottom_sheet_title_size) + (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 0 : getResources().getDimension(R.dimen.map_box_flag_height)) + getResources().getDimension(R.dimen.margin_big)) / (pxToDp(bottomSheet.getHeight()) * getResources().getDisplayMetrics().density));
                     }
                 });
                 mapBox.setVisibility(View.VISIBLE);
                 loadingScreen.endLoadingScreen();
             }
         });
+
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(false);
@@ -206,7 +227,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                 }
                 if (bottomSheetTitle.getText().length() == 0) {
                     Log.e(getTAG(), "No data was found for country " + isoCountry + "!");
-                    bottomSheetTitle.setText("No data available!");
+                    bottomSheetTitle.setText(getString(R.string.no_data));
                     ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_DATA_FOUND, null);
                 }
             }
@@ -312,6 +333,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     private void selectCountry(Country<T> selectedCountry){
         mapViewModel.selectedCountry.setValue(selectedCountry);
     }
+
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
         if (getContext() != null) {
