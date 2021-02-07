@@ -30,16 +30,10 @@ import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
  */
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
-    private static final String TAG = FavouriteFragment.class.getSimpleName();
-
     public FavouriteFragment() {
         super();
     }
 
-    @Override
-    public void setupOnCreateViewAfterInitOfRecyclerView() {
-
-    }
 
     @Override
     public StatisticCallDataManager.DataType getDataType() {

@@ -13,6 +13,10 @@ import androidx.fragment.app.Fragment;
 
 import de.dhbw.corona_world_app.R;
 
+/**
+ * This Fragment shows a text with basic Information to the App
+ * @author Aleksandr Stankoski
+ */
 public class InfoFragment extends Fragment {
     @Nullable
     @Override
