@@ -1,6 +1,9 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+
+import android.content.res.Configuration;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -20,7 +23,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -28,23 +30,21 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.json.JSONException;
 
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.APIManager;
-import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
-import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.Displayable;
-import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.map.MapData;
@@ -52,6 +52,15 @@ import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
+/**
+ * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
+ * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
+ * A {@link TextView} is placed in the top right to show summarized Data
+ *
+ * @param <T> The {@link Displayable} used to select Data
+ * @author Thomas Meier ({@link WebView} and Logic)
+ * @author Aleksandr Stankoski ({@link BottomSheetBehavior} and Layout)
+ */
 public abstract class GenericMapFragment<T extends Displayable> extends Fragment {
 
     private MapViewModel mapViewModel;
@@ -93,6 +102,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         }
     };
 
+    @SuppressWarnings("unchecked")
     @SuppressLint({"SetJavaScriptEnabled", "SetTextI18n"})
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(getTAG(), "Creating MapFragment view");
@@ -180,7 +190,8 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     public void onGlobalLayout() {
                         bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                         //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
-                        if(bottomSheet.getHeight()!=0)bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
+                        if (bottomSheet.getHeight() != 0)
+                            bottomSheetBehavior.setHalfExpandedRatio((getResources().getDimension(R.dimen.bottom_sheet_expand_size) + getResources().getDimension(R.dimen.bottom_sheet_title_size) + (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 0 : getResources().getDimension(R.dimen.map_box_flag_height)) + getResources().getDimension(R.dimen.margin_big)) / (pxToDp(bottomSheet.getHeight()) * getResources().getDisplayMetrics().density));
                     }
                 });
                 mapBox.setVisibility(View.VISIBLE);
@@ -202,10 +213,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
                     if (countryList.get(i).getName().equals(isoCountry)) {
-                        ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
-                        selectedCountry = countryList.get(i);
-                        bottomSheetTitle.setText(isoCountry.toString());
-                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getBottomSheetText());
+                        selectCountry(countryList.get(i));
                     }
                 }
                 if (bottomSheetTitle.getText().length() == 0) {
@@ -216,23 +224,30 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
             }
         });
 
+        mapViewModel.selectedCountry.observe(getViewLifecycleOwner(), selection -> {
+            bottomSheetTitle.setText(selection.getName().toString());
+            ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), selection.getName().getFlagDrawableID()));
+            selectedCountry = (Country<T>) selection;
+            ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getBottomSheetText());
+        });
+
         Log.v(getTAG(), "Requesting all countries...");
         loadingScreen.setProgressBar(25);
         service.execute(() -> {
+            Thread executionThread = Thread.currentThread();
             try {
-                if(getContext()!=null) {
+                if (getContext() != null) {
                     executeViewModelListInitiation(mapViewModel);
                 }
             } catch (InterruptedException | ExecutionException | IOException | JSONException | ClassNotFoundException e) {
-                handleException(e);
+                handleException(e, executionThread);
             }
         });
+        mapViewModel.progress.observe(getViewLifecycleOwner(), loadingScreen::setProgressBar);
         getListFromViewModel(mapViewModel).observe(
                 getViewLifecycleOwner(), countries ->
                 {
-                    loadingScreen.setProgressBar(50);
                     Log.v(getTAG(), "Requested countries have arrived");
-                    loadingScreen.setProgressBar(70);
                     webViewString.setValue(mapViewModel.getWebViewStringCustom(countries));
                     Log.v(getTAG(), "Loading WebView with WebString...");
                     loadingScreen.setProgressBar(100);
@@ -241,18 +256,32 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         return root;
     }
 
-    private void handleException(Exception e) {
-        if(getContext()!=null) {
+    private void handleException(Exception e, Thread currentThread) {
+        if (getContext() != null) {
             if (e instanceof InterruptedException || e instanceof ExecutionException) {
                 Logger.logE(getTAG(), "Unexpected exception during initialization of country list!", e);
                 requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null));
-            } else if (e instanceof ClassNotFoundException) {
+            } else if (e instanceof ClassNotFoundException || e instanceof InvalidClassException || e instanceof EOFException) {
                 Logger.logE(getTAG(), "Exception during loading cache!", e);
-                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, null));
-                //todo call a method that kills cache
+                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CACHE_CORRUPT, (dialog, which) -> {
+                    synchronized (currentThread) {
+                        currentThread.notify();
+                    }
+                }, "OK"));
+                try {
+                    synchronized (currentThread) {
+                        currentThread.wait();
+                    }
+                    deleteCache(mapViewModel);
+                    executeViewModelListInitiation(mapViewModel);
+                } catch (IOException ioException) {
+                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.COULD_NOT_DELETE_CACHE, null));
+                } catch (JSONException | ExecutionException | InterruptedException | ClassNotFoundException exception) {
+                    handleException(exception, currentThread);
+                }
             } else if (e instanceof JSONException) {
                 Logger.logE(getTAG(), "Exception while parsing data!", e);
-                //todo inform user
+                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.API_CURRENTLY_NOT_AVAILABLE, null));
             } else if (e instanceof IOException) {
                 Logger.logE(getTAG(), "Exception during request!", e);
                 try {
@@ -286,12 +315,19 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
 
     protected abstract int getMapBoxFormattedString();
 
-    protected String getTAG(){
+    protected abstract void deleteCache(MapViewModel viewModel) throws IOException;
+
+    protected String getTAG() {
         return this.getClass().getSimpleName();
     }
-    
+
+    private void selectCountry(Country<T> selectedCountry){
+        mapViewModel.selectedCountry.setValue(selectedCountry);
+    }
+
+
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
-        if(getContext()!=null) {
+        if (getContext() != null) {
             NumberFormat percentFormat = NumberFormat.getPercentInstance();
             percentFormat.setMaximumFractionDigits(3);
             textView.setText(getString(getMapBoxFormattedString(), populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), activeWorld, percentFormat.format((double) activeWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
@@ -299,7 +335,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     }
 
     private int pxToDp(int px) {
-        if(getContext()!=null) {
+        if (getContext() != null) {
             DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
             return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
         } else {

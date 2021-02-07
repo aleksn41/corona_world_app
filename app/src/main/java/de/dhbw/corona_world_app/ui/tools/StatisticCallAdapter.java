@@ -23,7 +23,11 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
 import static android.view.View.GONE;
 
-
+/**
+ * This Adapter handles the Items in the {@link StatisticCallRecyclerViewFragment}
+ * It uses an {@link ActionMode} to start a multiSelection and can trigger the Items in the Actionbar to delete or favourite items
+ * @author Aleksandr Stankoski
+ */
 public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean>, StatisticCallViewHolder> {
     private boolean multiSelectForDeleteActivated=false;
 
@@ -54,7 +58,6 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if(item.getItemId()==R.id.action_delete) {
-                //delete All Items
                 Log.d(this.getClass().getName(), "clicked on delete Item");
                 deleteSelectedItems();
                 mode.finish();
@@ -140,7 +143,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
         //tell Fragment and ViewModel that an Item should be marked for deletion and Deletion Mode should be activated if not already on
         holder.itemView.setOnLongClickListener(v -> {
             if(!multiSelectForDeleteActivated){
-                actionModeInterface.enterDeleteMode(actionMode);
+                actionModeInterface.enterActionMode(actionMode);
                 selectItem(holder.getAdapterPosition(),holder);
             }
             return true;
@@ -166,7 +169,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall,Boolean
             }
         }
         selectedItems.addAll(allNonBlacklistedIndices);
-        if(mActionMode==null)actionModeInterface.enterDeleteMode(actionMode);
+        if(mActionMode==null)actionModeInterface.enterActionMode(actionMode);
         notifyDataSetChanged();
     }
 

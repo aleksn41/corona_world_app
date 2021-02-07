@@ -7,6 +7,10 @@ import androidx.appcompat.app.AlertDialog;
 
 import de.dhbw.corona_world_app.R;
 
+/**
+ * This is a helper Class used to easily display an Errordialog
+ * @author Aleksandr Stankoski
+ */
 public class ErrorDialog {
 
     public static void showBasicErrorDialog(Context context, ErrorCode errorCode, DialogInterface.OnClickListener onClickPositiveButton, String positiveButtonText){

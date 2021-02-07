@@ -24,6 +24,10 @@ import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallRecyclerViewFragment;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
+/**
+ * This Fragment is used to display the Favourite {@link StatisticCall} made by the User
+ * @author Aleksandr Stankoski
+ */
 public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
 
     private static final String TAG = FavouriteFragment.class.getSimpleName();
@@ -40,44 +44,5 @@ public class FavouriteFragment extends StatisticCallRecyclerViewFragment {
     @Override
     public StatisticCallDataManager.DataType getDataType() {
         return StatisticCallDataManager.DataType.FAVOURITE_DATA;
-    }
-
-    @Override
-    public ShowStatisticInterface getShowStatisticInterface() {
-        return request -> {
-            FavouriteFragmentDirections.ShowStatistic action = FavouriteFragmentDirections.showStatistic(request,false);
-            NavHostFragment navHostFragment =
-                    (NavHostFragment) requireActivity().getSupportFragmentManager()
-                            .findFragmentById(R.id.nav_host_fragment);
-            navHostFragment.getNavController().navigate(action);
-        };
-    }
-
-    //TODO change this
-    @Override
-    public void initViewModelData(StatisticCallViewModel statisticCallViewModel) {
-        try {
-            statisticCallViewModel.init(requireActivity().getFilesDir(), ThreadPoolHandler.getInstance());
-        } catch (IOException e) {
-            Log.e(TAG,"could not load or create File",e);
-            //TODO inform user
-        }
-        try {
-            Future<Void> future=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.ALL_DATA);
-            Future<Void> future1=statisticCallViewModel.getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA);
-            future.get();
-            future1.get();
-        } catch (ExecutionException e) {
-            Log.e(TAG,"error getting new Data",e);
-            Throwable error=e.getCause();
-            if(error instanceof IOException){
-                //check if error is undoable
-            }else if(error instanceof DataException){
-                //inform User that data is corrupt and must be remade
-            }
-        }catch (InterruptedException e){
-            Log.e(TAG,"Thread has been interrupted",e);
-            //future.cancel(true);
-        }
     }
 }

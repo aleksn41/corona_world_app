@@ -20,6 +20,13 @@ import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.R;
 
+/**
+ * This Adapter is used to Filter and limit the amount of items displayed in the {@link android.widget.AutoCompleteTextView}
+ * This Adapter also implements the {@link StatisticRequestRule.RuleEnumAdapter} in order to disallow certain items when a certain selection has been made
+ * See {@link StatisticRequestRule} for more info on the Rule System
+ * @param <T> the enum used in the {@link android.widget.AutoCompleteTextView}
+ * @author Aleksandr Stankoski
+ */
 public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter implements Filterable, StatisticRequestRule.RuleEnumAdapter<T> {
     private final Context context;
     HashSet<T> selectedItems;
@@ -28,6 +35,7 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
     HashSet<T> blackListItems;
     int originalLimit;
     int limit;
+    public static final int NO_LIMIT = -1;
     LimitListener limitListener;
     StatisticRequestRule.OnItemsChangeListener itemsChangeListener;
 
@@ -52,7 +60,7 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
-                if (limit != -1 && selectedItems.size() == limit) {
+                if (limit != NO_LIMIT && selectedItems.size() == limit) {
                     results.values = new ArrayList<>();
                     if (limitListener != null) limitListener.onLimitReached(limit);
                 }
@@ -125,6 +133,12 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
 
     public void unSelectItem(T item) {
         selectedItems.remove(item);
+        itemsChangeListener.onItemChange();
+    }
+
+    public void submitSelectedItems(HashSet<T> items){
+        selectedItems=items;
+        notifyDataSetChanged();
         itemsChangeListener.onItemChange();
     }
 

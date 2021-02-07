@@ -2,7 +2,11 @@ package de.dhbw.corona_world_app.ui.tools;
 
 import org.jetbrains.annotations.NotNull;
 
-//TODO if i where a user i would not know what to do with these error messages
+/**
+ * Used to inform the user if a certain Error occurred
+ * @author Thomas Meier
+ * @author Aleksandr Stankoski
+ */
 public enum ErrorCode {
     UNEXPECTED_ERROR(0, "An unexpected error occurred."),
     DATA_CORRUPT(1, "Your data is corrupt, all corrupt files will be deleted."),
@@ -16,6 +20,9 @@ public enum ErrorCode {
     UNEXPECTED_ANSWER(9,"The requested data has an unexpected format."),
     TOO_MANY_REQUESTS(10, "Too many requests were made, please retry querying in a few seconds."),
     NO_DATA_FOUND(11, "There was no data found. Please try reloading the map."),
+    CACHE_CORRUPT(12, "There was an error reading local cache. All cache files will be deleted."),
+    COULD_NOT_DELETE_CACHE(13, "An error occurred while deleting local cache. Try deleting your local cash."),
+    API_CURRENTLY_NOT_AVAILABLE(14, "Data service is currently unavailable. Please try again later.")
     ;
 
     int code;

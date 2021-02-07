@@ -50,9 +50,10 @@
         <TextView
             android:id="@+id/bottomSheetTitle"
             style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/bottom_sheet_title_size"
             android:layout_below="@id/bottom_sheet_expand"
+            android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="No Country Selected"
             android:textAlignment="center"
@@ -61,11 +62,11 @@
         <!--suppress AndroidDomInspection -->
         <ImageView
             android:id="@+id/map_box_flag"
-            android:layout_width="42dp"
-            android:layout_height="@dimen/map_box_flag_height"
-            android:layout_below="@id/bottomSheetTitle"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="@dimen/margin_big"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/bottom_sheet_title_size"
+            android:layout_below="@id/bottom_sheet_expand"
+            android:layout_marginEnd="@dimen/margin_big"
+            android:layout_toStartOf="@id/bottomSheetTitle"
             android:contentDescription="Flag of currently selected Country"
             android:src="@michaelfotiadis:drawable/ic_list_country_unknown" />
 
@@ -73,7 +74,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/bottomSheetButton"
-            android:layout_below="@id/map_box_flag">
+            android:layout_below="@id/map_box_flag"
+            android:layout_marginTop="@dimen/margin_big">
 
             <TextView
                 android:id="@+id/bottomSheetDescription"

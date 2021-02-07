@@ -32,7 +32,7 @@ public class Logger {
 
     public static boolean getDebugging(){return !logOn; }
 
-    public static void disableLogging(){
+    public static void disableLogging() {
         logOn = false;
     }
 }
