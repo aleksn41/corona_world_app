@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,6 +57,7 @@ import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
  * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
  * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
  * A {@link TextView} is placed in the top right to show summarized Data
+ *
  * @param <T> The {@link Displayable} used to select Data
  * @author Thomas Meier ({@link WebView} and Logic)
  * @author Aleksandr Stankoski ({@link BottomSheetBehavior} and Layout)
@@ -189,7 +191,8 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     public void onGlobalLayout() {
                         bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                         //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
-                        if(bottomSheet.getHeight()!=0)bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
+                        if (bottomSheet.getHeight() != 0)
+                            bottomSheetBehavior.setHalfExpandedRatio((getResources().getDimension(R.dimen.bottom_sheet_expand_size) + getResources().getDimension(R.dimen.bottom_sheet_title_size) + (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 0 : getResources().getDimension(R.dimen.map_box_flag_height)) + getResources().getDimension(R.dimen.margin_big)) / (pxToDp(bottomSheet.getHeight()) * getResources().getDisplayMetrics().density));
                     }
                 });
                 mapBox.setVisibility(View.VISIBLE);
@@ -229,7 +232,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         loadingScreen.setProgressBar(25);
         service.execute(() -> {
             try {
-                if(getContext()!=null) {
+                if (getContext() != null) {
                     executeViewModelListInitiation(mapViewModel);
                 }
             } catch (InterruptedException | ExecutionException | IOException | JSONException | ClassNotFoundException e) {
@@ -251,7 +254,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     }
 
     private void handleException(Exception e) {
-        if(getContext()!=null) {
+        if (getContext() != null) {
             if (e instanceof InterruptedException || e instanceof ExecutionException) {
                 Logger.logE(getTAG(), "Unexpected exception during initialization of country list!", e);
                 requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null));
@@ -295,12 +298,12 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
 
     protected abstract int getMapBoxFormattedString();
 
-    protected String getTAG(){
+    protected String getTAG() {
         return this.getClass().getSimpleName();
     }
-    
+
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
-        if(getContext()!=null) {
+        if (getContext() != null) {
             NumberFormat percentFormat = NumberFormat.getPercentInstance();
             percentFormat.setMaximumFractionDigits(3);
             textView.setText(getString(getMapBoxFormattedString(), populationWorld, "100%", infectedWorld, percentFormat.format((double) infectedWorld / populationWorld), activeWorld, percentFormat.format((double) activeWorld / populationWorld), recoveredWorld, percentFormat.format((double) recoveredWorld / populationWorld), deathsWorld, percentFormat.format((double) deathsWorld / populationWorld)));
@@ -308,7 +311,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     }
 
     private int pxToDp(int px) {
-        if(getContext()!=null) {
+        if (getContext() != null) {
             DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
             return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
         } else {
