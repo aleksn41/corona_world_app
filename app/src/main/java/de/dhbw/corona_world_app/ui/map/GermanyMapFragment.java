@@ -63,11 +63,14 @@ public class GermanyMapFragment extends GenericMapFragment<GermanyState> {
     @Override
     protected void setAdditionalWebViewSettingsOnPageFinished(WebView webView) {
         webView.zoomBy(2.15f);
-        webView.setOnTouchListener((v, event) -> (event.getAction() == MotionEvent.ACTION_MOVE));
     }
 
     @Override
     protected void setAdditionalWebViewSettings(WebView webView) {
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
+        webSettings.setSupportZoom(true);
     }
 
     @Override
@@ -93,5 +96,10 @@ public class GermanyMapFragment extends GenericMapFragment<GermanyState> {
     @Override
     protected int getMapBoxFormattedString() {
         return R.string.map_box_content_germany;
+    }
+
+    @Override
+    protected void deleteCache(MapViewModel viewModel) throws IOException {
+        viewModel.deleteGermanyCache();
     }
 }

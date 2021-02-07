@@ -37,6 +37,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.map.MapCacheObject;
 import de.dhbw.corona_world_app.map.MapWithBoxCacheObject;
+import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 public class MapViewModel extends ViewModel {
 
@@ -50,10 +51,12 @@ public class MapViewModel extends ViewModel {
 
     private final MapData services = new MapData();
 
-    private File pathToCacheDir;
-
     private final ExecutorService executorService = ThreadPoolHandler.getInstance();
 
+    private File pathToCacheDir;
+
+
+    public MutableLiveData<Integer> progress = new MutableLiveData<>();
 
     public MutableLiveData<List<Country<ISOCountry>>> mCountryList = new MutableLiveData<>();
 
@@ -92,6 +95,17 @@ public class MapViewModel extends ViewModel {
         return returnList;
     }
 
+    public void deleteWorldCache() throws IOException {
+        Log.v(TAG, "Deleting world cache...");
+        File file = new File(pathToCacheDir + WORLD_CACHE_FILENAME);
+        if(file.delete()){
+            Log.v(TAG, "Delete was successful.");
+        } else {
+            Log.e(TAG, "Delete was unsuccessful!");
+            throw new IOException("Could not delete file "+ file +"!");
+        }
+    }
+
     public void cacheGermany(@NonNull List<Country<GermanyState>> germanyData, @NonNull Country<ISOCountry> germanySummary) throws IOException {
         Log.v(TAG, "Caching germany data...");
         try (FileOutputStream fileOut = new FileOutputStream(pathToCacheDir + GERMANY_CACHE_FILENAME)) {
@@ -102,13 +116,13 @@ public class MapViewModel extends ViewModel {
     }
 
     @SuppressWarnings("unchecked")
-    public MapWithBoxCacheObject<GermanyState> getCachedGermanyIfRelevant() throws IOException, ClassNotFoundException {
+    public MapWithBoxCacheObject<GermanyState, ISOCountry> getCachedGermanyIfRelevant() throws IOException, ClassNotFoundException {
         Log.v(TAG, "Getting cached germany data...");
         File file = new File(pathToCacheDir + GERMANY_CACHE_FILENAME);
         if (file.exists() && !file.isDirectory()) {
             try (FileInputStream fileIn = new FileInputStream(file)) {
                 ObjectInputStream in = new ObjectInputStream(fileIn);
-                MapWithBoxCacheObject<GermanyState> cacheObject = (MapWithBoxCacheObject<GermanyState>) in.readObject();
+                MapWithBoxCacheObject<GermanyState, ISOCountry> cacheObject = (MapWithBoxCacheObject<GermanyState, ISOCountry>) in.readObject();
                 if (cacheObject.getCreationTime().isAfter(LocalDateTime.now().minusMinutes(APIManager.MAX_GET_DATA_WORLD_CACHE_AGE))) {
                     return cacheObject;
                 }
@@ -118,45 +132,70 @@ public class MapViewModel extends ViewModel {
         return null;
     }
 
-    public void initGermany() throws IOException, InterruptedException, ExecutionException, ClassNotFoundException {
-        List<Country<GermanyState>> apiGottenList;
-        Country<ISOCountry> germanySummary;
+    public void deleteGermanyCache() throws IOException {
+        Log.v(TAG, "Deleting germany cache...");
+        File file = new File(pathToCacheDir + GERMANY_CACHE_FILENAME);
+        if(file.delete()){
+            Log.v(TAG, "Delete was successful.");
+        } else {
+            Log.e(TAG, "Delete was unsuccessful!");
+            throw new IOException("Could not delete file "+ file +"!");
+        }
+    }
+
+    public void initGermany() throws IOException, InterruptedException, ExecutionException, ClassNotFoundException, JSONException {
+        List<Country<GermanyState>> apiGottenList = null;
+        Country<ISOCountry> germanySummary = null;
         if (!alreadyRunning) {
+            alreadyRunning = true;
             try {
-                alreadyRunning = true;
                 Log.v(TAG, "Initiating country list...");
-                MapWithBoxCacheObject<GermanyState> cacheObject = null;
+                MapWithBoxCacheObject<GermanyState, ISOCountry> cacheObject = null;
                 if (APIManager.isCacheEnabled()) {
                     cacheObject = getCachedGermanyIfRelevant();
                 }
                 if(cacheObject == null) {
                     Future<List<Country<GermanyState>>> futureApiGottenList = executorService.submit(() -> APIManager.getDataGermany(API.ARCGIS));
-                    germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
-                    apiGottenList = futureApiGottenList.get();
-                    if (APIManager.isCacheEnabled()) {
-                        cacheGermany(apiGottenList, germanySummary);
+                    try {
+                        germanySummary = APIManager.getData(Collections.singletonList(ISOCountry.Germany), Arrays.asList(Criteria.POPULATION, Criteria.INFECTED, Criteria.DEATHS, Criteria.RECOVERED)).get(0);
+                        progress.postValue(55);
+                        apiGottenList = futureApiGottenList.get();
+                        progress.postValue(75);
+                        if (!(apiGottenList.size() > 0)) {
+                            throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
+                        }
+                        if (APIManager.isCacheEnabled()) {
+                            cacheGermany(apiGottenList, germanySummary);
+                        }
+                    } catch (ExecutionException e){
+                        handleExecutionException(e);
                     }
                 } else {
                     apiGottenList = cacheObject.getDataList();
-                    germanySummary =cacheObject.getMapBoxValue();
-                }
-                if (!(apiGottenList.size() > 0)) {
-                    throw new ConnectException("Could not get expected data from API " + API.ARCGIS.getName() + "!");
+                    germanySummary = cacheObject.getMapBoxValue();
                 }
                 mBoxValue.postValue(germanySummary);
                 mStatesList.postValue(apiGottenList);
+            } finally {
                 alreadyRunning = false;
-            } catch (Exception e) {
-                alreadyRunning = false;
-                throw e;
             }
         } else {
-            MapWithBoxCacheObject<GermanyState> cache = getCachedGermanyIfRelevant();
-            apiGottenList = cache.getDataList();
-            germanySummary = cache.getMapBoxValue();
-            mBoxValue.postValue(germanySummary);
-            mStatesList.postValue(apiGottenList);
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void handleExecutionException(ExecutionException e) throws ExecutionException, InterruptedException, JSONException, IOException {
+        Throwable cause = e.getCause();
+        if(cause instanceof ExecutionException){
+            throw (ExecutionException) cause;
+        } else if(cause instanceof InterruptedException){
+            throw (InterruptedException) cause;
+        } else if(cause instanceof JSONException){
+            throw (JSONException) cause;
+        } else if(cause instanceof IOException){
+            throw (IOException) cause;
+        } else {
+            throw e;
         }
     }
 
@@ -175,6 +214,7 @@ public class MapViewModel extends ViewModel {
                         cacheDataWorld(apiGottenList);
                     }
                 }
+                progress.postValue(75);
                 if (apiGottenList == null || !(apiGottenList.size() > 0)) {
                     throw new ConnectException("Could not get expected data from API " + API.HEROKU.getName() + "!");
                 }
@@ -190,13 +230,6 @@ public class MapViewModel extends ViewModel {
                 throw e;
             }
         } else {
-            apiGottenList = getCachedDataWorldIfRelevant();
-            for (Country<ISOCountry> country : apiGottenList) {
-                if (country.getName().equals(ISOCountry.World)) {
-                    mBoxValue.postValue(country);
-                }
-            }
-            mCountryList.postValue(apiGottenList);
             Thread.currentThread().interrupt();
         }
     }
