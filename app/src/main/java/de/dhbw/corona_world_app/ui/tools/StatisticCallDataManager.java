@@ -594,6 +594,17 @@ public class StatisticCallDataManager {
     }
     */
 
+    public boolean hasData(DataType dataType) {
+        switch (dataType){
+            case FAVOURITE_DATA:
+                return indicesOfFavouriteEntriesInAllData.size()>0;
+            case ALL_DATA:
+                return statisticCallData.size()-deletedIndicesAllData.size()>0;
+            default:
+                throw new IllegalStateException("Unexpected dataType");
+        }
+    }
+
     private Pair<StatisticCall, Boolean> parseData(@NonNull String s) throws DataException {
         String[] categories = s.split(Pattern.quote(String.valueOf(CATEGORY_SEPARATOR)));
         if (categories.length != AMOUNT_OF_CATEGORIES) throw new DataException("Data is corrupt");

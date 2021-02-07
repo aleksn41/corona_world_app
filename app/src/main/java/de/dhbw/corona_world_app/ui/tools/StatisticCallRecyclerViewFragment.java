@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -33,6 +34,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected StatisticCallAdapter statisticCallAdapter;
     protected RecyclerView.LayoutManager layoutManager;
     protected StatisticCallViewModel statisticCallViewModel;
+    private TextView emptyList;
     private ActionMode deleteMode;
     private Menu menu;
     private boolean customMenuShowing = false;
@@ -42,6 +44,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
         statisticCallViewModel =
                 new ViewModelProvider(requireActivity()).get(StatisticCallViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistical_call_list, container, false);
+        emptyList=root.findViewById(R.id.empty_view);
         setHasOptionsMenu(true);
         if (statisticCallViewModel.isNotInit()) {
             Log.d(this.getClass().getName(), "init ViewModel");
@@ -136,10 +139,14 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                 if (customMenuShowing && pairs.size() - statisticCallAdapter.getBlacklistedItemsSize() <= 0 && menu != null) {
                     menu.clear();
                     requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_menu, menu);
+                    statisticCallRecyclerView.setVisibility(View.GONE);
+                    emptyList.setVisibility(View.VISIBLE);
                     customMenuShowing = false;
                 } else if (!customMenuShowing && pairs.size() - statisticCallAdapter.getBlacklistedItemsSize() > 0 && menu != null) {
                     menu.clear();
                     requireActivity().getMenuInflater().inflate(R.menu.top_action_bar_select_menu, menu);
+                    statisticCallRecyclerView.setVisibility(View.VISIBLE);
+                    emptyList.setVisibility(View.GONE);
                     customMenuShowing = true;
                 }
                 statisticCallAdapter.notifyDataSetChanged();
@@ -147,6 +154,13 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             }
         }, getDataType());
         statisticCallRecyclerView.setAdapter(statisticCallAdapter);
+        if(!statisticCallViewModel.hasData(getDataType())){
+            statisticCallRecyclerView.setVisibility(View.GONE);
+            emptyList.setVisibility(View.VISIBLE);
+        }else{
+            statisticCallRecyclerView.setVisibility(View.VISIBLE);
+            emptyList.setVisibility(View.GONE);
+        }
         Log.d(this.getClass().getName(), "finished RecycleView");
 
         Log.d(this.getClass().getName(), "start Custom OnCreateView Function");

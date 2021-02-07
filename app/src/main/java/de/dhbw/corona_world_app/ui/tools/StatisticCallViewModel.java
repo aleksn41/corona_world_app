@@ -80,4 +80,8 @@ public class StatisticCallViewModel extends ViewModel {
         }
     }
 
+    public boolean hasData(StatisticCallDataManager.DataType dataType){
+        return dataManager.hasData(dataType);
+    }
+
 }
