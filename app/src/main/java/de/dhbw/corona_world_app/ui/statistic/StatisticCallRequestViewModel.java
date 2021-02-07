@@ -26,6 +26,10 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.ui.tools.Pair;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 
+/**
+ * Used to Save the data in {@link StatisticRequestFragment} in order to allow rotation of the App
+ * @author Aleksandr Stankoski
+ */
 public class StatisticCallRequestViewModel extends ViewModel {
     MutableLiveData<LinkedHashSet<ISOCountry>> selectedISOCountries;
     MutableLiveData<LinkedHashSet<Criteria>> selectedCriteriaCountries;

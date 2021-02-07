@@ -9,6 +9,11 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+/**
+ * This class is used to use functionality the {@link androidx.appcompat.widget.AppCompatAutoCompleteTextView} does not usually have
+ * This includes showing suggestions when the user has not typed anything and minimizing the keyboard instead of the dropdown when back is pressed
+ * @author Aleksandr Stankoski
+ */
 public class CustomAutoCompleteTextView extends androidx.appcompat.widget.AppCompatAutoCompleteTextView {
 
     public CustomAutoCompleteTextView(@NonNull Context context) {

@@ -50,6 +50,11 @@ import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
+/**
+ * This Class is used to show the Statistic
+ * @author Thomas Meier (Logic)
+ * @author Aleksandr Stankoski (Layout)
+ */
 public class StatisticFragment extends Fragment {
 
     private StatisticCallViewModel statisticCallViewModel;
@@ -259,12 +264,7 @@ public class StatisticFragment extends Fragment {
     }
 
     private void addToHistory(StatisticCall request) {
-        int items=100;
-        List<StatisticCall> itemss=new ArrayList<>(items);
-        for (int i = 0; i < items; i++) {
-            itemss.add(request);
-        }
-        statisticCallViewModel.addData(itemss);
+        statisticCallViewModel.addData(Collections.singletonList(request));
         statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
             @Override
             public void accept(Void unused, Throwable throwable) {

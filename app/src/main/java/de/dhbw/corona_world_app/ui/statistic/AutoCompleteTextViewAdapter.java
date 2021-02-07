@@ -20,6 +20,13 @@ import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.R;
 
+/**
+ * This Adapter is used to Filter and limit the amount of items displayed in the {@link android.widget.AutoCompleteTextView}
+ * This Adapter also implements the {@link StatisticRequestRule.RuleEnumAdapter} in order to disallow certain items when a certain selection has been made
+ * See {@link StatisticRequestRule} for more info on the Rule System
+ * @param <T> the enum used in the {@link android.widget.AutoCompleteTextView}
+ * @author Aleksandr Stankoski
+ */
 public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter implements Filterable, StatisticRequestRule.RuleEnumAdapter<T> {
     private final Context context;
     HashSet<T> selectedItems;

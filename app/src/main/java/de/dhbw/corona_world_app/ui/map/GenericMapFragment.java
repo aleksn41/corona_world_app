@@ -1,6 +1,8 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+
+import android.content.res.Configuration;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -21,7 +23,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -33,8 +34,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -44,11 +43,8 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.APIManager;
-import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Country;
-import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.Displayable;
-import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.JavaScriptInterface;
 import de.dhbw.corona_world_app.map.MapData;
@@ -56,6 +52,15 @@ import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
+/**
+ * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
+ * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
+ * A {@link TextView} is placed in the top right to show summarized Data
+ *
+ * @param <T> The {@link Displayable} used to select Data
+ * @author Thomas Meier ({@link WebView} and Logic)
+ * @author Aleksandr Stankoski ({@link BottomSheetBehavior} and Layout)
+ */
 public abstract class GenericMapFragment<T extends Displayable> extends Fragment {
 
     private MapViewModel mapViewModel;
@@ -97,6 +102,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         }
     };
 
+    @SuppressWarnings("unchecked")
     @SuppressLint({"SetJavaScriptEnabled", "SetTextI18n"})
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.v(getTAG(), "Creating MapFragment view");
@@ -186,7 +192,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                         bottomSheet.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                         //if the user switches between fragments very quickly the Fragment is stopped but still activated this listener
                         if (bottomSheet.getHeight() != 0)
-                            bottomSheetBehavior.setHalfExpandedRatio((float) 152 / pxToDp(bottomSheet.getHeight()));
+                            bottomSheetBehavior.setHalfExpandedRatio((getResources().getDimension(R.dimen.bottom_sheet_expand_size) + getResources().getDimension(R.dimen.bottom_sheet_title_size) + (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 0 : getResources().getDimension(R.dimen.map_box_flag_height)) + getResources().getDimension(R.dimen.margin_big)) / (pxToDp(bottomSheet.getHeight()) * getResources().getDisplayMetrics().density));
                     }
                 });
                 mapBox.setVisibility(View.VISIBLE);
@@ -208,10 +214,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     throw new IllegalStateException("Country list was not initialized correctly!");
                 for (int i = 0; i < countryList.size(); i++) {
                     if (countryList.get(i).getName().equals(isoCountry)) {
-                        ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), isoCountry.getFlagDrawableID()));
-                        selectedCountry = countryList.get(i);
-                        bottomSheetTitle.setText(isoCountry.toString());
-                        ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getBottomSheetText());
+                        selectCountry(countryList.get(i));
                     }
                 }
                 if (bottomSheetTitle.getText().length() == 0) {
@@ -220,6 +223,13 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_DATA_FOUND, null);
                 }
             }
+        });
+
+        mapViewModel.selectedCountry.observe(getViewLifecycleOwner(), selection -> {
+            bottomSheetTitle.setText(selection.getName().toString());
+            ((ImageView) root.findViewById(R.id.map_box_flag)).setImageDrawable(ContextCompat.getDrawable(requireContext(), selection.getName().getFlagDrawableID()));
+            selectedCountry = (Country<T>) selection;
+            ((TextView) root.findViewById(R.id.bottomSheetDescription)).setText(getBottomSheetText());
         });
 
         Log.v(getTAG(), "Requesting all countries...");
@@ -311,6 +321,11 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     protected String getTAG() {
         return this.getClass().getSimpleName();
     }
+
+    private void selectCountry(Country<T> selectedCountry){
+        mapViewModel.selectedCountry.setValue(selectedCountry);
+    }
+
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
         if (getContext() != null) {

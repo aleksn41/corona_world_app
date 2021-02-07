@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +29,12 @@ import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.ui.history.HistoryFragmentDirections;
 
+/**
+ * This abstract Fragment can be used to show either all favourites or all {@link StatisticCall} made by the user
+ * @author Aleksandr Stankoski
+ */
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
     protected StatisticCallAdapter statisticCallAdapter;
@@ -88,7 +94,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             }
         }, new StatisticCallActionModeInterface() {
             @Override
-            public void enterDeleteMode(ActionMode.Callback callback) {
+            public void enterActionMode(ActionMode.Callback callback) {
                 Log.v(this.getClass().getName(), "entering Delete Mode");
                 deleteMode = requireActivity().startActionMode(callback);
             }
@@ -129,7 +135,13 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                     });
                 }
             }
-        }, getShowStatisticInterface());
+        }, request -> {
+            HistoryFragmentDirections.ShowStatistic2 action = HistoryFragmentDirections.showStatistic2(request,false);
+            NavHostFragment navHostFragment =
+                    (NavHostFragment) requireActivity().getSupportFragmentManager()
+                            .findFragmentById(R.id.nav_host_fragment);
+            navHostFragment.getNavController().navigate(action);
+        });
         statisticCallViewModel.observeData(getViewLifecycleOwner(), new Observer<List<Pair<StatisticCall, Boolean>>>() {
             @Override
             public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
@@ -222,8 +234,6 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     public abstract void setupOnCreateViewAfterInitOfRecyclerView();
 
     public abstract StatisticCallDataManager.DataType getDataType();
-
-    public abstract ShowStatisticInterface getShowStatisticInterface();
 
     protected void tryRepairingData() {
         ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {

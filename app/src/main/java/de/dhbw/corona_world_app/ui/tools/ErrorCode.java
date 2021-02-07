@@ -2,7 +2,11 @@ package de.dhbw.corona_world_app.ui.tools;
 
 import org.jetbrains.annotations.NotNull;
 
-//TODO if i where a user i would not know what to do with these error messages
+/**
+ * Used to inform the user if a certain Error occurred
+ * @author Thomas Meier
+ * @author Aleksandr Stankoski
+ */
 public enum ErrorCode {
     UNEXPECTED_ERROR(0, "An unexpected error occurred."),
     DATA_CORRUPT(1, "Your data is corrupt, all corrupt files will be deleted."),
