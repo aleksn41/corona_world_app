@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -31,11 +32,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 
-import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.datastructure.ChartType;
@@ -43,14 +42,14 @@ import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
-//TODO put data in View Model
+/**
+ * This Fragment is used to choose and create a Statistic
+ * @author Aleksandr Stankoski
+ */
 public class StatisticRequestFragment extends Fragment {
 
-    private StatisticViewModel statisticViewModel;
+    StatisticCallRequestViewModel statisticCallRequestViewModel;
 
-    //setup DatePicker
-    private LocalDate start;
-    private LocalDate end;
 
     DatePickerDialog startDatePicker;
     DatePickerDialog endDatePicker;
@@ -62,20 +61,8 @@ public class StatisticRequestFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        //TODO delete after debugging is done
-        //Logger.disableLogging();
-        if (Logger.getDebbuging()) {
-            List<ISOCountry> clist = new ArrayList<>();
-            clist.add(ISOCountry.Germany);
-            //clist.add(ISOCountry.Belize);
-            List<Criteria> crlist = new ArrayList<>();
-            //crlist.add(Criteria.HEALTHY);
-            crlist.add(Criteria.INFECTED);
-            //crlist.add(Criteria.DEATHS);
-            requestStatistic(new StatisticCall(clist, ChartType.BAR, crlist, LocalDate.now().minusDays(89), LocalDate.now()));
-        }
-        statisticViewModel =
-                new ViewModelProvider(this).get(StatisticViewModel.class);
+        statisticCallRequestViewModel =
+                new ViewModelProvider(this).get(StatisticCallRequestViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic_request, container, false);
 
         ExtendedFloatingActionButton floatingActionButton = root.findViewById(R.id.floating_action_button);
@@ -88,7 +75,6 @@ public class StatisticRequestFragment extends Fragment {
                 floatingActionButton.extend();
             } else floatingActionButton.shrink();
         });
-        //TODO change with post
         //init floatingActionButtonPosition once it is known if the scrollview is at the end when initialized
         ViewTreeObserver vto = scrollView.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -102,17 +88,55 @@ public class StatisticRequestFragment extends Fragment {
             }
         });
 
-        //TODO visually show that limit is reached
         CustomAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
-        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, null);
-        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter, root.findViewById(R.id.isoCountryChips));
+        ChipGroup isoCountryChips = root.findViewById(R.id.isoCountryChips);
+        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country",isoCountryNachoTextView));
+        //special rule, user cannot select World for a statistic as it is not supported by the API
+        isoCountryAdapter.addToBlackList(ISOCountry.World);
+        isoCountryNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
+            statisticCallRequestViewModel.selectedISOCountries.getValue().add(isoCountryAdapter.getItem(position));
+            statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
+        });
+        statisticCallRequestViewModel.selectedISOCountries.observe(getViewLifecycleOwner(), isoCountries -> {
+            isoCountryAdapter.submitSelectedItems(isoCountries);
+            isoCountryNachoTextView.setText("");
+            isoCountryChips.removeAllViews();
+            for (ISOCountry isoCountry : isoCountries) {
+                Chip itemChip = getChip(isoCountry);
+                itemChip.setOnCloseIconClickListener(v -> {
+                    statisticCallRequestViewModel.selectedISOCountries.getValue().remove(isoCountry);
+                    statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
+                });
+                isoCountryChips.addView(itemChip);
+            }
+        });
+        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter);
 
         CustomAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
-        AutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new AutoCompleteTextViewAdapter<>(getContext(), Criteria.class, -1, null);
-        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter, root.findViewById(R.id.criteriaChips));
+        ChipGroup criteriaChips = root.findViewById(R.id.criteriaChips);
+        AutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new AutoCompleteTextViewAdapter<>(getContext(), Criteria.class, AutoCompleteTextViewAdapter.NO_LIMIT, null);
+        criteriaNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
+            statisticCallRequestViewModel.selectedCriteriaCountries.getValue().add(criteriaAdapter.getItem(position));
+            statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
+        });
+        statisticCallRequestViewModel.selectedCriteriaCountries.observe(getViewLifecycleOwner(), criteriaItems -> {
+            criteriaAdapter.submitSelectedItems(criteriaItems);
+            criteriaNachoTextView.setText("");
+            criteriaChips.removeAllViews();
+            for (Criteria criteria : criteriaItems) {
+                Chip itemChip = getChip(criteria);
+                itemChip.setOnCloseIconClickListener(v -> {
+                    statisticCallRequestViewModel.selectedCriteriaCountries.getValue().remove(criteria);
+                    statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
+                });
+                criteriaChips.addView(itemChip);
+            }
+        });
+        setupMultiAutoCompleteTextView(criteriaNachoTextView, criteriaAdapter);
 
         CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
-        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, null) {
+        ChipGroup chartTypeChips = root.findViewById(R.id.chartTypeChips);
+        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, getLimitListener("Chart-Type",chartTypeNachoTextView)) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
@@ -120,7 +144,24 @@ public class StatisticRequestFragment extends Fragment {
                 super.conditionApplies(allowOnlyOneItem);
             }
         };
-        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter, root.findViewById(R.id.chartTypeChips));
+        chartTypeNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
+            statisticCallRequestViewModel.selectedChartTypeCountries.getValue().add(chartTypeAdapter.getItem(position));
+            statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
+        });
+        statisticCallRequestViewModel.selectedChartTypeCountries.observe(getViewLifecycleOwner(), chartTypeItems -> {
+            chartTypeAdapter.submitSelectedItems(chartTypeItems);
+            chartTypeNachoTextView.setText("");
+            chartTypeChips.removeAllViews();
+            for (ChartType chartType : chartTypeItems) {
+                Chip itemChip = getChip(chartType);
+                itemChip.setOnCloseIconClickListener(v -> {
+                    statisticCallRequestViewModel.selectedChartTypeCountries.getValue().remove(chartType);
+                    statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
+                });
+                chartTypeChips.addView(itemChip);
+            }
+        });
+        setupMultiAutoCompleteTextView(chartTypeNachoTextView, chartTypeAdapter);
 
         //get current Date
         final Calendar c = Calendar.getInstance();
@@ -131,19 +172,23 @@ public class StatisticRequestFragment extends Fragment {
         Button startDateChooser = root.findViewById(R.id.startDateChooser);
         Button endDateChooser = root.findViewById(R.id.endDateChooser);
 
-        startDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, (view, year12, month12, dayOfMonth) -> {
-            start = LocalDate.of(year12, month12 + 1, dayOfMonth);
+        startDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
+        statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+            if (!endDateChooser.isEnabled()) endDateChooser.setEnabled(true);
             if (startDateChange != null) startDateChange.onItemChange();
-        }, year, month, day);
-
-        endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, (view, year1, month1, dayOfMonth) -> {
-            end = LocalDate.of(year1, month1 + 1, dayOfMonth);
+        });
+        endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
+        statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), end -> {
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
             startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
             if (endDateChange != null) endDateChange.onItemChange();
-        }, year, month, day);
+        });
+
+        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> statisticCallRequestViewModel.startDate.setValue(LocalDate.of(year1, month1 + 1, dayOfMonth)));
+
+        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> statisticCallRequestViewModel.endDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth)));
 
         //sets the min date to the beginning of Corona
         startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
@@ -154,10 +199,11 @@ public class StatisticRequestFragment extends Fragment {
         endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
 
         //Default selection is now
-        start = StatisticCall.NOW;
         startDateChooser.setText("Now");
-        end = StatisticCall.NOW;
         endDateChooser.setText("Now");
+
+        //not allowed to change end Date until start date is changed
+        endDateChooser.setEnabled(false);
 
         startDateChooser.setOnClickListener(v -> startDatePicker.show());
         endDateChooser.setOnClickListener(v -> endDatePicker.show());
@@ -168,12 +214,12 @@ public class StatisticRequestFragment extends Fragment {
 
             @Override
             public LocalDate getStartDate() {
-                return start;
+                return statisticCallRequestViewModel.startDate.getValue();
             }
 
             @Override
             public LocalDate getEndDate() {
-                return end;
+                return statisticCallRequestViewModel.endDate.getValue();
             }
 
             @Override
@@ -190,21 +236,21 @@ public class StatisticRequestFragment extends Fragment {
             public void conditionApplies(boolean startAndEndDateMustBeSame) {
                 if (startAndEndDateMustBeSame && !changed) {
                     //end and start date must not be same
-                    if (!Objects.equals(start, end)) {
+                    if (!Objects.equals(statisticCallRequestViewModel.startDate.getValue(), statisticCallRequestViewModel.endDate.getValue())) {
                         throw new IllegalStateException("Unexpected State, start and end are different but must be same");
                     }
-                    endDatePicker.setOnDateSetListener(null);
+                    statisticCallRequestViewModel.endDate.removeObservers(getViewLifecycleOwner());
                     endDateChooser.setEnabled(false);
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
-                    startDatePicker.setOnDateSetListener((view, year13, month13, dayOfMonth) -> {
-                        start = LocalDate.of(year13, month13 + 1, dayOfMonth);
+                    statisticCallRequestViewModel.startDate.removeObservers(getViewLifecycleOwner());
+                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
                         startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                         endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
                         endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
-                        endDatePicker.getDatePicker().updateDate(year13, month13 + 1, dayOfMonth);
-                        end = start;
-                        endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
+                        endDatePicker.getDatePicker().updateDate(start.getYear(), start.getMonthValue(), start.getDayOfMonth());
+                        statisticCallRequestViewModel.endDate.setValue(start);
+                        endDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                         if (startDateChange != null) startDateChange.onItemChange();
                         if (endDateChange != null) endDateChange.onItemChange();
                     });
@@ -215,23 +261,23 @@ public class StatisticRequestFragment extends Fragment {
             @Override
             public void conditionDoesNotApply() {
                 if (changed) {
-                    startDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> {
-                        start = LocalDate.of(year12, month12 + 1, dayOfMonth);
+                    statisticCallRequestViewModel.startDate.removeObservers(getViewLifecycleOwner());
+                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
                         startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                         endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
                         if (startDateChange != null) startDateChange.onItemChange();
                     });
-                    endDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> {
-                        end = LocalDate.of(year1, month1 + 1, dayOfMonth);
+                    statisticCallRequestViewModel.endDate.removeObservers(getViewLifecycleOwner());
+                    statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), end -> {
                         endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
                         startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
                         if (endDateChange != null) endDateChange.onItemChange();
                     });
 
-                    if (end != null)
-                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-                    if (start != null)
-                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
+                    if (statisticCallRequestViewModel.endDate.getValue() != null)
+                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(statisticCallRequestViewModel.endDate.getValue()));
+                    if (statisticCallRequestViewModel.startDate.getValue() != null)
+                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(statisticCallRequestViewModel.startDate.getValue()));
                     else
                         endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(LocalDate.now()));
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
@@ -244,9 +290,15 @@ public class StatisticRequestFragment extends Fragment {
 
         floatingActionButton.setOnClickListener(v -> {
             if (isoCountryAdapter.anySelected() && criteriaAdapter.anySelected() && chartTypeAdapter.anySelected()) {
-                requestStatistic(new StatisticCall(isoCountryAdapter.getSelectedItems(), chartTypeAdapter.getSelectedItems().get(0), criteriaAdapter.getSelectedItems(), start, end));
+                requestStatistic(new StatisticCall(isoCountryAdapter.getSelectedItems(), chartTypeAdapter.getSelectedItems().get(0), criteriaAdapter.getSelectedItems(), statisticCallRequestViewModel.startDate.getValue(), statisticCallRequestViewModel.endDate.getValue()));
             } else {
                 Toast.makeText(getContext(), "Please select everything before proceeding", Toast.LENGTH_SHORT).show();
+                if (!isoCountryAdapter.anySelected())
+                    isoCountryNachoTextView.setError("no item selected");
+                if (!criteriaAdapter.anySelected())
+                    criteriaNachoTextView.setError("no item selected");
+                if (!chartTypeAdapter.anySelected())
+                    chartTypeNachoTextView.setError("no item selected");
             }
         });
         return root;
@@ -264,18 +316,7 @@ public class StatisticRequestFragment extends Fragment {
         return date.atStartOfDay().toEpochSecond(ZoneId.systemDefault().getRules().getOffset(Instant.now())) * 1000;
     }
 
-    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(AutoCompleteTextView textView, AutoCompleteTextViewAdapter<T> adapter, ChipGroup chipGroup) {
-        textView.setOnItemClickListener((parent, view, position, id) -> {
-            adapter.selectItem(position);
-            T selectedItem = adapter.getItem(position);
-            textView.setText("");
-            Chip itemChip = getChip(selectedItem);
-            itemChip.setOnCloseIconClickListener(v -> {
-                adapter.unSelectItem(selectedItem);
-                chipGroup.removeView(v);
-            });
-            chipGroup.addView(itemChip);
-        });
+    private <T extends Enum<T>> void setupMultiAutoCompleteTextView(AutoCompleteTextView textView, AutoCompleteTextViewAdapter<T> adapter) {
         //when the user presses enter, use top suggestion
         textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         textView.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
@@ -284,7 +325,9 @@ public class StatisticRequestFragment extends Fragment {
             if (event == null) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                     if (adapter.filteredItems.size() > 0) {
+                        textView.setError(null);
                         if (!textView.isPopupShowing()) textView.showDropDown();
+                        textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
                     } else {
                         showErrorWithCompletion(textView);
@@ -294,7 +337,9 @@ public class StatisticRequestFragment extends Fragment {
             } else if (actionId == EditorInfo.IME_NULL) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (adapter.filteredItems.size() > 0) {
+                        textView.setError(null);
                         if (!textView.isPopupShowing()) textView.showDropDown();
+                        textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
                     } else {
                         showErrorWithCompletion(textView);
@@ -310,10 +355,10 @@ public class StatisticRequestFragment extends Fragment {
     private <T extends Enum<T>> Chip getChip(T item) {
         Chip chip = new Chip(requireContext());
         chip.setCloseIconVisible(true);
-        if(item instanceof ISOCountry) {
+        if (item instanceof ISOCountry) {
             chip.setChipIconVisible(true);
             chip.setIconStartPadding(10f);
-            chip.setChipIcon(ContextCompat.getDrawable(requireContext(), ((ISOCountry)item).getFlagDrawableID()));
+            chip.setChipIcon(ContextCompat.getDrawable(requireContext(), ((ISOCountry) item).getFlagDrawableID()));
         }
         chip.setText(item.toString());
         chip.setTextIsSelectable(false);
@@ -321,6 +366,15 @@ public class StatisticRequestFragment extends Fragment {
     }
 
     private void showErrorWithCompletion(TextView textView) {
-        textView.setError("No Matching Item");
+        if(textView.getError()==null)textView.setError("No Matching Item");
+    }
+
+    private <T extends Enum<T>> AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name,TextView textView) {
+        return (limit) -> {
+            if (getContext() != null) {
+                Toast.makeText(getContext(), getString(R.string.limit_reached, limit, name), Toast.LENGTH_SHORT).show();
+                requireActivity().runOnUiThread(()->textView.setError("reached Limit"));
+            }
+        };
     }
 }

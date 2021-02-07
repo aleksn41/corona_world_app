@@ -2,6 +2,11 @@ package de.dhbw.corona_world_app.datastructure.displayables;
 
 import de.dhbw.corona_world_app.datastructure.Displayable;
 
+/**
+ * This Class contains all Countries with their ISOCode, Displayname and Flag
+ * @author Thomas Meier
+ * @author Aleksandr Stankoski
+ */
 public enum ISOCountry implements Displayable {
 
     Afghanistan("AF","Afghanistan", com.michaelfotiadis.androidflags.R.drawable.ic_list_country_af),

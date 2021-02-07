@@ -15,6 +15,7 @@
         <item name="windowActionModeOverlay">true</item>
         <!-- Customize your theme here. -->
         <item name="bottom_sheet_background">@color/dark_grey</item>
+        <item name="android:textSize">@dimen/font_size</item>
     </style>
     <drawable name="germany_flag">@drawable/germany_flag_white_n_black</drawable>
     <!-- 60 Colors should be more than sufficient -->

@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
+/**
+ * This {@link RecyclerView.ViewHolder} is used to Display the {@link StatisticCall} in a RecyclerView
+ * @author Aleksandr Stankoski
+ */
 public class StatisticCallViewHolder extends RecyclerView.ViewHolder implements StatisticCallViewHolderInterface<Pair<StatisticCall, Boolean>> {
     private final TextView textView;
     private final SparkButton sparkButton;

@@ -10,7 +10,11 @@ import de.dhbw.corona_world_app.datastructure.ChartType;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
-//this is used in order to disallow certain Items in the UI of StatisticRequest when certain conditions are met
+/**
+ * This Class is used to disallow certain items to be picked in the {@link StatisticRequestFragment} when certain conditions are met
+ * @author Thomas Meier (implemented Rule)
+ * @author Aleksandr Stankoski (designed Class)
+ */
 public class StatisticRequestRule {
 
     public Rule rule;
@@ -19,16 +23,16 @@ public class StatisticRequestRule {
     RuleEnumAdapter<ChartType> chartTypeAdapter;
     RuleEnumAdapter<Criteria> criteriaAdapter;
     RuleDateRangeInterface ruleDateRangeInterface;
-    boolean ruleApplied=false;
+    boolean ruleApplied = false;
     OnItemsChangeListener checkCondition = new OnItemsChangeListener() {
         @Override
         public void onItemChange() {
             if (rule.conditionSatisfied(isoCountryAdapter.getSelectedItemsSize(), criteriaAdapter.getSelectedItemsSize(), chartTypeAdapter.getSelectedItemsSize() == 0 ? null : chartTypeAdapter.getSelectedItems().get(0), ruleDateRangeInterface.getStartDate(), ruleDateRangeInterface.getEndDate())) {
                 applyRule(rule);
-                ruleApplied=true;
-            }else if(ruleApplied){
+                ruleApplied = true;
+            } else if (ruleApplied) {
                 doNotApplyRule();
-                ruleApplied=false;
+                ruleApplied = false;
                 rule.startAndEndDateMustBeSame = false;
                 rule.allowOnlyOneCriteria = false;
                 rule.allowOnlyOneCountry = false;

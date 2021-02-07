@@ -46,7 +46,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 /**
  * This class manages the saving and reading of all Data related to Statistic requests ({@link StatisticCall}).
  * All Data is saved locally and will be written to the corresponding file if {@link StatisticCallDataManager#saveAllData()} is called.
- * For more information on how the data is structure see
+ * For more information on how the data is structured see
  *
  * @author Aleksandr Stankoski
  */
@@ -170,13 +170,12 @@ public class StatisticCallDataManager {
      * @param dataType describes the data that is supposed to be loaded
      * @return Future<Void> that can be used to get the result in sync if async is not possible
      */
-    public Future<Void> requestMoreData(@NonNull DataType dataType) {
+    public CompletableFuture<Void> requestMoreData(@NonNull DataType dataType) {
         Log.i(this.getClass().getName() + "|" + dataType, "loading more Data of " + dataType);
-        return executorService.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
+        return CompletableFuture.supplyAsync(()->{
+            try{
                 readLock.lock();
-                saveLock.acquire();
+                saveLock.acquireUninterruptibly();
                 try {
                     switch (dataType) {
                         case ALL_DATA:
@@ -201,10 +200,12 @@ public class StatisticCallDataManager {
                             if(currentPositionOnFavIndices!=indicesOfFavouriteEntriesInAllData.size()){
                                 if(readLines+currentPositionOnFavIndices>=indicesOfFavouriteEntriesInAllData.size())readLines=indicesOfFavouriteEntriesInAllData.size()-currentPositionOnFavIndices;
                                 //calculate how many lines of AllData need to be read
-                                int linesOfAllData=indicesOfFavouriteEntriesInAllData.get(readLines+currentPositionOnFavIndices-1);
+                                int linesOfAllData=indicesOfFavouriteEntriesInAllData.get(readLines+currentPositionOnFavIndices-1)+1-currentPositionOnData;
                                 readFromFileIntoAllData(linesOfAllData);
                                 currentPositionOnFavIndices+=readLines;
+                                currentPositionOnData+=linesOfAllData;
                                 if(currentPositionOnFavIndices==indicesOfFavouriteEntriesInAllData.size())readAllAvailableFavData=true;
+                                if(currentPositionOnData-amountOfNewItemsAddedInSession==linesInCurrentFile)readAllAvailableData=true;
                             }else readAllAvailableFavData=true;
                             break;
                         default:
@@ -218,8 +219,10 @@ public class StatisticCallDataManager {
                     saveLock.release();
                     readLock.unlock();
                 }
+            }catch (IOException e){
+                throw new CompletionException(e);
             }
-        });
+        },executorService);
     }
 
     private void readFromFileIntoAllData(int readLines) throws IOException {
@@ -354,8 +357,9 @@ public class StatisticCallDataManager {
             int indexOfFavData = dataType == DataType.FAVOURITE_DATA ? index : Collections.binarySearch(indicesOfFavouriteEntriesInAllData, indexOfAllData);
             //check if item is favourite
             if (statisticCallData.get(indexOfAllData).second) {
-                //TODO use Binary search to make this more efficient
-                deletedIndicesFavData.add(indexOfFavData);
+                int insertIndex=Collections.binarySearch(deletedIndicesFavData,indexOfFavData);
+                insertIndex=insertIndex<0?-insertIndex-1:insertIndex+1;
+                deletedIndicesFavData.add(insertIndex,indexOfFavData);
                 Collections.sort(deletedIndicesFavData);
             } else {
                 //check if this item is already in FavList
@@ -391,7 +395,7 @@ public class StatisticCallDataManager {
 
     private void notifyChangeInFavData(boolean inUIThread){
         ArrayList<Pair<StatisticCall,Boolean>> temp=new ArrayList<>(indicesOfFavouriteEntriesInAllData.size());
-        for (int i = 0; i < indicesOfFavouriteEntriesInAllData.size(); i++) {
+        for (int i = 0; i < currentPositionOnFavIndices; i++) {
             temp.add(statisticCallData.get(indicesOfFavouriteEntriesInAllData.get(i)));
         }
         if(inUIThread)statisticCallFavouriteData.setValue(temp);
@@ -590,6 +594,17 @@ public class StatisticCallDataManager {
     }
     */
 
+    public boolean hasData(DataType dataType) {
+        switch (dataType){
+            case FAVOURITE_DATA:
+                return indicesOfFavouriteEntriesInAllData.size()>0;
+            case ALL_DATA:
+                return statisticCallData.size()-deletedIndicesAllData.size()>0;
+            default:
+                throw new IllegalStateException("Unexpected dataType");
+        }
+    }
+
     private Pair<StatisticCall, Boolean> parseData(@NonNull String s) throws DataException {
         String[] categories = s.split(Pattern.quote(String.valueOf(CATEGORY_SEPARATOR)));
         if (categories.length != AMOUNT_OF_CATEGORIES) throw new DataException("Data is corrupt");
@@ -650,6 +665,7 @@ public class StatisticCallDataManager {
                 else if (deleted > 0)
                     indicesOfFavouriteEntriesInAllData.set(i, indicesOfFavouriteEntriesInAllData.get(i) - deleted);
             }
+            currentPositionOnData-=deletedIndicesAllData.size();
         }
         if(!deletedIndicesFavData.isEmpty()) {
             final Iterator<Integer> each2 = indicesOfFavouriteEntriesInAllData.iterator();
@@ -662,6 +678,7 @@ public class StatisticCallDataManager {
                 each2.next();
                 each2.remove();
             }
+            currentPositionOnFavIndices-=deletedIndicesFavData.size();
         }
         deletedIndicesAllData.clear();
         deletedIndicesFavData.clear();

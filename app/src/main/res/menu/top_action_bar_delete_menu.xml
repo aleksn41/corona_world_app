@@ -6,4 +6,17 @@
         android:icon="@android:drawable/ic_menu_delete"
         android:title="@string/menu_item_delete"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_favourite"
+        android:icon="@drawable/ic_baseline_star_outline_24"
+        android:title="@string/menu_item_delete"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/select_all"
+        android:title="@string/select_all"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/un_select_all"
+        android:title="@string/un_select_all"
+        app:showAsAction="never" />
 </menu>

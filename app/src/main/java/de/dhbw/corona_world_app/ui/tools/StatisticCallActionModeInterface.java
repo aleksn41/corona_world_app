@@ -6,7 +6,8 @@ import android.view.ActionMode;
 import java.util.ArrayList;
 import java.util.Set;
 
-public interface StatisticCallDeleteInterface {
-    void enterDeleteMode(ActionMode.Callback callback);
+public interface StatisticCallActionModeInterface {
+    void enterActionMode(ActionMode.Callback callback);
     void deleteItems(Set<Integer> ItemIds);
+    void favouriteItems(Set<Integer> ItemIds);
 }
