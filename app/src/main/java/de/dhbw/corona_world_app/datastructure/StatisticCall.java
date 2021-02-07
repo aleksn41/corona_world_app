@@ -13,7 +13,14 @@ import java.io.Serializable;
 
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
+/**
+ * This class is used to create Statistics
+ * It contains all necessary Information that is needed for a Statistic
+ * @author Thomas Meier
+ * @author Aleksandr Stankoski
+ */
 public class StatisticCall implements Serializable {
+    //First Date that can be chosen by the API
     public static final LocalDate MIN_DATE = LocalDate.of(2020, 1, 22);
     public static DateTimeFormatter DATE_FORMAT= DateTimeFormatter.ofPattern("dd-MM-yyyy");
     public static final LocalDate NOW=null;
