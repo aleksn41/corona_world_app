@@ -159,7 +159,7 @@ public class APIManager {
         return returnList;
     }
 
-    public static List<TimeFramedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException {
+    public static List<TimeFramedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException, UnavailableException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         if (endDate != null && (startDate == null || endDate.isBefore(startDate)))
             throw new IllegalArgumentException("Ending date is before starting date!");
@@ -257,12 +257,10 @@ public class APIManager {
     private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) {
         if (!api.acceptsTimeFrames())
             throw new IllegalArgumentException("The given api \"" + api.getName() + "\" does not support time frames!");
-        switch (api) {
-            case POSTMANAPI:
-                return "?from=" + LocalDateTime.of(from, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME) + "&to=" + LocalDateTime.of(to, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME);
-            default:
-                throw new IllegalArgumentException("Given API has not yet been implemented to use time frames!");
+        if (api == API.POSTMANAPI) {
+            return "?from=" + LocalDateTime.of(from, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME) + "&to=" + LocalDateTime.of(to, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME);
         }
+        throw new IllegalArgumentException("Given API has not yet been implemented to use time frames!");
     }
 
     public static boolean isCacheEnabled() {
