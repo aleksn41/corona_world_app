@@ -19,16 +19,16 @@ public class StatisticRequestRule {
     RuleEnumAdapter<ChartType> chartTypeAdapter;
     RuleEnumAdapter<Criteria> criteriaAdapter;
     RuleDateRangeInterface ruleDateRangeInterface;
-    boolean ruleApplied=false;
+    boolean ruleApplied = false;
     OnItemsChangeListener checkCondition = new OnItemsChangeListener() {
         @Override
         public void onItemChange() {
             if (rule.conditionSatisfied(isoCountryAdapter.getSelectedItemsSize(), criteriaAdapter.getSelectedItemsSize(), chartTypeAdapter.getSelectedItemsSize() == 0 ? null : chartTypeAdapter.getSelectedItems().get(0), ruleDateRangeInterface.getStartDate(), ruleDateRangeInterface.getEndDate())) {
                 applyRule(rule);
-                ruleApplied=true;
-            }else if(ruleApplied){
+                ruleApplied = true;
+            } else if (ruleApplied) {
                 doNotApplyRule();
-                ruleApplied=false;
+                ruleApplied = false;
                 rule.startAndEndDateMustBeSame = false;
                 rule.allowOnlyOneCriteria = false;
                 rule.allowOnlyOneCountry = false;

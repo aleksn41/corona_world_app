@@ -31,7 +31,7 @@ public class CustomAutoCompleteTextView extends androidx.appcompat.widget.AppCom
     @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
-        if(focused){
+        if (focused) {
             refreshAutoCompleteResults();
         }
     }
@@ -41,19 +41,11 @@ public class CustomAutoCompleteTextView extends androidx.appcompat.widget.AppCom
         if (keyCode == KeyEvent.KEYCODE_BACK && isPopupShowing()) {
             InputMethodManager inputManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-            if(inputManager.hideSoftInputFromWindow(findFocus().getWindowToken(),
-                    InputMethodManager.HIDE_NOT_ALWAYS)){
+            if (inputManager.hideSoftInputFromWindow(findFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS)) {
                 return true;
             }
         }
         return super.onKeyPreIme(keyCode, event);
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        super.onWindowFocusChanged(hasWindowFocus);
-        if(hasWindowFocus&&getFilter()!=null){
-            refreshAutoCompleteResults();
-        }
     }
 }
