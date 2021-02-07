@@ -1,16 +1,22 @@
 package de.dhbw.corona_world_app;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.API;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
+import de.dhbw.corona_world_app.api.UnavailableException;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
@@ -117,5 +123,22 @@ public class APIManagerTests {
         List<Country<GermanyState>> countries = APIManager.getDataGermany(API.ARCGIS);
         assertNotNull(countries);
         System.out.println(countries);
+    }
+
+    @Test
+    public void testAPIAllGetEveryCountry() throws InterruptedException, TooManyRequestsException, ExecutionException, UnavailableException, JSONException {
+        APIManager.disableLogsForTesting();
+        ISOCountry[] countryArray = ISOCountry.values();
+        int cnt = 0;
+        int countriesNotAvailable = 0;
+        for (ISOCountry country: countryArray) {
+            List<TimeFramedCountry> timeList = APIManager.getData(Collections.singletonList(country), Collections.singletonList(Criteria.INFECTED), null, null);
+            if(timeList.get(0).getCountry() == null){
+                System.out.println(country.toString());
+                countriesNotAvailable++;
+            }
+            if(cnt++%10==0) Thread.sleep(1500);
+        }
+        System.out.println("Count of countries not available = "+countriesNotAvailable);
     }
 }
