@@ -51,7 +51,7 @@ import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 /**
- * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
+ * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a heat map of the Corona-virus spread
  * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
  * A {@link TextView} is placed in the top right to show summarized Data
  *
@@ -164,7 +164,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     case BottomSheetBehavior.STATE_SETTLING:
                         break;
                 }
-                if (selectedCountry != null && mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD))
+                if (selectedCountry != null && mapViewModel.getCurrentResolution().equals(MapData.Resolution.WORLD))
                     root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
             }
 
