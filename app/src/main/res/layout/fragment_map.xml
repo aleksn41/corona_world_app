@@ -57,7 +57,8 @@
             android:text="No Country Selected"
             android:textAlignment="center"
             android:textSize="@dimen/font_title_size" />
-
+        <!--the ide for some reason cannot find the drawable used in the source below, even tough it exists and is properly build-->
+        <!--suppress AndroidDomInspection -->
         <ImageView
             android:id="@+id/map_box_flag"
             android:layout_width="42dp"
