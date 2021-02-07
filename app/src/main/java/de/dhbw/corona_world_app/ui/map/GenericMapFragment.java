@@ -57,8 +57,8 @@ import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
  * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
  * A {@link TextView} is placed in the top right to show summarized Data
  * @param <T> The {@link Displayable} used to select Data
- * @author Thomas Meier ({@link WebView})
- * @author Aleksandr Stankoski ({@link BottomSheetBehavior})
+ * @author Thomas Meier ({@link WebView} and Logic)
+ * @author Aleksandr Stankoski ({@link BottomSheetBehavior} and Layout)
  */
 public abstract class GenericMapFragment<T extends Displayable> extends Fragment {
 

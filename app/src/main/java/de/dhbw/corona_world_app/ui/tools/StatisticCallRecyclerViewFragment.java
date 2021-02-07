@@ -31,6 +31,10 @@ import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.history.HistoryFragmentDirections;
 
+/**
+ * This abstract Fragment can be used to show either all favourites or all {@link StatisticCall} made by the user
+ * @author Aleksandr Stankoski
+ */
 public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     protected RecyclerView statisticCallRecyclerView;
     protected StatisticCallAdapter statisticCallAdapter;
@@ -90,7 +94,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
             }
         }, new StatisticCallActionModeInterface() {
             @Override
-            public void enterDeleteMode(ActionMode.Callback callback) {
+            public void enterActionMode(ActionMode.Callback callback) {
                 Log.v(this.getClass().getName(), "entering Delete Mode");
                 deleteMode = requireActivity().startActionMode(callback);
             }

@@ -42,6 +42,10 @@ import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
+/**
+ * This Fragment is used to choose and create a Statistic
+ * @author Aleksandr Stankoski
+ */
 public class StatisticRequestFragment extends Fragment {
 
     StatisticCallRequestViewModel statisticCallRequestViewModel;

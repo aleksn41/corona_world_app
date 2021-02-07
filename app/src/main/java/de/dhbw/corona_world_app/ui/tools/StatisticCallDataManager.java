@@ -46,7 +46,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 /**
  * This class manages the saving and reading of all Data related to Statistic requests ({@link StatisticCall}).
  * All Data is saved locally and will be written to the corresponding file if {@link StatisticCallDataManager#saveAllData()} is called.
- * For more information on how the data is structure see
+ * For more information on how the data is structured see
  *
  * @author Aleksandr Stankoski
  */

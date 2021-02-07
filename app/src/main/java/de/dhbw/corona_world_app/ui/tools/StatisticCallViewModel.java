@@ -22,6 +22,10 @@ import java.util.function.BiConsumer;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 
+/**
+ * This ViewModel uses the Datamanager to save and give data to the {@link StatisticCallRecyclerViewFragment}
+ * @author Aleksandr Stankoski
+ */
 public class StatisticCallViewModel extends ViewModel {
     private File dataFile;
     private StatisticCallDataManager dataManager;

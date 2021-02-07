@@ -49,6 +49,11 @@ import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
+/**
+ * This Class is used to show the Statistic
+ * @author Thomas Meier (Logic)
+ * @author Aleksandr Stankoski (Layout)
+ */
 public class StatisticFragment extends Fragment {
 
     private StatisticCallViewModel statisticCallViewModel;
