@@ -175,10 +175,9 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         });
 
         boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated", false);
-        boolean storageDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("storage_deactivated", false);
-        Log.d(getTAG(), "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + " and storage " + (storageDisabled ? "disabled" : "enabled") + "...");
+        Log.d(getTAG(), "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + "...");
+        mapViewModel.init(cacheDisabled);
 
-        mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
 

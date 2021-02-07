@@ -2,6 +2,11 @@ package de.dhbw.corona_world_app.datastructure.displayables;
 
 import de.dhbw.corona_world_app.datastructure.Displayable;
 
+
+/**
+ * This Class contains all states of germany with their ISOCode, display name. The returned flag is always that of germany.
+ * @author Thomas Meier
+ */
 public enum GermanyState implements Displayable {
     BADEN_WUERTTEMBERG("DE-BW","Baden-Wuerttemberg"),
     BAYERN("DE-BY","Bayern"),
