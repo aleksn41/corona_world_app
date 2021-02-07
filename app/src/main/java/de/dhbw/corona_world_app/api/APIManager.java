@@ -82,8 +82,8 @@ public class APIManager {
             Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
             returnList = returnList.stream().filter(c -> c.getName() != null).collect(Collectors.toList());
             Logger.logV(TAG, "Returning data list...");
-        } catch (ExecutionException e){
-            if(e.getCause() instanceof IOException){
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof IOException) {
                 throw (IOException) e.getCause();
             } else {
                 throw e;
@@ -250,8 +250,8 @@ public class APIManager {
     }
 
     public static boolean pingGoogleDNS() throws IOException {
-            InetAddress address = InetAddress.getByName("8.8.8.8");
-            return address.isReachable(10000);
+        InetAddress address = InetAddress.getByName("8.8.8.8");
+        return address.isReachable(10000);
     }
 
     private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) {

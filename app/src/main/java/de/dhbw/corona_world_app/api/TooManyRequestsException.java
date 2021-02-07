@@ -5,4 +5,5 @@ public class TooManyRequestsException extends Exception {
     public TooManyRequestsException(String s) {
         super(s);
     }
+
 }
