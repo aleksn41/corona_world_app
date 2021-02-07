@@ -14,6 +14,7 @@ import de.dhbw.corona_world_app.api.API;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 import static org.junit.Assert.*;
@@ -22,7 +23,7 @@ public class APIManagerTests {
 
     @Before
     public void getAPIManger() {
-        APIManager.setSettings(false, false);
+        APIManager.setSettings(false);
     }
 
     @Test
@@ -45,7 +46,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist, criteriaList);
+        List<Country<ISOCountry>> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -87,7 +88,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist, criteriaList);
+        List<Country<ISOCountry>> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -96,7 +97,7 @@ public class APIManagerTests {
     public void testGetDataWorld() throws Throwable {
         APIManager.disableLogsForTesting();
         APIManager.createAPICall("https://google.de");
-        List<Country> returnList = APIManager.getDataWorld(API.HEROKU);
+        List<Country<ISOCountry>> returnList = APIManager.getDataWorld(API.HEROKU);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -113,7 +114,7 @@ public class APIManagerTests {
     @Test
     public void testGetDataGermany() throws Throwable {
         APIManager.disableLogsForTesting();
-        List<Country> countries = APIManager.getDataGermany(API.ARCGIS);
+        List<Country<GermanyState>> countries = APIManager.getDataGermany(API.ARCGIS);
         assertNotNull(countries);
         System.out.println(countries);
     }
