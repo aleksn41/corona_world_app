@@ -42,6 +42,8 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall, Boolea
     //blacklist set by DataManager
     private List<Integer> blackListedIndices = new ArrayList<>();
 
+    private Integer heightOfView;
+
     //used to load new Actionbar if item is selected for actionMode
     private final ActionMode.Callback actionMode = new ActionMode.Callback() {
         @Override
@@ -122,6 +124,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall, Boolea
     public StatisticCallViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.statistic_call_row_item, parent, false);
+        if (heightOfView == null) heightOfView = view.getHeight();
         return new StatisticCallViewHolder(view);
     }
 
@@ -133,7 +136,7 @@ public class StatisticCallAdapter extends ListAdapter<Pair<StatisticCall, Boolea
             holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
         } else if (holder.itemView.getVisibility() != View.VISIBLE) {
             holder.itemView.setVisibility(View.VISIBLE);
-            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, heightOfView));
         }
         //give the itemOnActionCallback Interface to the Item, such that it can implement its own logic
         holder.setItem(getItem(holder.getAdapterPosition()));
