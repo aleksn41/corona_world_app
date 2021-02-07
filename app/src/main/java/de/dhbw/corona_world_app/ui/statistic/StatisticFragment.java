@@ -40,6 +40,7 @@ import java.util.function.BiConsumer;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
+import de.dhbw.corona_world_app.api.UnavailableException;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
@@ -176,6 +177,21 @@ public class StatisticFragment extends Fragment {
                     } catch (JSONException e) {
                         Log.e(TAG, "An error has occurred while parsing api answer!", e);
                         requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ANSWER, (dialog, which) -> {
+                            retry.set(true);
+                            synchronized (currentThread) {
+                                currentThread.notify();
+                            }
+                        }, "Retry"));
+                        try {
+                            synchronized (currentThread) {
+                                currentThread.wait();
+                            }
+                        } catch (InterruptedException interruptedException) {
+                            Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
+                        }
+                    } catch (UnavailableException e){
+                        Log.e(TAG, "The api is currently not available!", e);
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, (dialog, which) -> {
                             retry.set(true);
                             synchronized (currentThread) {
                                 currentThread.notify();

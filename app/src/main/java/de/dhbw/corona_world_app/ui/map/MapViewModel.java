@@ -34,6 +34,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.map.MapCacheObject;
 import de.dhbw.corona_world_app.map.MapWithBoxCacheObject;
+import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 public class MapViewModel extends ViewModel {
 
@@ -50,6 +51,7 @@ public class MapViewModel extends ViewModel {
     private final ExecutorService executorService = ThreadPoolHandler.getInstance();
 
     private File pathToCacheDir;
+
 
 
     public MutableLiveData<Country<? extends Displayable>> selectedCountry = new MutableLiveData<>();

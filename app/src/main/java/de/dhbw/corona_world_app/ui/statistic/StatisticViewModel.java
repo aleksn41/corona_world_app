@@ -41,6 +41,7 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
+import de.dhbw.corona_world_app.api.UnavailableException;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.DataException;
@@ -155,7 +156,7 @@ public class StatisticViewModel extends ViewModel {
         return toReturn.getData();
     }
 
-    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException {
+    public void getBarChart(StatisticCall statisticCall, BarChart chart, Context context) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException, UnavailableException {
         Logger.logV(TAG, "Getting bar chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -274,7 +275,7 @@ public class StatisticViewModel extends ViewModel {
         });
     }
 
-    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException {
+    public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException, UnavailableException {
         Logger.logV(TAG, "Getting pie chart for " + statisticCall);
         init();
         List<TimeFramedCountry> apiGottenList;
@@ -339,7 +340,7 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(pieData);
     }
 
-    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException {
+    public void getLineChart(StatisticCall statisticCall, LineChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException, UnavailableException {
         Logger.logV(TAG, "Getting line chart for " + statisticCall);
         init();
 

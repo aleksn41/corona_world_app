@@ -1,6 +1,7 @@
 package de.dhbw.corona_world_app.ui.map;
 
 import android.annotation.SuppressLint;
+
 import android.content.res.Configuration;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
@@ -323,6 +325,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
     private void selectCountry(Country<T> selectedCountry){
         mapViewModel.selectedCountry.setValue(selectedCountry);
     }
+
 
     private void setDataOfBox(TextView textView, long populationWorld, long infectedWorld, long activeWorld, long recoveredWorld, long deathsWorld) {
         if (getContext() != null) {
