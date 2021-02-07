@@ -25,8 +25,11 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -39,6 +42,7 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
+import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 
@@ -239,7 +243,12 @@ public class StatisticFragment extends Fragment {
     }
 
     private void addToHistory(StatisticCall request) {
-        statisticCallViewModel.addData(Collections.singletonList(request));
+        int items=100;
+        List<StatisticCall> itemss=new ArrayList<>(items);
+        for (int i = 0; i < items; i++) {
+            itemss.add(request);
+        }
+        statisticCallViewModel.addData(itemss);
         statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
             @Override
             public void accept(Void unused, Throwable throwable) {

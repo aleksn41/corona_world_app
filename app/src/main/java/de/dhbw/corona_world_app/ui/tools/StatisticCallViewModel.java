@@ -29,8 +29,8 @@ public class StatisticCallViewModel extends ViewModel {
     public void init(@NonNull File dataFile, @NonNull ExecutorService threadHandler) throws IOException, ExecutionException, InterruptedException, DataException {
         this.dataFile = dataFile;
         dataManager = new StatisticCallDataManager(threadHandler, dataFile);
-        getMoreData(StatisticCallDataManager.DataType.ALL_DATA).get();
         getMoreData(StatisticCallDataManager.DataType.FAVOURITE_DATA).get();
+        getMoreData(StatisticCallDataManager.DataType.ALL_DATA).get();
     }
     public boolean isNotInit() {
         return dataManager == null;

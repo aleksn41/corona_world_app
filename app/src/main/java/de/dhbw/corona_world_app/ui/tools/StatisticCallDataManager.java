@@ -200,10 +200,12 @@ public class StatisticCallDataManager {
                             if(currentPositionOnFavIndices!=indicesOfFavouriteEntriesInAllData.size()){
                                 if(readLines+currentPositionOnFavIndices>=indicesOfFavouriteEntriesInAllData.size())readLines=indicesOfFavouriteEntriesInAllData.size()-currentPositionOnFavIndices;
                                 //calculate how many lines of AllData need to be read
-                                int linesOfAllData=indicesOfFavouriteEntriesInAllData.get(readLines+currentPositionOnFavIndices-1);
+                                int linesOfAllData=indicesOfFavouriteEntriesInAllData.get(readLines+currentPositionOnFavIndices-1)+1-currentPositionOnData;
                                 readFromFileIntoAllData(linesOfAllData);
                                 currentPositionOnFavIndices+=readLines;
+                                currentPositionOnData+=linesOfAllData;
                                 if(currentPositionOnFavIndices==indicesOfFavouriteEntriesInAllData.size())readAllAvailableFavData=true;
+                                if(currentPositionOnData-amountOfNewItemsAddedInSession==linesInCurrentFile)readAllAvailableData=true;
                             }else readAllAvailableFavData=true;
                             break;
                         default:
@@ -355,8 +357,9 @@ public class StatisticCallDataManager {
             int indexOfFavData = dataType == DataType.FAVOURITE_DATA ? index : Collections.binarySearch(indicesOfFavouriteEntriesInAllData, indexOfAllData);
             //check if item is favourite
             if (statisticCallData.get(indexOfAllData).second) {
-                //TODO use Binary search to make this more efficient
-                deletedIndicesFavData.add(indexOfFavData);
+                int insertIndex=Collections.binarySearch(deletedIndicesFavData,indexOfFavData);
+                insertIndex=insertIndex<0?-insertIndex-1:insertIndex+1;
+                deletedIndicesFavData.add(insertIndex,indexOfFavData);
                 Collections.sort(deletedIndicesFavData);
             } else {
                 //check if this item is already in FavList
@@ -392,7 +395,7 @@ public class StatisticCallDataManager {
 
     private void notifyChangeInFavData(boolean inUIThread){
         ArrayList<Pair<StatisticCall,Boolean>> temp=new ArrayList<>(indicesOfFavouriteEntriesInAllData.size());
-        for (int i = 0; i < indicesOfFavouriteEntriesInAllData.size(); i++) {
+        for (int i = 0; i < currentPositionOnFavIndices; i++) {
             temp.add(statisticCallData.get(indicesOfFavouriteEntriesInAllData.get(i)));
         }
         if(inUIThread)statisticCallFavouriteData.setValue(temp);
@@ -651,6 +654,7 @@ public class StatisticCallDataManager {
                 else if (deleted > 0)
                     indicesOfFavouriteEntriesInAllData.set(i, indicesOfFavouriteEntriesInAllData.get(i) - deleted);
             }
+            currentPositionOnData-=deletedIndicesAllData.size();
         }
         if(!deletedIndicesFavData.isEmpty()) {
             final Iterator<Integer> each2 = indicesOfFavouriteEntriesInAllData.iterator();
@@ -663,6 +667,7 @@ public class StatisticCallDataManager {
                 each2.next();
                 each2.remove();
             }
+            currentPositionOnFavIndices-=deletedIndicesFavData.size();
         }
         deletedIndicesAllData.clear();
         deletedIndicesFavData.clear();
