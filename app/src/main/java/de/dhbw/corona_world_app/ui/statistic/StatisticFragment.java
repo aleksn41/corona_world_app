@@ -243,12 +243,7 @@ public class StatisticFragment extends Fragment {
     }
 
     private void addToHistory(StatisticCall request) {
-        int items=100;
-        List<StatisticCall> itemss=new ArrayList<>(items);
-        for (int i = 0; i < items; i++) {
-            itemss.add(request);
-        }
-        statisticCallViewModel.addData(itemss);
+        statisticCallViewModel.addData(Collections.singletonList(request));
         statisticCallViewModel.saveAllData().whenComplete(new BiConsumer<Void, Throwable>() {
             @Override
             public void accept(Void unused, Throwable throwable) {
