@@ -11,7 +11,6 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,7 +18,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -32,7 +30,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.LinkedHashSet;
 import java.util.Objects;
 
 import de.dhbw.corona_world_app.R;
@@ -50,7 +47,6 @@ public class StatisticRequestFragment extends Fragment {
 
     StatisticCallRequestViewModel statisticCallRequestViewModel;
 
-
     DatePickerDialog startDatePicker;
     DatePickerDialog endDatePicker;
 
@@ -61,8 +57,7 @@ public class StatisticRequestFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        statisticCallRequestViewModel =
-                new ViewModelProvider(this).get(StatisticCallRequestViewModel.class);
+        statisticCallRequestViewModel =new ViewModelProvider(this).get(StatisticCallRequestViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic_request, container, false);
 
         ExtendedFloatingActionButton floatingActionButton = root.findViewById(R.id.floating_action_button);
@@ -75,6 +70,7 @@ public class StatisticRequestFragment extends Fragment {
                 floatingActionButton.extend();
             } else floatingActionButton.shrink();
         });
+
         //init floatingActionButtonPosition once it is known if the scrollview is at the end when initialized
         ViewTreeObserver vto = scrollView.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -88,18 +84,21 @@ public class StatisticRequestFragment extends Fragment {
             }
         });
 
-        CustomAutoCompleteTextView isoCountryNachoTextView = root.findViewById(R.id.nachoIsoCountryTextView);
+        CustomAutoCompleteTextView isoCountryTextView = root.findViewById(R.id.isoCountryTextView);
         ChipGroup isoCountryChips = root.findViewById(R.id.isoCountryChips);
-        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country",isoCountryNachoTextView));
+        AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country", isoCountryTextView));
+
         //special rule, user cannot select World for a statistic as it is not supported by the API
         isoCountryAdapter.addToBlackList(ISOCountry.World);
-        isoCountryNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
+
+        //When an item is selected, submit to ViewModel and change Chips
+        isoCountryTextView.setOnItemClickListener((parent, view, position, id) -> {
             statisticCallRequestViewModel.selectedISOCountries.getValue().add(isoCountryAdapter.getItem(position));
             statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
         });
         statisticCallRequestViewModel.selectedISOCountries.observe(getViewLifecycleOwner(), isoCountries -> {
             isoCountryAdapter.submitSelectedItems(isoCountries);
-            isoCountryNachoTextView.setText("");
+            isoCountryTextView.setText("");
             isoCountryChips.removeAllViews();
             for (ISOCountry isoCountry : isoCountries) {
                 Chip itemChip = getChip(isoCountry);
@@ -110,7 +109,7 @@ public class StatisticRequestFragment extends Fragment {
                 isoCountryChips.addView(itemChip);
             }
         });
-        setupMultiAutoCompleteTextView(isoCountryNachoTextView, isoCountryAdapter);
+        setupMultiAutoCompleteTextView(isoCountryTextView, isoCountryAdapter);
 
         CustomAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
         ChipGroup criteriaChips = root.findViewById(R.id.criteriaChips);
@@ -136,7 +135,7 @@ public class StatisticRequestFragment extends Fragment {
 
         CustomAutoCompleteTextView chartTypeNachoTextView = root.findViewById(R.id.nachoChartTypeTextView);
         ChipGroup chartTypeChips = root.findViewById(R.id.chartTypeChips);
-        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, getLimitListener("Chart-Type",chartTypeNachoTextView)) {
+        AutoCompleteTextViewAdapter<ChartType> chartTypeAdapter = new AutoCompleteTextViewAdapter<ChartType>(getContext(), ChartType.class, 1, getLimitListener("Chart-Type", chartTypeNachoTextView)) {
             //special case where if condition applies, a bar chart cannot be shown
             @Override
             public void conditionApplies(boolean allowOnlyOneItem) {
@@ -173,22 +172,22 @@ public class StatisticRequestFragment extends Fragment {
         Button endDateChooser = root.findViewById(R.id.endDateChooser);
 
         startDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
-        statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
+        statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
             if (!endDateChooser.isEnabled()) endDateChooser.setEnabled(true);
             if (startDateChange != null) startDateChange.onItemChange();
         });
         endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
-        statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), end -> {
+        statisticCallRequestViewModel.selectedEndDate.observe(getViewLifecycleOwner(), end -> {
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
             startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
             if (endDateChange != null) endDateChange.onItemChange();
         });
 
-        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> statisticCallRequestViewModel.startDate.setValue(LocalDate.of(year1, month1 + 1, dayOfMonth)));
+        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> statisticCallRequestViewModel.selectedStartDate.setValue(LocalDate.of(year1, month1 + 1, dayOfMonth)));
 
-        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> statisticCallRequestViewModel.endDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth)));
+        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> statisticCallRequestViewModel.selectedEndDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth)));
 
         //sets the min date to the beginning of Corona
         startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
@@ -214,12 +213,12 @@ public class StatisticRequestFragment extends Fragment {
 
             @Override
             public LocalDate getStartDate() {
-                return statisticCallRequestViewModel.startDate.getValue();
+                return statisticCallRequestViewModel.selectedStartDate.getValue();
             }
 
             @Override
             public LocalDate getEndDate() {
-                return statisticCallRequestViewModel.endDate.getValue();
+                return statisticCallRequestViewModel.selectedEndDate.getValue();
             }
 
             @Override
@@ -236,20 +235,20 @@ public class StatisticRequestFragment extends Fragment {
             public void conditionApplies(boolean startAndEndDateMustBeSame) {
                 if (startAndEndDateMustBeSame && !changed) {
                     //end and start date must not be same
-                    if (!Objects.equals(statisticCallRequestViewModel.startDate.getValue(), statisticCallRequestViewModel.endDate.getValue())) {
+                    if (!Objects.equals(statisticCallRequestViewModel.selectedStartDate.getValue(), statisticCallRequestViewModel.selectedEndDate.getValue())) {
                         throw new IllegalStateException("Unexpected State, start and end are different but must be same");
                     }
-                    statisticCallRequestViewModel.endDate.removeObservers(getViewLifecycleOwner());
+                    statisticCallRequestViewModel.selectedEndDate.removeObservers(getViewLifecycleOwner());
                     endDateChooser.setEnabled(false);
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
-                    statisticCallRequestViewModel.startDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
+                    statisticCallRequestViewModel.selectedStartDate.removeObservers(getViewLifecycleOwner());
+                    statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
                         startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                         endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
                         endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
                         endDatePicker.getDatePicker().updateDate(start.getYear(), start.getMonthValue(), start.getDayOfMonth());
-                        statisticCallRequestViewModel.endDate.setValue(start);
+                        statisticCallRequestViewModel.selectedEndDate.setValue(start);
                         endDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                         if (startDateChange != null) startDateChange.onItemChange();
                         if (endDateChange != null) endDateChange.onItemChange();
@@ -261,23 +260,23 @@ public class StatisticRequestFragment extends Fragment {
             @Override
             public void conditionDoesNotApply() {
                 if (changed) {
-                    statisticCallRequestViewModel.startDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.startDate.observe(getViewLifecycleOwner(), start -> {
+                    statisticCallRequestViewModel.selectedStartDate.removeObservers(getViewLifecycleOwner());
+                    statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
                         startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
                         endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
                         if (startDateChange != null) startDateChange.onItemChange();
                     });
-                    statisticCallRequestViewModel.endDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.endDate.observe(getViewLifecycleOwner(), end -> {
+                    statisticCallRequestViewModel.selectedEndDate.removeObservers(getViewLifecycleOwner());
+                    statisticCallRequestViewModel.selectedEndDate.observe(getViewLifecycleOwner(), end -> {
                         endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
                         startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
                         if (endDateChange != null) endDateChange.onItemChange();
                     });
 
-                    if (statisticCallRequestViewModel.endDate.getValue() != null)
-                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(statisticCallRequestViewModel.endDate.getValue()));
-                    if (statisticCallRequestViewModel.startDate.getValue() != null)
-                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(statisticCallRequestViewModel.startDate.getValue()));
+                    if (statisticCallRequestViewModel.selectedEndDate.getValue() != null)
+                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(statisticCallRequestViewModel.selectedEndDate.getValue()));
+                    if (statisticCallRequestViewModel.selectedStartDate.getValue() != null)
+                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(statisticCallRequestViewModel.selectedStartDate.getValue()));
                     else
                         endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(LocalDate.now()));
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
@@ -290,11 +289,11 @@ public class StatisticRequestFragment extends Fragment {
 
         floatingActionButton.setOnClickListener(v -> {
             if (isoCountryAdapter.anySelected() && criteriaAdapter.anySelected() && chartTypeAdapter.anySelected()) {
-                requestStatistic(new StatisticCall(isoCountryAdapter.getSelectedItems(), chartTypeAdapter.getSelectedItems().get(0), criteriaAdapter.getSelectedItems(), statisticCallRequestViewModel.startDate.getValue(), statisticCallRequestViewModel.endDate.getValue()));
+                requestStatistic(new StatisticCall(isoCountryAdapter.getSelectedItems(), chartTypeAdapter.getSelectedItems().get(0), criteriaAdapter.getSelectedItems(), statisticCallRequestViewModel.selectedStartDate.getValue(), statisticCallRequestViewModel.selectedEndDate.getValue()));
             } else {
                 Toast.makeText(getContext(), "Please select everything before proceeding", Toast.LENGTH_SHORT).show();
                 if (!isoCountryAdapter.anySelected())
-                    isoCountryNachoTextView.setError("no item selected");
+                    isoCountryTextView.setError("no item selected");
                 if (!criteriaAdapter.anySelected())
                     criteriaNachoTextView.setError("no item selected");
                 if (!chartTypeAdapter.anySelected())
@@ -366,14 +365,14 @@ public class StatisticRequestFragment extends Fragment {
     }
 
     private void showErrorWithCompletion(TextView textView) {
-        if(textView.getError()==null)textView.setError("No Matching Item");
+        if (textView.getError() == null) textView.setError("No Matching Item");
     }
 
-    private <T extends Enum<T>> AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name,TextView textView) {
+    private <T extends Enum<T>> AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name, TextView textView) {
         return (limit) -> {
             if (getContext() != null) {
                 Toast.makeText(getContext(), getString(R.string.limit_reached, limit, name), Toast.LENGTH_SHORT).show();
-                requireActivity().runOnUiThread(()->textView.setError("reached Limit"));
+                requireActivity().runOnUiThread(() -> textView.setError("reached Limit"));
             }
         };
     }

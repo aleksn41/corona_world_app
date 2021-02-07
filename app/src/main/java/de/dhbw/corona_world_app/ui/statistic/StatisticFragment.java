@@ -8,7 +8,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,16 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 
 import de.dhbw.corona_world_app.R;
@@ -42,20 +36,19 @@ import de.dhbw.corona_world_app.ThreadPoolHandler;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.datastructure.DataException;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
-import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 
-import de.dhbw.corona_world_app.ui.tools.StatisticCallDataManager;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 /**
  * This Class is used to show the Statistic
+ *
  * @author Thomas Meier (Logic)
  * @author Aleksandr Stankoski (Layout)
  */
 public class StatisticFragment extends Fragment {
-
+    //used to save the data in history
     private StatisticCallViewModel statisticCallViewModel;
 
     private StatisticViewModel statisticViewModel;
@@ -71,8 +64,6 @@ public class StatisticFragment extends Fragment {
     PieChart pieChart;
 
     LineChart lineChart;
-
-    TextView testDisplay;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -103,20 +94,22 @@ public class StatisticFragment extends Fragment {
                 ErrorDialog.showBasicErrorDialog(requireContext(), ErrorCode.UNEXPECTED_ERROR, null);
             } catch (DataException e) {
                 Log.e(this.getClass().getName(), ErrorCode.DATA_CORRUPT.toString(), e);
-                tryRepairingData();
+                deleteCorruptData();
             }
         }
 
         // ChartValueSetGenerator provider = new ChartValueSetGenerator();
         View root = inflater.inflate(R.layout.fragment_statistic, container, false);
-        progressBar = root.findViewById(R.id.progressBar);
         statisticViewModel = new ViewModelProvider(requireActivity()).get(StatisticViewModel.class);
+
+        progressBar = root.findViewById(R.id.progressBar);
         barChart = root.findViewById(R.id.bar_chart);
         pieChart = root.findViewById(R.id.pie_chart);
         lineChart = root.findViewById(R.id.line_chart);
         barChart.setVisibility(View.GONE);
         pieChart.setVisibility(View.GONE);
         lineChart.setVisibility(View.GONE);
+
         statisticViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         Bundle bundle = getArguments();
         assert bundle != null;
@@ -371,22 +364,14 @@ public class StatisticFragment extends Fragment {
         arr2.recycle();
     }
 
-    protected void tryRepairingData() {
-        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
-            //TODO implement check to see if Data can be recovered
-            boolean canBeRecovered = false;
-            if (canBeRecovered) {
-                //recover Data
-            } else {
-                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_RESTORE_FILE, (dialog1, which1) -> {
-                    try {
-                        statisticCallViewModel.deleteAllItems();
-                    } catch (IOException e) {
-                        Log.e(this.getClass().getName(), ErrorCode.CANNOT_DELETE_FILE.toString(), e);
-                        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
-                    }
-                }, "I understand");
+    private void deleteCorruptData() {
+        ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_RESTORE_FILE, (dialog1, which1) -> {
+            try {
+                statisticCallViewModel.deleteAllItems();
+            } catch (IOException e) {
+                Log.e(this.getClass().getName(), ErrorCode.CANNOT_DELETE_FILE.toString(), e);
+                ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, null);
             }
-        });
+        }, "I understand"));
     }
 }
