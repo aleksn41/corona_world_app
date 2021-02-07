@@ -42,15 +42,12 @@ public class APIManager {
 
     private static boolean cacheEnabled;
 
-    private static boolean longTermStorageEnabled;
-
     private static final String TAG = APIManager.class.getName();
 
     private static final ExecutorService service = ThreadPoolHandler.getInstance();
 
-    public static void setSettings(boolean cacheEnabled, boolean longTermStorageEnabled) {
+    public static void setSettings(boolean cacheEnabled) {
         APIManager.cacheEnabled = cacheEnabled;
-        APIManager.longTermStorageEnabled = longTermStorageEnabled;
     }
 
     //gets the data of the whole world through the specified api
@@ -267,26 +264,6 @@ public class APIManager {
 
     public static boolean isCacheEnabled() {
         return cacheEnabled;
-    }
-
-    public static boolean isLongTermStorageEnabled() {
-        return longTermStorageEnabled;
-    }
-
-    public static void enableCache() {
-        APIManager.cacheEnabled = true;
-    }
-
-    public static void disableCache() {
-        APIManager.cacheEnabled = false;
-    }
-
-    public static void enableLongTermStorage() {
-        APIManager.longTermStorageEnabled = true;
-    }
-
-    public static void disableLongTermStorage() {
-        APIManager.longTermStorageEnabled = false;
     }
 
     //disables logs for testing

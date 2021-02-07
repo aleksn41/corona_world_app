@@ -61,8 +61,8 @@ public class MapViewModel extends ViewModel {
 
     public MutableLiveData<Country<ISOCountry>> mBoxValue = new MutableLiveData<>();
 
-    public void init(boolean cacheDisabled, boolean longTermDisabled) {
-        APIManager.setSettings(!cacheDisabled, !longTermDisabled);
+    public void init(boolean cacheDisabled) {
+        APIManager.setSettings(!cacheDisabled);
     }
 
     public void cacheDataWorld(@NonNull List<Country<ISOCountry>> worldData) throws IOException {
