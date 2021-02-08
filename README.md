@@ -39,6 +39,9 @@
       <a href="#about-the-project">About The Project</a>
     </li>
     <li>
+      <a href="#wiki">Wiki</a>
+    </li>
+    <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
@@ -70,6 +73,10 @@ Main Features:
 - **History** of all your customized Statistics
 - **Favourites** for your favourite custom made Statistic
 
+
+## Wiki
+
+This Project has a **[Wiki](https://github.com/aleksn41/corona_world_app/wiki)**!
 
 <!-- GETTING STARTED -->
 ## Getting Started
