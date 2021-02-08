@@ -50,8 +50,7 @@ public class StringToCountryParser {
         if (toParse.toLowerCase().startsWith("{\"message\":\"too many requests")) {
             throw new TooManyRequestsException("Too many requests were made!");
         }
-        if (toParse.toLowerCase().startsWith("<html>\n" +
-                "    <head><title>503 service temporarily unavailable</title></head>")){
+        if (toParse.toLowerCase().contains("503 service temporarily unavailable")){
             throw new UnavailableException("Service is currently unavailable...");
         }
         TimeFramedCountry country = new TimeFramedCountry();
