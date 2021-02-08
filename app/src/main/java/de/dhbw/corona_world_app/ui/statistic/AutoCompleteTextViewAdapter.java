@@ -37,6 +37,8 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
     final LimitListener limitListener;
     StatisticRequestRule.OnItemsChangeListener itemsChangeListener;
     CharSequence lastQuery;
+    //remember when the limitListener has been triggered to not show unnecessary messages
+    boolean limitListenerHasBeenTriggered=false;
 
     interface LimitListener {
         void onLimitReached(int limit);
@@ -61,8 +63,12 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
                 FilterResults results = new FilterResults();
                 if (limit != NO_LIMIT && selectedItems.size() == limit) {
                     results.values = new ArrayList<>();
-                    if (limitListener != null) limitListener.onLimitReached(limit);
+                    if (limitListener != null&&!limitListenerHasBeenTriggered){
+                        limitListener.onLimitReached(limit);
+                        limitListenerHasBeenTriggered=true;
+                    }
                 } else {
+                    limitListenerHasBeenTriggered=false;
                     List<T> tempFilteredItems;
                     if (constraint == null || constraint.length() == 0) {
                         tempFilteredItems = originalItems.parallelStream().filter(p -> !selectedItems.contains(p) && !blackListItems.contains(p)).collect(Collectors.toList());
