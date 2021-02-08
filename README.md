@@ -136,7 +136,7 @@ The global settings and info dropdown can be reached from all fragments. It open
 <p align="center">
   <img src="/images/Settings_Info_Tab.png" alt="Settings & Info Tab">
 </p>
-Through clicking the user either enters the settings or info screen. In the settings screen the user can en/disable cache (WIP). In the Info screen a short description of the app and it's developers is given.
+Through clicking the user either enters the settings or info screen. In the settings screen the user can en/disable cache. In the Info screen a short description of the app and it's developers is given.
 
 ### Statistic Chooser
 In this screen the user can choose which countries, which data, in which time frame and which statistic he wants to be displayed. Image:
