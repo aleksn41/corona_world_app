@@ -297,7 +297,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     Logger.logE(getTAG(), "Trying to ping 8.8.8.8 (Google DNS)...");
                     if (APIManager.pingGoogleDNS()) {
                         Logger.logE(getTAG(), "Success!");
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.API_CURRENTLY_NOT_AVAILABLE, null));
                     } else {
                         Logger.logE(getTAG(), "Failure!");
                         requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
