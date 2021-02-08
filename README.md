@@ -100,12 +100,12 @@ This Application can only run on Android 10 or greater (API level 29 or greater)
 
 
 ## Usage
-
-Once the app is opened you are conveyed to the starting screen, the world map. In this screen a heat map of the world is shown. All countries are colored from green to red after their respective ratio of how much of the population is infected. Image:
+### Starting Screen / World Map
+Once the app is opened you are conveyed to the starting screen, the world map. In this screen a heat map of the world is shown. All countries are colored from green to red after their respective ratio of how much population is infected. Image:
 <p align="center">
   <img src="/images/WorldMap.png" alt="World Map">
 </p>
-In the top right corner of this screen a summary of the whole world is shown. At the bottom above the navigation bar, a small bar with and upwards arror can be clicked. If any country was previously selected it's name and flag are shown in this BottomSheet. Image:
+In the top right corner of this screen a summary of the whole world is shown. At the bottom, above the navigation bar a small bar with and upwards arror can be clicked. If any country was previously selected (by clicking) it's name and flag are shown in this BottomSheet. Image:
 <p align="center">
   <img src="/images/WorldMap_Selected_HalfExpanded.png" alt="World Map - Half Expanded BottomSheet">
 </p>
@@ -115,6 +115,16 @@ If this BottomSheet is clicked another time, it extends all the way and layers o
 </p>
 
 For more info on the world map click [here](https://github.com/aleksn41/corona_world_app/wiki/World-Map).
+
+### Map of Germany
+In this screen a map of germany and all it's states is shown. The coloring and functionalities are the same as in the World Map. In the top right corner is a summary of germany shown instead of a world overview. Image:
+<p align="center">
+  <img src="/images/Germany_Selected_HalfExpanded.png" alt="Map of Germany - Half Expanded BottomSheet">
+</p>
+This time however it is not possible to get a quick overview by creating a pie chart within the BottomSheet. There are also less infos available. (As it is this is only a beta feature, more infos and/or creating a quick pie chart may become available in the future) Image:
+<p align="center">
+  <img src="/images/Germany_Selected_FullyExpanded.png" alt="Map of Germany - Fully Expanded BottomSheet">
+</p>
 
 Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
 
