@@ -113,6 +113,7 @@ If this BottomSheet is clicked another time, it extends all the way and layers o
 <p align="center">
   <img src="/images/WorldMap_Selected_FullyExpanded.png" alt="World Map - Fully Expanded BottomSheet">
 </p>
+For more info on the world map click [here](https://github.com/aleksn41/corona_world_app/wiki/World-Map).
 
 Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
 
