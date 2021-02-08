@@ -12,17 +12,19 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
  * This Class is used to disallow certain items to be picked in the {@link StatisticRequestFragment} when certain conditions are met
+ *
  * @author Thomas Meier (implemented Rule)
  * @author Aleksandr Stankoski (designed Class)
  */
 public class StatisticRequestRule {
 
     public Rule rule;
-
+    //keep a reference to the adapters containing the information
     RuleEnumAdapter<ISOCountry> isoCountryAdapter;
     RuleEnumAdapter<ChartType> chartTypeAdapter;
     RuleEnumAdapter<Criteria> criteriaAdapter;
     RuleDateRangeInterface ruleDateRangeInterface;
+    //check if the rule has already been applied
     boolean ruleApplied = false;
     OnItemsChangeListener checkCondition = new OnItemsChangeListener() {
         @Override
@@ -52,14 +54,11 @@ public class StatisticRequestRule {
         boolean doNotAllowBarChart;
     }
 
-    interface ChartTypeAllowedInterface {
-        boolean isAllowed(ChartType chartType);
-    }
-
     interface OnItemsChangeListener {
         void onItemChange();
     }
 
+    //interface an Adapter needs to implement
     public interface RuleEnumAdapter<T extends Enum<T>> {
         void setOnItemsChangeListener(OnItemsChangeListener listener);
 
@@ -72,6 +71,7 @@ public class StatisticRequestRule {
         void conditionDoesNotApply();
     }
 
+    //interface the DatePicker need to implement
     public interface RuleDateRangeInterface {
         LocalDate getStartDate();
 

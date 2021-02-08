@@ -1,14 +1,11 @@
 package de.dhbw.corona_world_app.ui.tools;
 
-import androidx.annotation.NonNull;
-
 public interface LoadingScreenInterface {
 
-    public void startLoadingScreen();
+    void startLoadingScreen();
 
-    public void endLoadingScreen();
+    void endLoadingScreen();
 
-    public void setProgressBar(int progress);
+    void setProgressBar(int progress);
 
-    public float getProgress();
 }

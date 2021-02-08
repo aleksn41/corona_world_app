@@ -19,6 +19,11 @@ import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
+/**
+ * This class parses the Strings of an API to Country or TimeFramedCountry objects.
+ *
+ * @author Thomas Meier
+ */
 public class StringToCountryParser {
 
     private static final String TAG = StringToCountryParser.class.getSimpleName();

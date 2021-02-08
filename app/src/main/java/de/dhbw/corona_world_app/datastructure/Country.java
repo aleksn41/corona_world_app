@@ -2,6 +2,13 @@ package de.dhbw.corona_world_app.datastructure;
 
 import java.io.Serializable;
 
+/**
+ * This class contains the live data of one country.
+ *
+ * @param <T> type of this country-object, can be any Displayable (currently GermanyState, ISOCountry)
+ *
+ * @author Thomas Meier
+ */
 public class Country<T extends Displayable> implements Serializable {
 
     private T name;

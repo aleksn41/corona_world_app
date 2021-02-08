@@ -6,6 +6,11 @@ import java.util.Arrays;
 
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
+/**
+ * This class contains the data of one country for the given LocalDate[] dates days.
+ *
+ * @author Thomas Meier
+ */
 public class TimeFramedCountry implements Serializable, Comparable<TimeFramedCountry> {
 
     private ISOCountry country;

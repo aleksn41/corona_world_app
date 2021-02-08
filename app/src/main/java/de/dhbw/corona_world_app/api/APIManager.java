@@ -6,7 +6,6 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,6 +29,11 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+/**
+ * This class is used for getting the data and statistics from a specified API. It uses async calls to get corona and population data for every country.
+ *
+ * @author Thomas Meier
+ */
 public class APIManager {
 
     public static final int MAX_COUNTRY_LIST_SIZE = 10;
@@ -42,19 +46,26 @@ public class APIManager {
 
     private static boolean cacheEnabled;
 
-    private static boolean longTermStorageEnabled;
-
     private static final String TAG = APIManager.class.getName();
 
     private static final ExecutorService service = ThreadPoolHandler.getInstance();
 
-    public static void setSettings(boolean cacheEnabled, boolean longTermStorageEnabled) {
+    public static void setSettings(boolean cacheEnabled) {
         APIManager.cacheEnabled = cacheEnabled;
-        APIManager.longTermStorageEnabled = longTermStorageEnabled;
     }
 
-    //gets the data of the whole world through the specified api
-    public static List<Country<ISOCountry>> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, InterruptedException, IOException {
+    /**
+     * Gets the corona data of the whole world (every country) through the specified api. (API.HEROKU recommended)
+     * It additionally gets the population data of every country through the API.POSTMANAPI.
+     *
+     * @param api - API to use for the call
+     * @return List of Country-objects enriched with their according data
+     * @throws ExecutionException   - in case an async task fails
+     * @throws JSONException        - in case the parsing of the population data failed with a JSONException
+     * @throws InterruptedException - in case the getting of population data failed with an InterruptedException
+     * @throws IOException          - in case an async task fails because of an IOException
+     */
+    public static List<Country<ISOCountry>> getDataWorld(@NonNull API api) throws ExecutionException, JSONException, IOException, InterruptedException {
         Logger.logV(TAG, "Getting data for every Country from api " + api.getName() + "...");
         List<Country<ISOCountry>> returnList;
         try {
@@ -82,7 +93,7 @@ public class APIManager {
             Logger.logD(TAG, "Count of countries with no popCount: " + cnt);
             returnList = returnList.stream().filter(c -> c.getName() != null).collect(Collectors.toList());
             Logger.logV(TAG, "Returning data list...");
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | InterruptedException e) {
             if (e.getCause() instanceof IOException) {
                 throw (IOException) e.getCause();
             } else {
@@ -92,6 +103,18 @@ public class APIManager {
         return returnList;
     }
 
+    /**
+     * Gets the corona data of Germany through the specified API. (API.ARCGIS recommended)
+     * The population field of the Country-objects are not explicitly returned but calculated with the use of
+     * the returned "cases per 100k inhabitants"-field.
+     *
+     * @param api - api to get the germany data
+     * @return List of Country-objects enriched with their according data
+     * @throws ExecutionException   - in case an async task fails
+     * @throws InterruptedException - in case the getting of the async result fails due to thread interruption
+     * @throws JSONException        - in case the parsing of the countries fails
+     * @throws IOException          - in case the api call fails with an IOException
+     */
     public static List<Country<GermanyState>> getDataGermany(@NonNull API api) throws ExecutionException, InterruptedException, JSONException, IOException {
         Logger.logV(TAG, "Getting data for every state of germany...");
 
@@ -114,7 +137,16 @@ public class APIManager {
         return returnList;
     }
 
-    //this method creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of country-objects
+    /**
+     * Creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of Country-objects. This is meant to be used to get data for one day only!
+     *
+     * @param countryList  - List of countries to get corona data for
+     * @param criteriaList - List of criteria to get (ex.: infected)
+     * @return List of Country-objects enriched with the according data
+     * @throws IllegalArgumentException - in case the input country-list contains too many countries (limit set by constant MAX_COUNTRY_LIST_SIZE)
+     * @throws ExecutionException       - if any of the async calls fail
+     * @throws InterruptedException     - if getting any of the async results fail due to thread interruption
+     */
     public static List<Country<ISOCountry>> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList) throws IllegalArgumentException, ExecutionException, InterruptedException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
         List<Country<ISOCountry>> returnList = new ArrayList<>();
@@ -159,46 +191,61 @@ public class APIManager {
         return returnList;
     }
 
+    /**
+     * Creates one/multiple async calls to get the specified country's/countries' data and returns it through a list of TimeFramedCountry-objects. This is meant to be used for time frames and also returns
+     * TimeFramedCountries instead of normal Country-objects.
+     *
+     * @param countryList  - List of countries to get corona data for
+     * @param criteriaList - List of criteria to get (ex.: infected)
+     * @param startDate    - start date of time frame to get data for
+     * @param endDate      - end date of the time frame to get data for
+     * @return List of TimeFramedCountry-objects enriched with the according data
+     * @throws IllegalArgumentException - in case the input country-list contains too many countries (limit set by constant MAX_COUNTRY_LIST_SIZE)
+     * @throws JSONException            - in case the input country-list contains too many countries (limit set by constant MAX_COUNTRY_LIST_SIZE)
+     * @throws ExecutionException       - if any of the async calls fail
+     * @throws InterruptedException     - if getting any of the async results fail due to thread interruption
+     * @throws TooManyRequestsException - if the api returns that too many requests were made during a short amount of time
+     */
     public static List<TimeFramedCountry> getData(@NonNull List<ISOCountry> countryList, @NonNull List<Criteria> criteriaList, LocalDate startDate, LocalDate endDate) throws ExecutionException, InterruptedException, JSONException, TooManyRequestsException, UnavailableException {
         Logger.logV(TAG, "Getting data according to following parameters: " + countryList + " ; " + criteriaList);
-        if (endDate != null && (startDate == null || endDate.isBefore(startDate)))
-            throw new IllegalArgumentException("Ending date is before starting date!");
-        List<TimeFramedCountry> returnList = new ArrayList<>();
-        List<Future<String>> futureCoronaData = new ArrayList<>();
-        List<Future<Country<ISOCountry>>> futurePopData = new ArrayList<>();
-        if (startDate == null) startDate = LocalDate.now();
-        if (endDate == null) endDate = LocalDate.now();
+        if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
+            if (endDate != null && (startDate == null || endDate.isBefore(startDate)))
+                throw new IllegalArgumentException("Ending date is before starting date!");
+            List<TimeFramedCountry> returnList = new ArrayList<>();
+            List<Future<String>> futureCoronaData = new ArrayList<>();
+            List<Future<Country<ISOCountry>>> futurePopData = new ArrayList<>();
+            if (startDate == null) startDate = LocalDate.now();
+            if (endDate == null) endDate = LocalDate.now();
 
-        final LocalDate finalStartDate;
-        final LocalDate finalEndDate = endDate;
+            final LocalDate finalStartDate;
+            final LocalDate finalEndDate = endDate;
 
-        //this is only needed because the api cannot handle when start and end date are equal and returns all dates' data
-        boolean startAndEndEqual = startDate.equals(endDate);
-        if (startAndEndEqual) {
-            finalStartDate = startDate.minusDays(1);
-        } else {
-            finalStartDate = startDate;
-        }
-
-        boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
-        if (startAndEndEqual && startDate.equals(LocalDate.now())) {
-            List<Country<ISOCountry>> countries = getData(countryList, criteriaList);
-            List<TimeFramedCountry> timeframedCountries = new ArrayList<>();
-            for (Country<ISOCountry> country : countries) {
-                TimeFramedCountry countryToAdd = new TimeFramedCountry();
-                countryToAdd.setInfected(new int[]{country.getInfected()});
-                countryToAdd.setDates(new LocalDate[]{startDate});
-                countryToAdd.setDeaths(new int[]{country.getDeaths()});
-                countryToAdd.setRecovered(new int[]{country.getRecovered()});
-                countryToAdd.setPop_inf_ratio(new double[1]);
-                countryToAdd.setActive(new int[]{country.getActive()});
-                countryToAdd.setPopulation(country.getPopulation());
-                countryToAdd.setCountry(country.getName());
-                timeframedCountries.add(countryToAdd);
+            //this is only needed because the api cannot handle when start and end date are equal and returns all dates' data
+            boolean startAndEndEqual = startDate.equals(endDate);
+            if (startAndEndEqual) {
+                finalStartDate = startDate.minusDays(1);
+            } else {
+                finalStartDate = startDate;
             }
-            return timeframedCountries;
-        } else {
-            if (countryList.size() <= MAX_COUNTRY_LIST_SIZE) {
+
+            boolean popNeeded = criteriaList.contains(Criteria.POPULATION) || criteriaList.contains(Criteria.IH_RATION) || criteriaList.contains(Criteria.HEALTHY);
+            if (startAndEndEqual && startDate.equals(LocalDate.now())) {
+                List<Country<ISOCountry>> countries = getData(countryList, criteriaList);
+                List<TimeFramedCountry> timeframedCountries = new ArrayList<>();
+                for (Country<ISOCountry> country : countries) {
+                    TimeFramedCountry countryToAdd = new TimeFramedCountry();
+                    countryToAdd.setInfected(new int[]{country.getInfected()});
+                    countryToAdd.setDates(new LocalDate[]{startDate});
+                    countryToAdd.setDeaths(new int[]{country.getDeaths()});
+                    countryToAdd.setRecovered(new int[]{country.getRecovered()});
+                    countryToAdd.setPop_inf_ratio(new double[1]);
+                    countryToAdd.setActive(new int[]{country.getActive()});
+                    countryToAdd.setPopulation(country.getPopulation());
+                    countryToAdd.setCountry(country.getName());
+                    timeframedCountries.add(countryToAdd);
+                }
+                return timeframedCountries;
+            } else {
                 for (ISOCountry isoCountry : countryList) {
                     Future<String> future = service.submit(() -> {
                                 String url = API.POSTMANAPI.getUrl();
@@ -224,22 +271,36 @@ public class APIManager {
                     returnList.add(country);
                 }
                 Logger.logV(TAG, "Country-List finished constructing...");
-            } else {
-                Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
-                throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE + "!");
+
+                return returnList;
             }
-            return returnList;
+        } else {
+            Logger.logE(TAG, "Throwing IllegalArgumentException! MAX_COUNTRY_LIST_SIZE has been exceeded!");
+            throw new IllegalArgumentException("Input country list is too big, max allowed " + MAX_COUNTRY_LIST_SIZE + "!");
         }
     }
 
-    //Gets a map with ISOCountries mapped to a {@code long} population count gotten by the restcountries api.
-    public static Map<ISOCountry, Long> getAllCountriesPopData() throws ExecutionException, InterruptedException, JSONException {
+    /**
+     * Gets a map with ISOCountries mapped to a {@code long} population count gotten by the restcountries api.
+     *
+     * @return Map of ISOCountry to Long with each country mapped to it's according population count
+     * @throws ExecutionException   - in case the async task fails with an exception
+     * @throws JSONException        - in case the api result could not be parsed
+     * @throws InterruptedException - in case the getting of the async result failed due to thread interruption
+     */
+    public static Map<ISOCountry, Long> getAllCountriesPopData() throws ExecutionException, JSONException, InterruptedException {
         Logger.logV(TAG, "Getting population data...");
         Future<String> future = service.submit(() -> createAPICall(API.RESTCOUNTRIES.getUrl() + API.RESTCOUNTRIES.getAllCountries()));
         return StringToCountryParser.parseMultiPopCount(future.get());
     }
 
-    //creates a GET-Call to an url and returns the {@code String} body
+    /**
+     * Creates a GET-Call to an url and returns the {@code String} body.
+     *
+     * @param url - URL to make the GET-request to
+     * @return String body of the HTTP-answer
+     * @throws IOException - in case the request failed due to connectivity, wrong host name, etc.
+     */
     public static String createAPICall(@NonNull String url) throws IOException {
         Logger.logV(TAG, "Making api call to " + url + " ...");
         OkHttpClient client = new OkHttpClient();
@@ -249,11 +310,25 @@ public class APIManager {
         return Objects.requireNonNull(client.newCall(request).execute().body()).string();
     }
 
+    /**
+     * Checks if the internet is available by trying to connect to the GoogleDNS-Server (8.8.8.8).
+     *
+     * @return true if GoogleDNS could be reached, false otherwise
+     * @throws IOException - if a network error occurs
+     */
     public static boolean pingGoogleDNS() throws IOException {
         InetAddress address = InetAddress.getByName("8.8.8.8");
         return address.isReachable(10000);
     }
 
+    /**
+     * Gets the formatted URL snippet to use when an API uses dates.
+     *
+     * @param api - API to get the URL snippet for
+     * @param from - start date
+     * @param to - end date
+     * @return String formatted URL snippet
+     */
     private static String getFormattedTimeFrameURLSnippet(@NonNull API api, @NonNull LocalDate from, @NonNull LocalDate to) {
         if (!api.acceptsTimeFrames())
             throw new IllegalArgumentException("The given api \"" + api.getName() + "\" does not support time frames!");
@@ -263,31 +338,18 @@ public class APIManager {
         throw new IllegalArgumentException("Given API has not yet been implemented to use time frames!");
     }
 
+    /**
+     * Checks if cache is enabled.
+     *
+     * @return true if cache is enabled, false otherwise
+     */
     public static boolean isCacheEnabled() {
         return cacheEnabled;
     }
 
-    public static boolean isLongTermStorageEnabled() {
-        return longTermStorageEnabled;
-    }
-
-    public static void enableCache() {
-        APIManager.cacheEnabled = true;
-    }
-
-    public static void disableCache() {
-        APIManager.cacheEnabled = false;
-    }
-
-    public static void enableLongTermStorage() {
-        APIManager.longTermStorageEnabled = true;
-    }
-
-    public static void disableLongTermStorage() {
-        APIManager.longTermStorageEnabled = false;
-    }
-
-    //disables logs for testing
+    /**
+     *  Disables logs for testing.
+     */
     public static void disableLogsForTesting() {
         Logger.disableLogging();
     }
