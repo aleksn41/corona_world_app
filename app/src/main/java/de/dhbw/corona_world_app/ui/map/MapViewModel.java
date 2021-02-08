@@ -71,8 +71,8 @@ public class MapViewModel extends ViewModel {
     public MutableLiveData<Country<ISOCountry>> mBoxValue = new MutableLiveData<>();
 
 
-    public void init(boolean cacheDisabled, boolean longTermDisabled) {
-        APIManager.setSettings(!cacheDisabled, !longTermDisabled);
+    public void init(boolean cacheDisabled) {
+        APIManager.setSettings(!cacheDisabled);
 
     }
 
