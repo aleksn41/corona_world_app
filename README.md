@@ -101,7 +101,10 @@ This Application can only run on Android 10 or greater (API level 29 or greater)
 
 ## Usage
 
-This will be filled once Documentation and Design have been finished (Screenshots will be included)
+Once the app is opened you are conveyed to the starting screen, the world map. In this screen a heat map of the world is shown. All countries are colored from green to red after their respective ratio of how much of the population is infected. Image:
+<p align="center">
+  <img src="/images/WorldMap.png" alt="World Map">
+</p>
 
 Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
 
