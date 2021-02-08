@@ -9,7 +9,7 @@
     <item
         android:id="@+id/navigation_germany"
         android:icon="@drawable/germany_flag"
-        android:title="@string/title_germany"/>
+        android:title="@string/title_germany" />
 
     <item
         android:id="@+id/navigation_statistic_request"

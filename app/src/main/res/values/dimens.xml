@@ -1,17 +1,10 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="statistic_call_list_item_height">165dp</dimen>
-    <dimen name="statistic_call_list_item_margin_image">20dp</dimen>
     <dimen name="margin_medium">8dp</dimen>
     <dimen name="margin_big">16dp</dimen>
-    <dimen name="margin_basic_25">0.25dp</dimen>
     <dimen name="font_size">12sp</dimen>
     <dimen name="font_title_size">22sp</dimen>
     <dimen name="margin_huge">32dp</dimen>
-    <dimen name="map_box_height">80dp</dimen>
-    <dimen name="map_box_width">256dp</dimen>
     <dimen name="bottom_sheet_expand_size">24dp</dimen>
     <dimen name="bottom_sheet_title_size">60dp</dimen>
     <dimen name="map_box_flag_height">42dp</dimen>

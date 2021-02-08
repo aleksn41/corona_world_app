@@ -44,7 +44,7 @@
             android:id="@+id/bottom_sheet_expand"
             android:layout_width="match_parent"
             android:layout_height="@dimen/bottom_sheet_expand_size"
-            android:contentDescription="Icon to expand View with information of the currently selected country"
+            android:contentDescription="@string/icon_to_expand_view_description"
             android:src="@drawable/ic_baseline_expand_less_24" />
 
         <TextView
@@ -54,7 +54,7 @@
             android:layout_height="@dimen/bottom_sheet_title_size"
             android:layout_below="@id/bottom_sheet_expand"
             android:gravity="center"
-            android:text="No Country Selected"
+            android:text="@string/no_country_selected"
             android:textAlignment="center"
             android:textSize="@dimen/font_title_size" />
         <!--the ide for some reason cannot find the drawable used in the source below, even tough it exists and is properly build-->
@@ -66,7 +66,7 @@
             android:layout_below="@id/bottomSheetTitle"
             android:layout_centerHorizontal="true"
             android:layout_margin="@dimen/margin_big"
-            android:contentDescription="Flag of currently selected Country"
+            android:contentDescription="@string/flag_currently_selected_country"
             android:src="@michaelfotiadis:drawable/ic_list_country_unknown" />
 
         <ScrollView
