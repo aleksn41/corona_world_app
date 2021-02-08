@@ -126,7 +126,6 @@ public class APIManagerTests {
         System.out.println(countries);
     }
 
-    @Test
     //Heads up! This may take a while as it makes 10 sec pauses every 10 requests.
     public void testAPIAllGetEveryCountry() throws InterruptedException, TooManyRequestsException, ExecutionException, UnavailableException {
         APIManager.disableLogsForTesting();

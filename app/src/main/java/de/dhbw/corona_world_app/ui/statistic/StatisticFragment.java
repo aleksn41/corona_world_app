@@ -250,6 +250,7 @@ public class StatisticFragment extends Fragment {
                     } catch (IOException e) {
                         Log.v(TAG, "Exception while creating statistic!", e);
                         if (getActivity() != null) {
+                            retry.set(false);
                             try {
                                 Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
                                 if (APIManager.pingGoogleDNS()) {

@@ -318,7 +318,7 @@ public class APIManager {
      */
     public static boolean pingGoogleDNS() throws IOException {
         InetAddress address = InetAddress.getByName("8.8.8.8");
-        return address.isReachable(10000);
+        return address.isReachable(1500);
     }
 
     /**
