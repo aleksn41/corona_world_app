@@ -108,6 +108,8 @@ This Application can only run on Android 10 or greater (API level 29 or greater)
 
 ## Usage
 
+### This app supports both light and dark mode!
+
 ### Click [here](https://github.com/aleksn41/corona_world_app/wiki/2\)-Overview) for a detailed overview of all features and functionalities. 
 
 ### Starting Screen / World Map
