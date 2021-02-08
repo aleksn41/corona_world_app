@@ -80,7 +80,7 @@ public class APIManager {
 
             for (Country<ISOCountry> country : returnList) {
                 ISOCountry isoCountry = country.getName();
-                if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
+                if (country.getName() != null && Mapper.isInBlacklist(isoCountry.name())) {
                     if (popMap.containsKey(isoCountry)) {
                         country.setPopulation(popMap.get(isoCountry));
                     } else {

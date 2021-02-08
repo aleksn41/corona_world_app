@@ -14,7 +14,7 @@ import de.dhbw.corona_world_app.datastructure.Displayable;
  */
 public class JavaScriptInterface {
 
-    public MutableLiveData<Displayable> current = new MutableLiveData<>();
+    public final MutableLiveData<Displayable> current = new MutableLiveData<>();
 
     public JavaScriptInterface(){
 

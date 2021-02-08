@@ -10,7 +10,7 @@ public enum ChartType {
     PIE("Pie-Chart"),
     LINE("Line-Chart");
 
-    String displayName;
+    final String displayName;
     ChartType(String displayName){
         this.displayName=displayName;
     }

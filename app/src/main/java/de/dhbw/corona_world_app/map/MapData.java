@@ -24,10 +24,10 @@ public class MapData {
         WORLD("countries", "world", "#22748f", "#ffffff"),
         GERMANY("provinces", "DE", "#22748f", "#22748f"),
         ;
-        String value;
-        String region;
-        String backgroundColor;
-        String dataLessRegionColor;
+        final String value;
+        final String region;
+        final String backgroundColor;
+        final String dataLessRegionColor;
 
         Resolution(String value, String region, String backgroundColor, String dataLessRegionColor){
             this.value = value;
@@ -37,7 +37,7 @@ public class MapData {
         }
     }
 
-    String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>" +
+    final String WebViewStart = "<html><head><title>World Map</title><script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>" +
             "  <script type=\"text/javascript\">" +
             "  openStats = (country) => {jsinterface.setISOCountry(country)};" +
             "  google.charts.load('current', {" +

@@ -16,12 +16,12 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
  * @author Aleksandr Stankoski
  */
 public class StatisticCallRequestViewModel extends ViewModel {
-    MutableLiveData<LinkedHashSet<ISOCountry>> selectedISOCountries;
-    MutableLiveData<LinkedHashSet<Criteria>> selectedCriteriaCountries;
-    MutableLiveData<LinkedHashSet<ChartType>> selectedChartTypeCountries;
-    MutableLiveData<LocalDate> selectedStartDate;
-    MutableLiveData<LocalDate> selectedEndDate;
-    MutableLiveData<Boolean> ruleAppliesForDatePicker;
+    final MutableLiveData<LinkedHashSet<ISOCountry>> selectedISOCountries;
+    final MutableLiveData<LinkedHashSet<Criteria>> selectedCriteriaCountries;
+    final MutableLiveData<LinkedHashSet<ChartType>> selectedChartTypeCountries;
+    final MutableLiveData<LocalDate> selectedStartDate;
+    final MutableLiveData<LocalDate> selectedEndDate;
+    final MutableLiveData<Boolean> ruleAppliesForDatePicker;
 
     public StatisticCallRequestViewModel() {
         selectedISOCountries = new MutableLiveData<>();

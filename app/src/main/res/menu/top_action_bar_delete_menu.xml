@@ -10,7 +10,7 @@
         android:id="@+id/action_favourite"
         android:icon="@drawable/ic_baseline_star_outline_24"
         android:title="@string/menu_item_delete"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/select_all"
         android:title="@string/select_all"

@@ -27,8 +27,6 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
-import org.w3c.dom.Text;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -453,7 +451,7 @@ public class StatisticRequestFragment extends Fragment {
     private <T extends Enum<T>> AutoCompleteTextViewAdapter.LimitListener getLimitListener(String name, TextView textView) {
         return (limit) -> {
             if (getContext() != null) {
-                Toast.makeText(getContext(), getString(R.string.limit_reached, limit, name), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getResources().getQuantityString(R.plurals.limit_reached, limit,limit, name), Toast.LENGTH_SHORT).show();
                 requireActivity().runOnUiThread(() -> textView.setError("reached Limit"));
                 Log.i(this.getClass().getName(), "reached limit with " + name);
             }

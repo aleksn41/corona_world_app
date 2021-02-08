@@ -145,7 +145,7 @@ public class Mapper {
 
     public static boolean isInBlacklist(String countryName) {
         init();
-        return blackList.contains(countryName);
+        return !blackList.contains(countryName);
     }
 
     public static boolean isInMap(API api, String countryToBeChecked) {

@@ -15,7 +15,7 @@ public enum Criteria {
     ID_RATION("Infected Deaths Ratio"),
     IH_RATION("Infected Health Ratio");
 
-    String displayName;
+    final String displayName;
 
     Criteria(String displayName){
         this.displayName=displayName;

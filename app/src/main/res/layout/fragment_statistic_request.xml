@@ -13,7 +13,6 @@
         android:fillViewport="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/statisticCallRequest"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:context=".ui.statistic.StatisticRequestFragment">
@@ -44,7 +43,7 @@
                     android:id="@+id/isoCountryTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Countries"
+                    android:hint="@string/countries"
                     android:saveEnabled="false" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -83,7 +82,7 @@
                     android:id="@+id/nachoCriteriaTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Criteria"
+                    android:hint="@string/criteria"
                     android:saveEnabled="false" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -123,7 +122,7 @@
                     android:id="@+id/nachoChartTypeTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Chart-Type"
+                    android:hint="@string/chart_type"
                     android:saveEnabled="false" />
 
             </com.google.android.material.textfield.TextInputLayout>

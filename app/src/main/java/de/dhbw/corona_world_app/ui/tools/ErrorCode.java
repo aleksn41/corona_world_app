@@ -25,8 +25,8 @@ public enum ErrorCode {
     COULD_NOT_DELETE_CACHE(13, "An error occurred while deleting local cache. Try deleting your local cash."),
     API_CURRENTLY_NOT_AVAILABLE(14, "Data service is currently unavailable. Please try again later.");
 
-    int code;
-    String message;
+    final int code;
+    final String message;
 
     ErrorCode(int code, @NotNull String message) {
         this.code = code;

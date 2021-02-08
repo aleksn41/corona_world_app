@@ -20,16 +20,16 @@ public class StatisticRequestRule {
 
     public Rule rule;
     //keep a reference to the adapters containing the information
-    RuleEnumAdapter<ISOCountry> isoCountryAdapter;
-    RuleEnumAdapter<ChartType> chartTypeAdapter;
-    RuleEnumAdapter<Criteria> criteriaAdapter;
-    RuleDateRangeInterface ruleDateRangeInterface;
+    final RuleEnumAdapter<ISOCountry> isoCountryAdapter;
+    final RuleEnumAdapter<ChartType> chartTypeAdapter;
+    final RuleEnumAdapter<Criteria> criteriaAdapter;
+    final RuleDateRangeInterface ruleDateRangeInterface;
     //check if the rule has already been applied
     boolean ruleApplied = false;
-    OnItemsChangeListener checkCondition = new OnItemsChangeListener() {
+    final OnItemsChangeListener checkCondition = new OnItemsChangeListener() {
         @Override
         public void onItemChange() {
-            if (rule.conditionSatisfied(isoCountryAdapter.getSelectedItemsSize(), criteriaAdapter.getSelectedItemsSize(), chartTypeAdapter.getSelectedItemsSize() == 0 ? null : chartTypeAdapter.getSelectedItems().get(0), ruleDateRangeInterface.getStartDate(), ruleDateRangeInterface.getEndDate())) {
+            if (rule.conditionSatisfied(isoCountryAdapter.getSelectedItemsSize(), criteriaAdapter.getSelectedItemsSize(), ruleDateRangeInterface.getStartDate(), ruleDateRangeInterface.getEndDate())) {
                 applyRule(rule);
                 ruleApplied = true;
             } else if (ruleApplied) {
@@ -45,7 +45,7 @@ public class StatisticRequestRule {
 
     private abstract static class Rule {
         //if this condition is satisfied, the Rule will apply
-        abstract boolean conditionSatisfied(int selectedISOCountriesSize, int selectedCriteriaSize, @Nullable ChartType selectedChartType, @Nullable LocalDate selectedStartDate, @Nullable LocalDate selectedEndDate);
+        abstract boolean conditionSatisfied(int selectedISOCountriesSize, int selectedCriteriaSize, @Nullable LocalDate selectedStartDate, @Nullable LocalDate selectedEndDate);
 
         //if the condition is satisfied, apply these Rules
         boolean allowOnlyOneCountry;
@@ -69,6 +69,8 @@ public class StatisticRequestRule {
         void conditionApplies(boolean allowOnlyOneItem);
 
         void conditionDoesNotApply();
+
+        void update();
     }
 
     //interface the DatePicker need to implement
@@ -103,7 +105,7 @@ public class StatisticRequestRule {
     private void init() {
         this.rule = new Rule() {
             @Override
-            boolean conditionSatisfied(int selectedISOCountriesSize, int selectedCriteriaSize, @Nullable ChartType selectedChartType, @Nullable LocalDate selectedStartDate, @Nullable LocalDate selectedEndDate) {
+            boolean conditionSatisfied(int selectedISOCountriesSize, int selectedCriteriaSize, @Nullable LocalDate selectedStartDate, @Nullable LocalDate selectedEndDate) {
                 boolean countryList2D = selectedISOCountriesSize > 1;
                 boolean criteriaList2D = selectedCriteriaSize > 1;
                 boolean dates2D = selectedStartDate != null ? selectedEndDate == null || !selectedStartDate.isEqual(selectedEndDate) : selectedEndDate != null;
@@ -138,6 +140,9 @@ public class StatisticRequestRule {
         criteriaAdapter.conditionApplies(rule.allowOnlyOneCriteria);
         chartTypeAdapter.conditionApplies(rule.doNotAllowBarChart);
         ruleDateRangeInterface.conditionApplies(rule.startAndEndDateMustBeSame);
+        isoCountryAdapter.update();
+        criteriaAdapter.update();
+        chartTypeAdapter.update();
     }
 
     private void doNotApplyRule() {
@@ -145,5 +150,8 @@ public class StatisticRequestRule {
         criteriaAdapter.conditionDoesNotApply();
         chartTypeAdapter.conditionDoesNotApply();
         ruleDateRangeInterface.conditionDoesNotApply();
+        isoCountryAdapter.update();
+        criteriaAdapter.update();
+        chartTypeAdapter.update();
     }
 }

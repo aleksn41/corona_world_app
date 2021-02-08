@@ -2,8 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mobile_navigation"
-    app:startDestination="@id/navigation_world">
+    app:startDestination="@id/navigation_world"
+    android:id="@+id/navigation">
 
     <fragment
         android:id="@+id/navigation_world"
@@ -19,7 +19,7 @@
         android:id="@+id/navigation_germany"
         android:name="de.dhbw.corona_world_app.ui.map.GermanyMapFragment"
         android:label="@string/title_germany"
-        tools:layout="@layout/fragment_map"></fragment>
+        tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/navigation_statistic_request"

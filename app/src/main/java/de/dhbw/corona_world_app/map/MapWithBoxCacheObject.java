@@ -5,7 +5,6 @@ import java.util.List;
 
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Displayable;
-import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
  * This class is used for caching data and keeping track of the cache's creation time.

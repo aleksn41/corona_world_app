@@ -109,7 +109,7 @@ public class StringToCountryParser {
                     String normalizedName = Mapper.normalizeCountryName(tuple[1].replace("\"", ""));
                     if (Mapper.isInMap(API.HEROKU, normalizedName)) {
                         country.setName(Mapper.mapNameToISOCountry(API.HEROKU, normalizedName));
-                    } else if (!Mapper.isInBlacklist(normalizedName)) {
+                    } else if (Mapper.isInBlacklist(normalizedName)) {
                         country.setName(ISOCountry.valueOf(normalizedName));
                     }
                     break;
@@ -167,7 +167,7 @@ public class StringToCountryParser {
                 returnMap.put(Mapper.mapNameToISOCountry(API.RESTCOUNTRIES, name), jsonArray.getJSONObject(i).getLong("population"));
             } else {
                 String normalizedName = Mapper.normalizeCountryName(name);
-                if (!Mapper.isInBlacklist(name)) {
+                if (Mapper.isInBlacklist(name)) {
                     returnMap.put(ISOCountry.valueOf(normalizedName), jsonArray.getJSONObject(i).getLong("population"));
                 }
             }

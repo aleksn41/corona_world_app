@@ -1,5 +1,6 @@
 package de.dhbw.corona_world_app.ui.map;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
