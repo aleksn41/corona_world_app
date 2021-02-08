@@ -178,10 +178,23 @@ If either the "GO TO STATISTICS" button in the [World Map](https://github.com/al
 For more info on Statistic click [here](https://github.com/aleksn41/corona_world_app/wiki/6\)-Statistic).
 
 ### History
-(WIP)
+In this screen the user is informed about his earlier statistic requests. The entries can also be favourited so that they show up under the favourites tab. Image:
+<p align="center">
+  <img src="/images/History.png" alt="History">
+</p>
+
+When an entry is clicked and hold the normale interface changes to a multi-select-interface so that a user can favourite multiple entries or delete one or multiple entries. Image:
+<p align="center">
+  <img src="/images/History_Delete.png" alt="History Delete">
+</p>
+
+For more info on Statistic click [here](https://github.com/aleksn41/corona_world_app/wiki/7\)-History-Statistic).
 
 ### Favourites
-(WIP)
+This screen has the same functionality as the history screen. The single difference is that only favourite entries are shown. Image:
+<p align="center">
+  <img src="/images/Favourites.png" alt="History Delete">
+</p>
 
 Click [here](https://github.com/aleksn41/corona_world_app/wiki/2\)-Overview) for a quick overview of all features and functionalities. 
 
