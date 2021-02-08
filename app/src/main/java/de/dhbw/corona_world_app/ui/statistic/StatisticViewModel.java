@@ -214,7 +214,6 @@ public class StatisticViewModel extends ViewModel {
 
             formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
             Collections.sort(apiGottenList);
-            Collections.reverse(apiGottenList);
             for (TimeFramedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
