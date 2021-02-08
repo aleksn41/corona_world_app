@@ -114,7 +114,7 @@ If this BottomSheet is clicked another time, it extends all the way and layers o
   <img src="/images/WorldMap_Selected_FullyExpanded.png" alt="World Map - Fully Expanded BottomSheet">
 </p>
 
-For more info on the World Map click [here](https://github.com/aleksn41/corona_world_app/wiki/World-Map).
+For more info on the World Map click [here](https://github.com/aleksn41/corona_world_app/wiki/3\)-World-Map).
 
 ### Map of Germany
 In this screen a Map of Germany and all it's states is shown. The coloring and functionalities are the same as in the World Map. In the top right corner is a summary of germany shown instead of a world overview. Image:
@@ -126,7 +126,7 @@ This time however it is not possible to get a quick overview by creating a pie c
   <img src="/images/Germany_Selected_FullyExpanded.png" alt="Map of Germany - Fully Expanded BottomSheet">
 </p>
 
-For more info on the Map of Germany click [here](https://github.com/aleksn41/corona_world_app/wiki/Germany-Map-(beta)).
+For more info on the Map of Germany click [here](https://github.com/aleksn41/corona_world_app/wiki/4\)-Germany-Map-(beta)).
 
 ### Settings & Info
 The global settings and info dropdown can be reached from all fragments. It opens on click at the three vertical dots in the top right corner of the screen. Image (this is from the World Map but the position does not vary):
@@ -136,7 +136,27 @@ The global settings and info dropdown can be reached from all fragments. It open
 Through clicking the user either enters the settings or info screen. In the settings screen the user can en/disable cache (WIP). In the Info screen a short description of the app and it's developers is given.
 
 ### Statistic Chooser
-(WIP)
+In this screen the user can choose which countries, which data, in which time frame and which statistic he wants to be displayed. Image:
+<p align="center">
+  <img src="/images/StatisticChooser.png" alt="Statistics Chooser">
+</p>
+
+When the user enters his parameters he can click on dropdown entries that match his letters. Image:
+<p align="center">
+  <img src="/images/StatisticChooser_Selection_Dropdown.png" alt="Statistics Chooser Selection Dropdown">
+</p>
+
+All selected Parameters will be displayed under their respective input boxes. In case of the countries they are also marked with their according flags. Image:
+<p align="center">
+  <img src="/images/StatisticChooser_Selection.png" alt="Statistics Chooser Selection">
+</p>
+
+When a limit for a certain parameter is reached a hint is given with a red flag. The selection can be finished in clicking on the "CREATE STATISTIC" button in the right bottom corner of the screen. Image:
+<p align="center">
+  <img src="/images/StatisticChooser_Create.png" alt="Statistics Chooser Create Statistic">
+</p>
+
+For more info on the Statistic Chooser click [here](https://github.com/aleksn41/corona_world_app/wiki/5\)-Statistic-Chooser).
 
 ### Statistic 
 If either the "GO TO STATISTICS" button in the [World Map](https://github.com/aleksn41/corona_world_app/tree/readme#starting-screen--world-map) is clicked or the user created his own statistic through the [Statistic Chooser](https://github.com/aleksn41/corona_world_app/tree/readme#statistic-chooser) a new statistic is created, saved in [History](https://github.com/aleksn41/corona_world_app/tree/readme#history) and then displayed. Example Images:
@@ -155,7 +175,7 @@ If either the "GO TO STATISTICS" button in the [World Map](https://github.com/al
   <img src="/images/Statistic_BarChart.png" alt="Bar Chart">
 </p>
 
-For more info on Statistic click [here](https://github.com/aleksn41/corona_world_app/wiki/Statistic).
+For more info on Statistic click [here](https://github.com/aleksn41/corona_world_app/wiki/6\)-Statistic).
 
 ### History
 (WIP)
@@ -163,7 +183,7 @@ For more info on Statistic click [here](https://github.com/aleksn41/corona_world
 ### Favourites
 (WIP)
 
-Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
+Click [here](https://github.com/aleksn41/corona_world_app/wiki/2\)-Overview) for a quick overview of all features and functionalities. 
 
 ## Roadmap
 
