@@ -27,6 +27,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
+import org.w3c.dom.Text;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -199,9 +201,29 @@ public class StatisticRequestFragment extends Fragment {
             if (endDateChange != null) endDateChange.onItemChange();
         });
 
-        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> statisticCallRequestViewModel.selectedStartDate.setValue(LocalDate.of(year1, month1 + 1, dayOfMonth)));
+        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> {
+            LocalDate newStartDate=LocalDate.of(year1, month1 + 1, dayOfMonth);
+            if(statisticCallRequestViewModel.selectedEndDate.getValue()!=StatisticCall.NOW&&newStartDate.isAfter(statisticCallRequestViewModel.selectedEndDate.getValue())){
+                Toast.makeText(getContext(),"Cannot choose a start date after end date",Toast.LENGTH_SHORT).show();
+                int oldYear=statisticCallRequestViewModel.selectedStartDate.getValue().getYear();
+                int oldMoth=statisticCallRequestViewModel.selectedStartDate.getValue().getMonthValue()-1;
+                int oldDayOfMonth=statisticCallRequestViewModel.selectedStartDate.getValue().getDayOfMonth();
+                startDatePicker.getDatePicker().updateDate(oldYear,oldMoth,oldDayOfMonth);
+            }
+            else statisticCallRequestViewModel.selectedStartDate.setValue(newStartDate);
+        });
 
-        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> statisticCallRequestViewModel.selectedEndDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth)));
+        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> {
+            LocalDate newEndDate=LocalDate.of(year12, month12 + 1, dayOfMonth);
+            if(statisticCallRequestViewModel.selectedStartDate.getValue()==null||newEndDate.isBefore(statisticCallRequestViewModel.selectedStartDate.getValue())){
+                Toast.makeText(getContext(),"Cannot choose a end date before start date",Toast.LENGTH_SHORT).show();
+                int oldYear=statisticCallRequestViewModel.selectedEndDate.getValue().getYear();
+                int oldMoth=statisticCallRequestViewModel.selectedEndDate.getValue().getMonthValue()-1;
+                int oldDayOfMonth=statisticCallRequestViewModel.selectedEndDate.getValue().getDayOfMonth();
+                startDatePicker.getDatePicker().updateDate(oldYear,oldMoth,oldDayOfMonth);
+            }
+            else statisticCallRequestViewModel.selectedEndDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth));
+        });
 
         //sets the min date to the beginning of Corona
         startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
