@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import de.dhbw.corona_world_app.Logger;
@@ -35,23 +36,24 @@ public class StringToCountryParser {
         for (int i = 0; i < jsonArray.length(); i++) {
             Country<GermanyState> country = new Country<>();
             JSONObject properties = jsonArray.getJSONObject(i).getJSONObject("properties");
-            country.setName(GermanyState.valueOf(properties.getString("LAN_ew_GEN").replace("-", "_").replace("ü", "ue").toUpperCase()));
+            country.setName(GermanyState.valueOf(properties.getString("LAN_ew_GEN").replace("-", "_").replace("ü", "ue").toUpperCase(Locale.ENGLISH)));
             country.setInfected(properties.getInt("Fallzahl"));
             country.setDeaths(properties.getInt("Death"));
             country.setPopulation((long) (properties.getInt("Fallzahl") / (properties.getDouble("faelle_100000_EW") / 100000)));
             countries.add(country);
             if (country.getName() == null)
-                Log.e(TAG, properties.getString("LAN_ew_GEN").replace("-", "_").replace("ü", "ue").toUpperCase() + "has not been matched!");
+                Log.e(TAG, properties.getString("LAN_ew_GEN").replace("-", "_").replace("ü", "ue").toUpperCase(Locale.ENGLISH) + "has not been matched!");
         }
         return countries;
     }
 
     public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException, TooManyRequestsException, UnavailableException {
-        if (toParse.toLowerCase().startsWith("{\"message\":\"too many requests")) {
-            throw new TooManyRequestsException("Too many requests were made! Answer: "+toParse);
+        if (toParse.toLowerCase(Locale.ENGLISH).startsWith("{\"message\":\"too many requests")) {
+            throw new TooManyRequestsException("Too many requests were made!");
         }
-        if (toParse.toLowerCase().contains("503 service temporarily unavailable")){
-            throw new UnavailableException("Service is currently unavailable! Answer: "+toParse);
+        if (toParse.toLowerCase(Locale.ENGLISH).contains("503 service temporarily unavailable")){
+            throw new UnavailableException("Service is currently unavailable...");
+
         }
         TimeFramedCountry country = new TimeFramedCountry();
 
