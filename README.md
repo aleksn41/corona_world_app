@@ -129,7 +129,7 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 - https://coronavirus-19-api.herokuapp.com (for live data of the world map and statistics)
 - https://restcountries.eu/rest/v2 (for population data)
 - https://api.covid19api.com (for past statistics)
-- https://opendata.arcgis.com (for live data of germany's states)
+- https://opendata.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0.geojson (for live data of germany's states)
 
 ## Libraries
 - Google Charts https://developers.google.com/chart (for displaying the maps)
