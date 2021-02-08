@@ -1,10 +1,8 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <SwitchPreferenceCompat
         app:defaultValue="false"
-        app:key="cache_deactivated"
-        app:title="Disable Cache for less RAM usage (increases loading time)"
         app:iconSpaceReserved="false"
-        app:singleLineTitle="false"/>
-
+        app:key="cache_deactivated"
+        app:singleLineTitle="false"
+        app:title="Disable Cache for less RAM usage (increases loading time)" />
 </PreferenceScreen>
