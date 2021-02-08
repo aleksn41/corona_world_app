@@ -190,19 +190,22 @@ public class StatisticRequestFragment extends Fragment {
             Log.d(this.getClass().getName(), "start Date changed");
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-            if (!endDateChooser.isEnabled()) endDateChooser.setEnabled(true);
+            if (!statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()) endDateChooser.setEnabled(true);
             if (startDateChange != null) startDateChange.onItemChange();
         });
         endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
         statisticCallRequestViewModel.selectedEndDate.observe(getViewLifecycleOwner(), end -> {
             Log.d(this.getClass().getName(), "end Date changed");
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-            startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
+            if(!statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue())startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
             if (endDateChange != null) endDateChange.onItemChange();
         });
 
         startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> {
             LocalDate newStartDate=LocalDate.of(year1, month1 + 1, dayOfMonth);
+            if(statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()){
+                statisticCallRequestViewModel.selectedEndDate.setValue(newStartDate);
+            }
             if(statisticCallRequestViewModel.selectedEndDate.getValue()!=StatisticCall.NOW&&newStartDate.isAfter(statisticCallRequestViewModel.selectedEndDate.getValue())){
                 Toast.makeText(getContext(),"Cannot choose a start date after end date",Toast.LENGTH_SHORT).show();
                 int oldYear=statisticCallRequestViewModel.selectedStartDate.getValue().getYear();
@@ -215,14 +218,14 @@ public class StatisticRequestFragment extends Fragment {
 
         endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> {
             LocalDate newEndDate=LocalDate.of(year12, month12 + 1, dayOfMonth);
-            if(statisticCallRequestViewModel.selectedStartDate.getValue()==null||newEndDate.isBefore(statisticCallRequestViewModel.selectedStartDate.getValue())){
+            if(statisticCallRequestViewModel.selectedStartDate.getValue()==StatisticCall.NOW||newEndDate.isBefore(statisticCallRequestViewModel.selectedStartDate.getValue())){
                 Toast.makeText(getContext(),"Cannot choose a end date before start date",Toast.LENGTH_SHORT).show();
                 int oldYear=statisticCallRequestViewModel.selectedEndDate.getValue().getYear();
                 int oldMoth=statisticCallRequestViewModel.selectedEndDate.getValue().getMonthValue()-1;
                 int oldDayOfMonth=statisticCallRequestViewModel.selectedEndDate.getValue().getDayOfMonth();
                 startDatePicker.getDatePicker().updateDate(oldYear,oldMoth,oldDayOfMonth);
             }
-            else statisticCallRequestViewModel.selectedEndDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth));
+            else statisticCallRequestViewModel.selectedEndDate.setValue(newEndDate);
         });
 
         //sets the min date to the beginning of Corona
@@ -245,7 +248,6 @@ public class StatisticRequestFragment extends Fragment {
 
         //setup RuleWatcher
         rule = new StatisticRequestRule(isoCountryAdapter, criteriaAdapter, chartTypeAdapter, new StatisticRequestRule.RuleDateRangeInterface() {
-            boolean changed = false;
 
             @Override
             public LocalDate getStartDate() {
@@ -270,50 +272,22 @@ public class StatisticRequestFragment extends Fragment {
             //the EndDate picker is forced to be equal to the startDatePicker if the condition applies
             @Override
             public void conditionApplies(boolean startAndEndDateMustBeSame) {
-                if (startAndEndDateMustBeSame && !changed) {
+                if (startAndEndDateMustBeSame && !statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()) {
                     //end and start date must not be same
                     if (!Objects.equals(statisticCallRequestViewModel.selectedStartDate.getValue(), statisticCallRequestViewModel.selectedEndDate.getValue())) {
                         throw new IllegalStateException("Unexpected State, start and end are different but must be same");
                     }
-                    statisticCallRequestViewModel.selectedEndDate.removeObservers(getViewLifecycleOwner());
                     endDateChooser.setEnabled(false);
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
-                    statisticCallRequestViewModel.selectedStartDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
-                        Log.d(this.getClass().getName(), "start and end Date changed");
-                        startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                        endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
-                        endDatePicker.getDatePicker().updateDate(start.getYear(), start.getMonthValue(), start.getDayOfMonth());
-                        statisticCallRequestViewModel.selectedEndDate.setValue(start);
-                        endDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                        if (startDateChange != null) startDateChange.onItemChange();
-                        if (endDateChange != null) endDateChange.onItemChange();
-                    });
-                    changed = true;
+                    statisticCallRequestViewModel.ruleAppliesForDatePicker.setValue(true);
                 }
             }
 
             //reset to old condition before condition did apply
             @Override
             public void conditionDoesNotApply() {
-                if (changed) {
-                    statisticCallRequestViewModel.selectedStartDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
-                        Log.d(this.getClass().getName(), "start Date changed");
-                        startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                        if (startDateChange != null) startDateChange.onItemChange();
-                    });
-                    statisticCallRequestViewModel.selectedEndDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.selectedEndDate.observe(getViewLifecycleOwner(), end -> {
-                        Log.d(this.getClass().getName(), "end Date changed");
-                        endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-                        if (endDateChange != null) endDateChange.onItemChange();
-                    });
-
+                if (statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()) {
                     if (statisticCallRequestViewModel.selectedEndDate.getValue() != null)
                         startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(statisticCallRequestViewModel.selectedEndDate.getValue()));
                     if (statisticCallRequestViewModel.selectedStartDate.getValue() != null)
@@ -323,7 +297,7 @@ public class StatisticRequestFragment extends Fragment {
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
                     endDateChooser.setEnabled(true);
-                    changed = false;
+                    statisticCallRequestViewModel.ruleAppliesForDatePicker.setValue(false);
                 }
             }
         });
