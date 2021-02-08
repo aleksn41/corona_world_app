@@ -40,12 +40,13 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 
+import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 /**
- * This Class is used to show the Statistic
+ * This Fragment is used to display a statistic to the user. The statistics automatically change style according to the user's device's global theme.
  *
- * @author Thomas Meier (Logic)
+ * @author Thomas Meier (Logic and Statistics style)
  * @author Aleksandr Stankoski (Layout)
  */
 public class StatisticFragment extends Fragment {
@@ -59,6 +60,25 @@ public class StatisticFragment extends Fragment {
     private final ExecutorService service = ThreadPoolHandler.getInstance();
 
     LinearProgressIndicator progressBar;
+
+    private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
+        @Override
+        public void startLoadingScreen() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void endLoadingScreen() {
+            progressBar.setProgress(0);
+            progressBar.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void setProgressBar(int progress) {
+            progressBar.setProgress(progress);
+        }
+
+    };
 
     BarChart barChart;
 
@@ -111,6 +131,7 @@ public class StatisticFragment extends Fragment {
         pieChart.setVisibility(View.GONE);
         lineChart.setVisibility(View.GONE);
 
+        loadingScreen.startLoadingScreen();
         statisticViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         Bundle bundle = getArguments();
         assert bundle != null;
@@ -120,11 +141,14 @@ public class StatisticFragment extends Fragment {
         setStyle(pieChart, statisticCall, requireContext());
         setStyle(lineChart, requireContext());
 
+        statisticViewModel.progress.observe(getViewLifecycleOwner(), loadingScreen::setProgressBar);
+
         service.execute(() -> {
             Thread currentThread = Thread.currentThread();
             AtomicBoolean retry = new AtomicBoolean(true);
             while (retry.get()) {
                 if (getContext() != null) {
+                    requireActivity().runOnUiThread(() -> loadingScreen.setProgressBar(20));
                     try {
                         switch (statisticCall.getChartType()) {
                             case BAR:
@@ -184,7 +208,7 @@ public class StatisticFragment extends Fragment {
                         }
                     } catch (UnavailableException e) {
                         Log.e(TAG, "The api is currently not available!", e);
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, (dialog, which) -> {
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.API_CURRENTLY_NOT_AVAILABLE, (dialog, which) -> {
                             retry.set(true);
                             synchronized (currentThread) {
                                 currentThread.notify();
@@ -238,11 +262,12 @@ public class StatisticFragment extends Fragment {
                         }
                     }
                 } else {
-                    //this is if the user quickly changes fragment and the error dialog pops up anyway
+                    //this is if the user quickly changes fragments and the error dialog pops up anyway
                     retry.set(false);
                 }
             }
         });
+        loadingScreen.endLoadingScreen();
         return root;
     }
 

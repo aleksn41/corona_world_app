@@ -100,6 +100,8 @@ public class StatisticRequestFragment extends Fragment {
         isoCountryAdapter.addToBlackList(ISOCountry.Aland_Islands);
         isoCountryAdapter.addToBlackList(ISOCountry.American_Samoa);
         isoCountryAdapter.addToBlackList(ISOCountry.Antarctica);
+        isoCountryAdapter.addToBlackList(ISOCountry.Anguilla);
+        isoCountryAdapter.addToBlackList(ISOCountry.Aruba);
         isoCountryAdapter.addToBlackList(ISOCountry.Bouvet_Island);
         isoCountryAdapter.addToBlackList(ISOCountry.British_Indian_Ocean_Territory);
         isoCountryAdapter.addToBlackList(ISOCountry.Christmas_Island);
