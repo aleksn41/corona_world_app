@@ -177,6 +177,7 @@ public class StatisticFragment extends Fragment {
                             default:
                                 throw new IllegalStateException("A not yet implemented chart type was selected!");
                         }
+                        requireActivity().runOnUiThread(loadingScreen::endLoadingScreen);
                         retry.set(false);
                     } catch (ExecutionException | InterruptedException | IllegalArgumentException e) {
                         Log.e(TAG, "An error has occurred while creating the statistic!", e);
@@ -293,7 +294,6 @@ public class StatisticFragment extends Fragment {
                 }
             }
         });
-        loadingScreen.endLoadingScreen();
         return root;
     }
 
