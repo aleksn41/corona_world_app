@@ -53,6 +53,7 @@ public class StringToCountryParser {
         }
         if (toParse.toLowerCase(Locale.ENGLISH).contains("503 service temporarily unavailable")){
             throw new UnavailableException("Service is currently unavailable...");
+
         }
         TimeFramedCountry country = new TimeFramedCountry();
 

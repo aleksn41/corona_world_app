@@ -12,6 +12,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
  * Used to Save the data in {@link StatisticRequestFragment} in order to allow rotation of the App
+ *
  * @author Aleksandr Stankoski
  */
 public class StatisticCallRequestViewModel extends ViewModel {
@@ -20,6 +21,7 @@ public class StatisticCallRequestViewModel extends ViewModel {
     MutableLiveData<LinkedHashSet<ChartType>> selectedChartTypeCountries;
     MutableLiveData<LocalDate> selectedStartDate;
     MutableLiveData<LocalDate> selectedEndDate;
+    MutableLiveData<Boolean> ruleAppliesForDatePicker;
 
     public StatisticCallRequestViewModel() {
         selectedISOCountries = new MutableLiveData<>();
@@ -30,5 +32,7 @@ public class StatisticCallRequestViewModel extends ViewModel {
         selectedChartTypeCountries.setValue(new LinkedHashSet<>());
         selectedStartDate = new MutableLiveData<>();
         selectedEndDate = new MutableLiveData<>();
+        ruleAppliesForDatePicker = new MutableLiveData<>();
+        ruleAppliesForDatePicker.setValue(false);
     }
 }

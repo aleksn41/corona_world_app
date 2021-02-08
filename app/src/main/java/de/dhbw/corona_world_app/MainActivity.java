@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_world, R.id.navigation_germany, R.id.navigation_statistic_request, R.id.navigation_favourites,R.id.navigation_history)
+                R.id.navigation_world, R.id.navigation_germany, R.id.navigation_statistic_request, R.id.navigation_favourites, R.id.navigation_history)
                 .build();
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager()
@@ -64,15 +64,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) {// User chose the "Settings" item, show the app settings UI...
-            NavDirections action=SettingsFragmentDirections.actionGlobalNavigationSettings();
+        if (item.getItemId() == R.id.action_settings) {
+            NavDirections action = SettingsFragmentDirections.actionGlobalNavigationSettings();
             NavHostFragment navHostFragment =
                     (NavHostFragment) getSupportFragmentManager()
                             .findFragmentById(R.id.nav_host_fragment);
             navHostFragment.getNavController().navigate(action);
             return true;
-        }else if(item.getItemId()==R.id.info){
-            NavDirections action= InfoFragmentDirections.actionGlobalNavigationInfo();
+        } else if (item.getItemId() == R.id.info) {
+            NavDirections action = InfoFragmentDirections.actionGlobalNavigationInfo();
             NavHostFragment navHostFragment =
                     (NavHostFragment) getSupportFragmentManager()
                             .findFragmentById(R.id.nav_host_fragment);

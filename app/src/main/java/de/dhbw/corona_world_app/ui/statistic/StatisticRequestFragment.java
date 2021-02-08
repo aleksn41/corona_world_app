@@ -2,6 +2,7 @@ package de.dhbw.corona_world_app.ui.statistic;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
+import org.w3c.dom.Text;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -41,6 +44,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
  * This Fragment is used to choose and create a Statistic
+ *
  * @author Aleksandr Stankoski
  */
 public class StatisticRequestFragment extends Fragment {
@@ -57,9 +61,9 @@ public class StatisticRequestFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        statisticCallRequestViewModel =new ViewModelProvider(this).get(StatisticCallRequestViewModel.class);
+        statisticCallRequestViewModel = new ViewModelProvider(this).get(StatisticCallRequestViewModel.class);
         View root = inflater.inflate(R.layout.fragment_statistic_request, container, false);
-
+        Log.v(this.getClass().getName(), "creating View");
         ExtendedFloatingActionButton floatingActionButton = root.findViewById(R.id.floating_action_button);
 
         //change floating button based on position in Scrollview
@@ -68,7 +72,11 @@ public class StatisticRequestFragment extends Fragment {
             boolean atEndOfView = scrollView.getChildAt(0).getBottom() - (scrollView.getHeight() + scrollY) == 0;
             if (atEndOfView) {
                 floatingActionButton.extend();
-            } else floatingActionButton.shrink();
+                Log.v(this.getClass().getName(), "reached bottom of Scrollview, extending Button");
+            } else {
+                floatingActionButton.shrink();
+                Log.v(this.getClass().getName(), "not at bottom of Scrollview, shrinking Button");
+            }
         });
 
         //init floatingActionButtonPosition once it is known if the scrollview is at the end when initialized
@@ -81,6 +89,7 @@ public class StatisticRequestFragment extends Fragment {
                 if (atEndOfView) {
                     floatingActionButton.extend();
                 } else floatingActionButton.shrink();
+                Log.v(this.getClass().getName(), "finished setup floating Button");
             }
         });
 
@@ -93,18 +102,47 @@ public class StatisticRequestFragment extends Fragment {
         isoCountryAdapter.addToBlackList(ISOCountry.Aland_Islands);
         isoCountryAdapter.addToBlackList(ISOCountry.American_Samoa);
         isoCountryAdapter.addToBlackList(ISOCountry.Antarctica);
+        isoCountryAdapter.addToBlackList(ISOCountry.Anguilla);
+        isoCountryAdapter.addToBlackList(ISOCountry.Aruba);
+        isoCountryAdapter.addToBlackList(ISOCountry.Bermuda);
+        isoCountryAdapter.addToBlackList(ISOCountry.Bonaire_Sint_Eustatius_and_Saba);
         isoCountryAdapter.addToBlackList(ISOCountry.Bouvet_Island);
         isoCountryAdapter.addToBlackList(ISOCountry.British_Indian_Ocean_Territory);
+        isoCountryAdapter.addToBlackList(ISOCountry.Cura_ao);
         isoCountryAdapter.addToBlackList(ISOCountry.Christmas_Island);
         isoCountryAdapter.addToBlackList(ISOCountry.Cocos);
+        isoCountryAdapter.addToBlackList(ISOCountry.Cayman_Islands);
         isoCountryAdapter.addToBlackList(ISOCountry.Cook_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Falkland_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Faroe_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.French_Guiana);
+        isoCountryAdapter.addToBlackList(ISOCountry.French_Polynesia);
         isoCountryAdapter.addToBlackList(ISOCountry.French_Southern_Territories);
         isoCountryAdapter.addToBlackList(ISOCountry.Guam);
+        isoCountryAdapter.addToBlackList(ISOCountry.Gibraltar);
+        isoCountryAdapter.addToBlackList(ISOCountry.Greenland);
+        isoCountryAdapter.addToBlackList(ISOCountry.Guadeloupe);
         isoCountryAdapter.addToBlackList(ISOCountry.Guernsey);
+        isoCountryAdapter.addToBlackList(ISOCountry.Hong_Kong);
         isoCountryAdapter.addToBlackList(ISOCountry.Heard_Island_and_McDonald_Islands);
         isoCountryAdapter.addToBlackList(ISOCountry.Holy_See);
+        isoCountryAdapter.addToBlackList(ISOCountry.Isle_of_Man);
         isoCountryAdapter.addToBlackList(ISOCountry.Jersey);
         isoCountryAdapter.addToBlackList(ISOCountry.Kiribati);
+        isoCountryAdapter.addToBlackList(ISOCountry.Macao);
+        isoCountryAdapter.addToBlackList(ISOCountry.Martinique);
+        isoCountryAdapter.addToBlackList(ISOCountry.Mayotte);
+        isoCountryAdapter.addToBlackList(ISOCountry.Montserrat);
+        isoCountryAdapter.addToBlackList(ISOCountry.New_Caledonia);
+        isoCountryAdapter.addToBlackList(ISOCountry.R_union);
+        isoCountryAdapter.addToBlackList(ISOCountry.Saint_Barth_lemy);
+        isoCountryAdapter.addToBlackList(ISOCountry.Saint_Martin);
+        isoCountryAdapter.addToBlackList(ISOCountry.Saint_Pierre_and_Miquelon);
+        isoCountryAdapter.addToBlackList(ISOCountry.Sint_Maarten);
+        isoCountryAdapter.addToBlackList(ISOCountry.Turks_and_Caicos_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.British_Virgin_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Wallis_and_Futuna);
+        isoCountryAdapter.addToBlackList(ISOCountry.Western_Sahara);
         isoCountryAdapter.addToBlackList(ISOCountry.North_Korea);
         isoCountryAdapter.addToBlackList(ISOCountry.Nauru);
         isoCountryAdapter.addToBlackList(ISOCountry.Niue);
@@ -130,6 +168,7 @@ public class StatisticRequestFragment extends Fragment {
             statisticCallRequestViewModel.selectedISOCountries.setValue(statisticCallRequestViewModel.selectedISOCountries.getValue());
         });
         statisticCallRequestViewModel.selectedISOCountries.observe(getViewLifecycleOwner(), isoCountries -> {
+            Log.d(this.getClass().getName(), "selected IsoCountries has been updated");
             isoCountryAdapter.submitSelectedItems(isoCountries);
             isoCountryTextView.setText("");
             isoCountryChips.removeAllViews();
@@ -147,11 +186,13 @@ public class StatisticRequestFragment extends Fragment {
         CustomAutoCompleteTextView criteriaNachoTextView = root.findViewById(R.id.nachoCriteriaTextView);
         ChipGroup criteriaChips = root.findViewById(R.id.criteriaChips);
         AutoCompleteTextViewAdapter<Criteria> criteriaAdapter = new AutoCompleteTextViewAdapter<>(getContext(), Criteria.class, AutoCompleteTextViewAdapter.NO_LIMIT, null);
+
         criteriaNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
             statisticCallRequestViewModel.selectedCriteriaCountries.getValue().add(criteriaAdapter.getItem(position));
             statisticCallRequestViewModel.selectedCriteriaCountries.setValue(statisticCallRequestViewModel.selectedCriteriaCountries.getValue());
         });
         statisticCallRequestViewModel.selectedCriteriaCountries.observe(getViewLifecycleOwner(), criteriaItems -> {
+            Log.d(this.getClass().getName(), "selected Criteria has been updated");
             criteriaAdapter.submitSelectedItems(criteriaItems);
             criteriaNachoTextView.setText("");
             criteriaChips.removeAllViews();
@@ -176,11 +217,13 @@ public class StatisticRequestFragment extends Fragment {
                 super.conditionApplies(allowOnlyOneItem);
             }
         };
+
         chartTypeNachoTextView.setOnItemClickListener((parent, view, position, id) -> {
             statisticCallRequestViewModel.selectedChartTypeCountries.getValue().add(chartTypeAdapter.getItem(position));
             statisticCallRequestViewModel.selectedChartTypeCountries.setValue(statisticCallRequestViewModel.selectedChartTypeCountries.getValue());
         });
         statisticCallRequestViewModel.selectedChartTypeCountries.observe(getViewLifecycleOwner(), chartTypeItems -> {
+            Log.d(this.getClass().getName(), "selected ChartType has been updated");
             chartTypeAdapter.submitSelectedItems(chartTypeItems);
             chartTypeNachoTextView.setText("");
             chartTypeChips.removeAllViews();
@@ -206,21 +249,46 @@ public class StatisticRequestFragment extends Fragment {
 
         startDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
         statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
+            Log.d(this.getClass().getName(), "start Date changed");
             startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
             endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-            if (!endDateChooser.isEnabled()) endDateChooser.setEnabled(true);
+            if (!statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()) endDateChooser.setEnabled(true);
             if (startDateChange != null) startDateChange.onItemChange();
         });
         endDatePicker = new DatePickerDialog(getContext(), R.style.SpinnerDatePickerStyle, null, year, month, day);
         statisticCallRequestViewModel.selectedEndDate.observe(getViewLifecycleOwner(), end -> {
+            Log.d(this.getClass().getName(), "end Date changed");
             endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-            startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
+            if(!statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue())startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
             if (endDateChange != null) endDateChange.onItemChange();
         });
 
-        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> statisticCallRequestViewModel.selectedStartDate.setValue(LocalDate.of(year1, month1 + 1, dayOfMonth)));
+        startDatePicker.setOnDateSetListener((view, year1, month1, dayOfMonth) -> {
+            LocalDate newStartDate=LocalDate.of(year1, month1 + 1, dayOfMonth);
+            if(statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()){
+                statisticCallRequestViewModel.selectedEndDate.setValue(newStartDate);
+            }
+            if(statisticCallRequestViewModel.selectedEndDate.getValue()!=StatisticCall.NOW&&newStartDate.isAfter(statisticCallRequestViewModel.selectedEndDate.getValue())){
+                Toast.makeText(getContext(),"Cannot choose a start date after end date",Toast.LENGTH_SHORT).show();
+                int oldYear=statisticCallRequestViewModel.selectedStartDate.getValue().getYear();
+                int oldMoth=statisticCallRequestViewModel.selectedStartDate.getValue().getMonthValue()-1;
+                int oldDayOfMonth=statisticCallRequestViewModel.selectedStartDate.getValue().getDayOfMonth();
+                startDatePicker.getDatePicker().updateDate(oldYear,oldMoth,oldDayOfMonth);
+            }
+            else statisticCallRequestViewModel.selectedStartDate.setValue(newStartDate);
+        });
 
-        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> statisticCallRequestViewModel.selectedEndDate.setValue(LocalDate.of(year12, month12 + 1, dayOfMonth)));
+        endDatePicker.setOnDateSetListener((view, year12, month12, dayOfMonth) -> {
+            LocalDate newEndDate=LocalDate.of(year12, month12 + 1, dayOfMonth);
+            if(statisticCallRequestViewModel.selectedStartDate.getValue()==StatisticCall.NOW||newEndDate.isBefore(statisticCallRequestViewModel.selectedStartDate.getValue())){
+                Toast.makeText(getContext(),"Cannot choose a end date before start date",Toast.LENGTH_SHORT).show();
+                int oldYear=statisticCallRequestViewModel.selectedEndDate.getValue().getYear();
+                int oldMoth=statisticCallRequestViewModel.selectedEndDate.getValue().getMonthValue()-1;
+                int oldDayOfMonth=statisticCallRequestViewModel.selectedEndDate.getValue().getDayOfMonth();
+                startDatePicker.getDatePicker().updateDate(oldYear,oldMoth,oldDayOfMonth);
+            }
+            else statisticCallRequestViewModel.selectedEndDate.setValue(newEndDate);
+        });
 
         //sets the min date to the beginning of Corona
         startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
@@ -231,8 +299,8 @@ public class StatisticRequestFragment extends Fragment {
         endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
 
         //Default selection is now
-        startDateChooser.setText("Now");
-        endDateChooser.setText("Now");
+        startDateChooser.setText(getString(R.string.now));
+        endDateChooser.setText(getString(R.string.now));
 
         //not allowed to change end Date until start date is changed
         endDateChooser.setEnabled(false);
@@ -242,7 +310,6 @@ public class StatisticRequestFragment extends Fragment {
 
         //setup RuleWatcher
         rule = new StatisticRequestRule(isoCountryAdapter, criteriaAdapter, chartTypeAdapter, new StatisticRequestRule.RuleDateRangeInterface() {
-            boolean changed = false;
 
             @Override
             public LocalDate getStartDate() {
@@ -264,48 +331,25 @@ public class StatisticRequestFragment extends Fragment {
                 endDateChange = listener;
             }
 
+            //the EndDate picker is forced to be equal to the startDatePicker if the condition applies
             @Override
             public void conditionApplies(boolean startAndEndDateMustBeSame) {
-                if (startAndEndDateMustBeSame && !changed) {
+                if (startAndEndDateMustBeSame && !statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()) {
                     //end and start date must not be same
                     if (!Objects.equals(statisticCallRequestViewModel.selectedStartDate.getValue(), statisticCallRequestViewModel.selectedEndDate.getValue())) {
                         throw new IllegalStateException("Unexpected State, start and end are different but must be same");
                     }
-                    statisticCallRequestViewModel.selectedEndDate.removeObservers(getViewLifecycleOwner());
                     endDateChooser.setEnabled(false);
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
-                    statisticCallRequestViewModel.selectedStartDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
-                        startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                        endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(start));
-                        endDatePicker.getDatePicker().updateDate(start.getYear(), start.getMonthValue(), start.getDayOfMonth());
-                        statisticCallRequestViewModel.selectedEndDate.setValue(start);
-                        endDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                        if (startDateChange != null) startDateChange.onItemChange();
-                        if (endDateChange != null) endDateChange.onItemChange();
-                    });
-                    changed = true;
+                    statisticCallRequestViewModel.ruleAppliesForDatePicker.setValue(true);
                 }
             }
 
+            //reset to old condition before condition did apply
             @Override
             public void conditionDoesNotApply() {
-                if (changed) {
-                    statisticCallRequestViewModel.selectedStartDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.selectedStartDate.observe(getViewLifecycleOwner(), start -> {
-                        startDateChooser.setText(start.format(StatisticCall.DATE_FORMAT));
-                        endDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(start));
-                        if (startDateChange != null) startDateChange.onItemChange();
-                    });
-                    statisticCallRequestViewModel.selectedEndDate.removeObservers(getViewLifecycleOwner());
-                    statisticCallRequestViewModel.selectedEndDate.observe(getViewLifecycleOwner(), end -> {
-                        endDateChooser.setText(end.format(StatisticCall.DATE_FORMAT));
-                        startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(end));
-                        if (endDateChange != null) endDateChange.onItemChange();
-                    });
-
+                if (statisticCallRequestViewModel.ruleAppliesForDatePicker.getValue()) {
                     if (statisticCallRequestViewModel.selectedEndDate.getValue() != null)
                         startDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(statisticCallRequestViewModel.selectedEndDate.getValue()));
                     if (statisticCallRequestViewModel.selectedStartDate.getValue() != null)
@@ -315,15 +359,17 @@ public class StatisticRequestFragment extends Fragment {
                     startDatePicker.getDatePicker().setMinDate(localDateToMilliSeconds(StatisticCall.MIN_DATE));
                     endDatePicker.getDatePicker().setMaxDate(localDateToMilliSeconds(LocalDate.now()));
                     endDateChooser.setEnabled(true);
-                    changed = false;
+                    statisticCallRequestViewModel.ruleAppliesForDatePicker.setValue(false);
                 }
             }
         });
 
         floatingActionButton.setOnClickListener(v -> {
             if (isoCountryAdapter.anySelected() && criteriaAdapter.anySelected() && chartTypeAdapter.anySelected()) {
+                Log.i(this.getClass().getName(), "creating statistic");
                 requestStatistic(new StatisticCall(isoCountryAdapter.getSelectedItems(), chartTypeAdapter.getSelectedItems().get(0), criteriaAdapter.getSelectedItems(), statisticCallRequestViewModel.selectedStartDate.getValue(), statisticCallRequestViewModel.selectedEndDate.getValue()));
             } else {
+                Log.i(this.getClass().getName(), "invalid input for statistic");
                 Toast.makeText(getContext(), "Please select everything before proceeding", Toast.LENGTH_SHORT).show();
                 if (!isoCountryAdapter.anySelected())
                     isoCountryTextView.setError("no item selected");
@@ -333,6 +379,7 @@ public class StatisticRequestFragment extends Fragment {
                     chartTypeNachoTextView.setError("no item selected");
             }
         });
+        Log.v(this.getClass().getName(), "finished creating View");
         return root;
     }
 
@@ -361,6 +408,7 @@ public class StatisticRequestFragment extends Fragment {
                         if (!textView.isPopupShowing()) textView.showDropDown();
                         textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
+                        Log.v(this.getClass().getName(), "AutoCompleted TextView query");
                     } else {
                         showErrorWithCompletion(textView);
                         return false;
@@ -373,6 +421,7 @@ public class StatisticRequestFragment extends Fragment {
                         if (!textView.isPopupShowing()) textView.showDropDown();
                         textView.setListSelection(0);
                         textView.onCommitCompletion(new CompletionInfo(0, 0, ""));
+                        Log.v(this.getClass().getName(), "AutoCompleted TextView query");
                     } else {
                         showErrorWithCompletion(textView);
                         return true;
@@ -406,6 +455,7 @@ public class StatisticRequestFragment extends Fragment {
             if (getContext() != null) {
                 Toast.makeText(getContext(), getString(R.string.limit_reached, limit, name), Toast.LENGTH_SHORT).show();
                 requireActivity().runOnUiThread(() -> textView.setError("reached Limit"));
+                Log.i(this.getClass().getName(), "reached limit with " + name);
             }
         };
     }

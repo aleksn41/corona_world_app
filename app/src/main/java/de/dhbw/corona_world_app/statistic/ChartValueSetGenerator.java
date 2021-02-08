@@ -1,8 +1,5 @@
 package de.dhbw.corona_world_app.statistic;
 
-import android.content.Context;
-import android.graphics.Color;
-
 import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.data.BarDataSet;
@@ -15,9 +12,13 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+/**
+ * This class generates the data sets that are used to display data in a statistic. It automatically selects different colors from the input List.
+ *
+ * @author Thomas Meier
+ */
 public class ChartValueSetGenerator {
 
     public BarDataSet getBarChartDataSet(@NonNull List<Float> data, @NonNull String label, @NonNull List<Integer> colors) {

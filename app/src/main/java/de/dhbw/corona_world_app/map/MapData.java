@@ -8,6 +8,12 @@ import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Displayable;
 
+/**
+ * This class is used for the communication between the javascript google charts library's functions and the app. It also keeps track of the "resolution" of
+ * the map (e.g. world, germany) and their respective coloring.
+ *
+ * @author Thomas Meier
+ */
 public class MapData {
 
     private static final String TAG = MapData.class.getName();
@@ -15,7 +21,7 @@ public class MapData {
     private Resolution resolution;
 
     public enum Resolution{
-        WOLRD("countries", "world", "#22748f", "#ffffff"),
+        WORLD("countries", "world", "#22748f", "#ffffff"),
         GERMANY("provinces", "DE", "#22748f", "#22748f"),
         ;
         String value;
@@ -35,8 +41,7 @@ public class MapData {
             "  <script type=\"text/javascript\">" +
             "  openStats = (country) => {jsinterface.setISOCountry(country)};" +
             "  google.charts.load('current', {" +
-            "  'packages':['geochart']," +
-            "  'mapsApiKey': '" + MapsKey.apiKey + "'});" +
+            "  'packages':['geochart']});" +
             "  google.charts.setOnLoadCallback(drawMap);" +
             "  function drawMap() {" +
             "  var dataTable = new google.visualization.DataTable();" +
@@ -45,11 +50,7 @@ public class MapData {
             "  dataTable.addRows([";
 
     public MapData(){
-        this.resolution = Resolution.WOLRD;
-    }
-
-    public MapData(Resolution resolution){
-        this.resolution = resolution;
+        this.resolution = Resolution.WORLD;
     }
 
     private String getWebViewEnd(){

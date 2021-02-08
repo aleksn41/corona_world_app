@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -20,7 +21,6 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -30,10 +30,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -42,10 +40,8 @@ import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.api.UnavailableException;
-import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.DataException;
-import de.dhbw.corona_world_app.datastructure.Displayable;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 import de.dhbw.corona_world_app.statistic.ChartValueSetGenerator;
@@ -53,6 +49,11 @@ import de.dhbw.corona_world_app.statistic.StatisticCacheObject;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+/**
+ * This class generates the different statistics and manages their respective cache.
+ *
+ * @author Thomas Meier
+ */
 public class StatisticViewModel extends ViewModel {
 
     private static final String TAG = StatisticViewModel.class.getName();
@@ -64,6 +65,9 @@ public class StatisticViewModel extends ViewModel {
     private ChartValueSetGenerator dataSetGenerator;
 
     private File pathToCacheDir;
+
+
+    public MutableLiveData<Integer> progress = new MutableLiveData<>();
 
     public StatisticViewModel() {
 
@@ -171,8 +175,11 @@ public class StatisticViewModel extends ViewModel {
         apiGottenList = getCachedDataIfContains(statisticCall);
         if(apiGottenList == null) {
             apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-            cacheStatisticCall(statisticCall, apiGottenList);
+            if(APIManager.isCacheEnabled()) {
+                cacheStatisticCall(statisticCall, apiGottenList);
+            }
         }
+        progress.postValue(75);
         LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
         if (startDate == null) startDate = LocalDate.now();
@@ -207,6 +214,7 @@ public class StatisticViewModel extends ViewModel {
 
             formatXAxis(apiGottenList, dayDifference, step, chart.getXAxis());
             Collections.sort(apiGottenList);
+            Collections.reverse(apiGottenList);
             for (TimeFramedCountry country : apiGottenList) {
                 for (Criteria criteria : criteriaOrder) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
@@ -222,10 +230,9 @@ public class StatisticViewModel extends ViewModel {
             for (TimeFramedCountry country : apiGottenList) {
                 countries.add(country.getCountry().getISOCode());
             }
-
+            Collections.sort(apiGottenList);
             for (Criteria criteria : criteriaOrder) {
                 List<Float> countriesData = new ArrayList<>();
-                Collections.sort(apiGottenList);
                 for (TimeFramedCountry country : apiGottenList) {
                     if (statisticCall.getCriteriaList().contains(criteria)) {
                         List<Float> data = getDataList(1, 1, country, criteria);
@@ -246,35 +253,6 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(barData);
     }
 
-    private int getIntArrayAvg(int[] array) {
-        int avg = 0;
-        for (int value : array) {
-            avg += value;
-        }
-        return avg / array.length;
-    }
-
-    private void formatXAxis(List<TimeFramedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
-        List<String> dates = new ArrayList<>();
-        for (int i = 0; i < dayDifference; i += step) {
-            String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
-            dates.add(dateFormatted);
-        }
-
-        xAxis.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                if (value >= 0) {
-                    if (dates.size() > (int) value) {
-                        return dates.get((int) value);
-                    } else return "";
-                } else {
-                    return "";
-                }
-            }
-        });
-    }
-
     public void getPieChart(StatisticCall statisticCall, PieChart chart, Context context) throws InterruptedException, ExecutionException, JSONException, TooManyRequestsException, IOException, ClassNotFoundException, UnavailableException {
         Logger.logV(TAG, "Getting pie chart for " + statisticCall);
         init();
@@ -290,8 +268,11 @@ public class StatisticViewModel extends ViewModel {
         apiGottenList = getCachedDataIfContains(statisticCall);
         if(apiGottenList == null) {
             apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-            cacheStatisticCall(statisticCall, apiGottenList);
+            if(APIManager.isCacheEnabled()) {
+                cacheStatisticCall(statisticCall, apiGottenList);
+            }
         }
+        progress.postValue(75);
         if (dates2D) {
             if (countryList2D) {
                 for (Criteria criteria : statisticCall.getCriteriaList()) {
@@ -356,8 +337,12 @@ public class StatisticViewModel extends ViewModel {
         apiGottenList = getCachedDataIfContains(statisticCall);
         if(apiGottenList == null) {
             apiGottenList = APIManager.getData(statisticCall.getCountryList(), statisticCall.getCriteriaList(), statisticCall.getStartDate(), statisticCall.getEndDate());
-            cacheStatisticCall(statisticCall, apiGottenList);
-        }        LocalDate startDate = statisticCall.getStartDate();
+            if(APIManager.isCacheEnabled()) {
+                cacheStatisticCall(statisticCall, apiGottenList);
+            }
+        }
+        progress.postValue(75);
+        LocalDate startDate = statisticCall.getStartDate();
         LocalDate endDate = statisticCall.getEndDate();
         if (startDate == null) startDate = LocalDate.now();
         if (endDate == null) endDate = LocalDate.now();
@@ -410,6 +395,11 @@ public class StatisticViewModel extends ViewModel {
         chart.setData(lineData);
     }
 
+    static String getDateFormatted(@NotNull LocalDate date) {
+        String year = Integer.toString(date.getYear());
+        return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
+    }
+
     @NotNull
     private List<Integer> getColors(Context context) {
         TypedArray colorsTyped = context.getTheme().getResources().obtainTypedArray(R.array.chartColors);
@@ -421,9 +411,37 @@ public class StatisticViewModel extends ViewModel {
         return colors;
     }
 
-    protected static String getDateFormatted(@NotNull LocalDate date) {
-        String year = Integer.toString(date.getYear());
-        return date.getDayOfMonth() + "." + date.getMonthValue() + "." + year.substring(2);
+    private int getIntArrayAvg(int[] array) {
+        int avg = 0;
+        for (int value : array) {
+            avg += value;
+        }
+        try {
+            return avg / array.length;
+        } catch (ArithmeticException e){
+            return 0;
+        }
+    }
+
+    private void formatXAxis(List<TimeFramedCountry> apiGottenList, int dayDifference, int step, XAxis xAxis) {
+        List<String> dates = new ArrayList<>();
+        for (int i = 0; i < dayDifference; i += step) {
+            String dateFormatted = getDateFormatted(apiGottenList.get(0).getDates()[i]);
+            dates.add(dateFormatted);
+        }
+
+        xAxis.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                if (value >= 0) {
+                    if (dates.size() > (int) value) {
+                        return dates.get((int) value);
+                    } else return "";
+                } else {
+                    return "";
+                }
+            }
+        });
     }
 
     private void addAverageDataToList(TimeFramedCountry country, AverageValues averageValues, List<Float> data, Criteria criteria) {
@@ -529,27 +547,27 @@ public class StatisticViewModel extends ViewModel {
             this.avgActive = 0;
         }
 
-        public int getAvgInfected() {
+        int getAvgInfected() {
             return avgInfected;
         }
 
-        public int getAvgDeaths() {
+        int getAvgDeaths() {
             return avgDeaths;
         }
 
-        public int getAvgRecovered() {
+        int getAvgRecovered() {
             return avgRecovered;
         }
 
-        public int getAvgActive() {
+        int getAvgActive() {
             return avgActive;
         }
 
-        public double getAvgPopInfRatio() {
+        double getAvgPopInfRatio() {
             return avgPopInfRatio;
         }
 
-        public double getAvgInfDeathRatio() {
+        double getAvgInfDeathRatio() {
             return avgInfDeathRatio;
         }
 
