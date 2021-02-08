@@ -1,8 +1,5 @@
 package de.dhbw.corona_world_app.statistic;
 
-import android.content.Context;
-import android.graphics.Color;
-
 import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.data.BarDataSet;
@@ -15,7 +12,6 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class ChartValueSetGenerator {

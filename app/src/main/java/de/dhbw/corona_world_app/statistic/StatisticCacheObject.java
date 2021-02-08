@@ -9,11 +9,11 @@ import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 
 public class StatisticCacheObject implements Serializable {
 
-    LocalDateTime creationTime;
+    final LocalDateTime creationTime;
 
-    StatisticCall statisticCall;
+    final StatisticCall statisticCall;
 
-    List<TimeFramedCountry> data;
+    final List<TimeFramedCountry> data;
 
     public StatisticCacheObject(LocalDateTime creationTime, StatisticCall statisticCall, List<TimeFramedCountry> data) {
         this.creationTime = creationTime;

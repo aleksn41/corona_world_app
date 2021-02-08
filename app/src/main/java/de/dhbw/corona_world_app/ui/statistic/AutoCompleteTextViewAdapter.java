@@ -1,16 +1,12 @@
 package de.dhbw.corona_world_app.ui.statistic;
 
 import android.content.Context;
-import android.database.DataSetObserver;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -32,13 +28,13 @@ import de.dhbw.corona_world_app.R;
 public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter implements Filterable, StatisticRequestRule.RuleEnumAdapter<T> {
     private final Context context;
     HashSet<T> selectedItems;
-    List<T> originalItems;
+    final List<T> originalItems;
     List<T> filteredItems;
-    HashSet<T> blackListItems;
-    int originalLimit;
+    final HashSet<T> blackListItems;
+    final int originalLimit;
     int limit;
     public static final int NO_LIMIT = -1;
-    LimitListener limitListener;
+    final LimitListener limitListener;
     StatisticRequestRule.OnItemsChangeListener itemsChangeListener;
 
     interface LimitListener {

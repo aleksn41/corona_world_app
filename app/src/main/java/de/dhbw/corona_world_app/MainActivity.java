@@ -10,13 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import de.dhbw.corona_world_app.ui.info.InfoFragmentDirections;
-import de.dhbw.corona_world_app.ui.settings.SettingsFragment;
 import de.dhbw.corona_world_app.ui.settings.SettingsFragmentDirections;
 
 public class MainActivity extends AppCompatActivity {

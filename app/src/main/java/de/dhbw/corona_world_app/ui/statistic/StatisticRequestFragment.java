@@ -27,8 +27,6 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
-import org.w3c.dom.Text;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;

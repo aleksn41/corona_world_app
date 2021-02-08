@@ -136,13 +136,7 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
                     });
                 }
             }
-        }, request -> {
-            HistoryFragmentDirections.ShowStatistic2 action = HistoryFragmentDirections.showStatistic2(request, false);
-            NavHostFragment navHostFragment =
-                    (NavHostFragment) requireActivity().getSupportFragmentManager()
-                            .findFragmentById(R.id.nav_host_fragment);
-            navHostFragment.getNavController().navigate(action);
-        });
+        }, this::goToStatistic);
         statisticCallViewModel.observeData(getViewLifecycleOwner(), new Observer<List<Pair<StatisticCall, Boolean>>>() {
             @Override
             public void onChanged(List<Pair<StatisticCall, Boolean>> pairs) {
@@ -230,6 +224,8 @@ public abstract class StatisticCallRecyclerViewFragment extends Fragment {
     }
 
     public abstract StatisticCallDataManager.DataType getDataType();
+
+    public abstract void goToStatistic(StatisticCall request);
 
     protected void deleteCorruptData() {
         ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_RESTORE_FILE, (dialog1, which1) -> {

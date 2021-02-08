@@ -6,7 +6,6 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -69,7 +68,7 @@ public class APIManager {
 
             for (Country<ISOCountry> country : returnList) {
                 ISOCountry isoCountry = country.getName();
-                if (country.getName() != null && !Mapper.isInBlacklist(isoCountry.name())) {
+                if (country.getName() != null && Mapper.isInBlacklist(isoCountry.name())) {
                     if (popMap.containsKey(isoCountry)) {
                         country.setPopulation(popMap.get(isoCountry));
                     } else {

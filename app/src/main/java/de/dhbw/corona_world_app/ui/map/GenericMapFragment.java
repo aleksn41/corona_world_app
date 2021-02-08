@@ -63,7 +63,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
 
     private MapViewModel mapViewModel;
 
-    MutableLiveData<String> webViewString = new MutableLiveData<>();
+    final MutableLiveData<String> webViewString = new MutableLiveData<>();
 
     LinearProgressIndicator progressBar;
 
@@ -75,7 +75,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
 
     Country<T> selectedCountry;
 
-    NumberFormat percentageFormat = NumberFormat.getPercentInstance();
+    final NumberFormat percentageFormat = NumberFormat.getPercentInstance();
 
     private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
         @Override

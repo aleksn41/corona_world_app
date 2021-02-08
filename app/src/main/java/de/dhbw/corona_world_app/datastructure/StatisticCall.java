@@ -22,7 +22,7 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 public class StatisticCall implements Serializable {
     //First Date that can be chosen by the API
     public static final LocalDate MIN_DATE = LocalDate.of(2020, 1, 22);
-    public static DateTimeFormatter DATE_FORMAT= DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public static final DateTimeFormatter DATE_FORMAT= DateTimeFormatter.ofPattern("dd-MM-yyyy");
     public static final LocalDate NOW=null;
 
     private List<ISOCountry> countryList;

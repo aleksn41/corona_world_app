@@ -1,7 +1,5 @@
 package de.dhbw.corona_world_app.datastructure;
 
-import androidx.annotation.NonNull;
-
 public enum Criteria {
     DEATHS("Deaths"),
     RECOVERED("Recovered"),
@@ -12,7 +10,7 @@ public enum Criteria {
     ID_RATION("Infected Deaths Ratio"),
     IH_RATION("Infected Health Ratio");
 
-    String displayName;
+    final String displayName;
 
     Criteria(String displayName){
         this.displayName=displayName;

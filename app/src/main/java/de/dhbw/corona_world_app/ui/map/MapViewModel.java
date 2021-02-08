@@ -34,7 +34,6 @@ import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.map.MapCacheObject;
 import de.dhbw.corona_world_app.map.MapWithBoxCacheObject;
-import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 public class MapViewModel extends ViewModel {
 
@@ -54,15 +53,15 @@ public class MapViewModel extends ViewModel {
 
 
 
-    public MutableLiveData<Country<? extends Displayable>> selectedCountry = new MutableLiveData<>();
+    public final MutableLiveData<Country<? extends Displayable>> selectedCountry = new MutableLiveData<>();
 
-    public MutableLiveData<Integer> progress = new MutableLiveData<>();
+    public final MutableLiveData<Integer> progress = new MutableLiveData<>();
 
-    public MutableLiveData<List<Country<ISOCountry>>> mCountryList = new MutableLiveData<>();
+    public final MutableLiveData<List<Country<ISOCountry>>> mCountryList = new MutableLiveData<>();
 
-    public MutableLiveData<List<Country<GermanyState>>> mStatesList = new MutableLiveData<>();
+    public final MutableLiveData<List<Country<GermanyState>>> mStatesList = new MutableLiveData<>();
 
-    public MutableLiveData<Country<ISOCountry>> mBoxValue = new MutableLiveData<>();
+    public final MutableLiveData<Country<ISOCountry>> mBoxValue = new MutableLiveData<>();
 
     public void init(boolean cacheDisabled, boolean longTermDisabled) {
         APIManager.setSettings(!cacheDisabled, !longTermDisabled);
