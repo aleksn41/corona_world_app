@@ -129,7 +129,7 @@ This time however it is not possible to get a quick overview by creating a pie c
 For more info on the Map of Germany click [here](https://github.com/aleksn41/corona_world_app/wiki/Germany-Map-(beta)).
 
 ### Settings & Info
-The global settings and info dropdown can be reached from all fragments. Image (this is from the World Map but the position does not vary):
+The global settings and info dropdown can be reached from all fragments. It opens on click at the three vertical dots in the top right corner of the screen. Image (this is from the World Map but the position does not vary):
 <p align="center">
   <img src="/images/Settings_Info_Tab.png" alt="Settings & Info Tab">
 </p>
