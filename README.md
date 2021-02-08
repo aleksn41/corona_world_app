@@ -100,6 +100,9 @@ This Application can only run on Android 10 or greater (API level 29 or greater)
 
 
 ## Usage
+
+### Click [here](https://github.com/aleksn41/corona_world_app/wiki/2\)-Overview) for a detailed overview of all features and functionalities. 
+
 ### Starting Screen / World Map
 Once the app is opened you are conveyed to the starting screen, the world map. In this screen a heat map of the world is shown. All countries are colored from green to red after their respective ratio of how much population is infected. Image:
 <p align="center">
@@ -188,7 +191,7 @@ When an entry is clicked and hold the normale interface changes to a multi-selec
   <img src="/images/History_Delete.png" alt="History Delete">
 </p>
 
-For more info on Statistic click [here](https://github.com/aleksn41/corona_world_app/wiki/7\)-History-Statistic).
+For more info on History click [here](https://github.com/aleksn41/corona_world_app/wiki/7\)-History-Statistic).
 
 ### Favourites
 This screen has the same functionality as the history screen. The single difference is that only favourite entries are shown. Image:
@@ -196,7 +199,7 @@ This screen has the same functionality as the history screen. The single differe
   <img src="/images/Favourites.png" alt="History Delete">
 </p>
 
-Click [here](https://github.com/aleksn41/corona_world_app/wiki/2\)-Overview) for a quick overview of all features and functionalities. 
+For more info on Favourites click [here](https://github.com/aleksn41/corona_world_app/wiki/8\)-Favourites-Statistic).
 
 ## Roadmap
 
