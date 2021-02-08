@@ -48,10 +48,10 @@ public class StringToCountryParser {
 
     public static TimeFramedCountry parseFromPostmanOneCountryWithTimeFrame(String toParse, ISOCountry isoCountry, boolean skipFirstDate) throws JSONException, TooManyRequestsException, UnavailableException {
         if (toParse.toLowerCase().startsWith("{\"message\":\"too many requests")) {
-            throw new TooManyRequestsException("Too many requests were made!");
+            throw new TooManyRequestsException("Too many requests were made! Answer: "+toParse);
         }
         if (toParse.toLowerCase().contains("503 service temporarily unavailable")){
-            throw new UnavailableException("Service is currently unavailable...");
+            throw new UnavailableException("Service is currently unavailable! Answer: "+toParse);
         }
         TimeFramedCountry country = new TimeFramedCountry();
 
