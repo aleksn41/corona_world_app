@@ -8,7 +8,7 @@ import de.dhbw.corona_world_app.datastructure.Displayable;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 /**
- * This class is used for caching data and keeping track of the creation time.
+ * This class is used for caching data and keeping track of the cache's creation time.
  *
  * @param <T> The {@link Displayable} type of the main dataList of the CacheObject
  * @param <R> The {@link Displayable} type of the secondary data value of the CacheObject
