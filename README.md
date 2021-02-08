@@ -105,6 +105,14 @@ Once the app is opened you are conveyed to the starting screen, the world map. I
 <p align="center">
   <img src="/images/WorldMap.png" alt="World Map">
 </p>
+In the top right corner of this screen a summary of the whole world is shown. At the bottom above the navigation bar, a small bar with and upwards arror can be clicked. If any country was previously selected it's name and flag are shown in this BottomSheet. Image:
+<p align="center">
+  <img src="/images/WorldMap_Selected_HalfExpanded.png" alt="World Map - Half Expanded BottomSheet">
+</p>
+If this BottomSheet is clicked another time, it extends all the way and layers of the full screen. Additional info for the selected country (Infected, Deaths, Recovered, etc.) is shown in this overlay. The user now has also the ability to get a pie chart with the most important info through the "GO TO STATISTICS" button. Image:
+<p align="center">
+  <img src="/images/WorldMap_Selected_FullyExpanded.png" alt="World Map - Fully Expanded BottomSheet">
+</p>
 
 Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
 
