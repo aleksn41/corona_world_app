@@ -36,6 +36,7 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
     public static final int NO_LIMIT = -1;
     final LimitListener limitListener;
     StatisticRequestRule.OnItemsChangeListener itemsChangeListener;
+    CharSequence lastQuery;
 
     interface LimitListener {
         void onLimitReached(int limit);
@@ -79,6 +80,7 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
                 //this must be a List of type T
                 filteredItems = (List<T>) results.values; // has the filtered values
                 notifyDataSetChanged();  // notifies the data with new filtered values
+                lastQuery=constraint;
             }
         };
     }
@@ -156,6 +158,11 @@ public class AutoCompleteTextViewAdapter<T extends Enum<T>> extends BaseAdapter 
     public void conditionDoesNotApply() {
         conditionApplies(false);
         blackListItems.clear();
+    }
+
+    @Override
+    public void update() {
+        getFilter().filter(lastQuery);
     }
 
     public void addToBlackList(T item) {

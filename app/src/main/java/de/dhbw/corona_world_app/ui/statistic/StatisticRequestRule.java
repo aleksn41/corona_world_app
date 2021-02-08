@@ -69,6 +69,8 @@ public class StatisticRequestRule {
         void conditionApplies(boolean allowOnlyOneItem);
 
         void conditionDoesNotApply();
+
+        void update();
     }
 
     //interface the DatePicker need to implement
@@ -138,6 +140,9 @@ public class StatisticRequestRule {
         criteriaAdapter.conditionApplies(rule.allowOnlyOneCriteria);
         chartTypeAdapter.conditionApplies(rule.doNotAllowBarChart);
         ruleDateRangeInterface.conditionApplies(rule.startAndEndDateMustBeSame);
+        isoCountryAdapter.update();
+        criteriaAdapter.update();
+        chartTypeAdapter.update();
     }
 
     private void doNotApplyRule() {
@@ -145,5 +150,8 @@ public class StatisticRequestRule {
         criteriaAdapter.conditionDoesNotApply();
         chartTypeAdapter.conditionDoesNotApply();
         ruleDateRangeInterface.conditionDoesNotApply();
+        isoCountryAdapter.update();
+        criteriaAdapter.update();
+        chartTypeAdapter.update();
     }
 }
