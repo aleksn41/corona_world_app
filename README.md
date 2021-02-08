@@ -197,7 +197,15 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 - MPAndroid Chart https://github.com/PhilJay/MPAndroidChart (for displaying charts)
 - okhttp3 https://square.github.io/okhttp/ (for making API requests)
 
+## Known Problems
+### Help! I'm getting: 
+     
+     Error Code 14:
+     (API_CURRENTLY_NOT_AVAILABLE)
+     Data service is currently unavailable.
+     Please try again later.
 
+**Resolution:** See [this](https://github.com/aleksn41/corona_world_app/wiki/Note-on-APIs) for help.
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/aleksn41/corona_world_app.svg?style=for-the-badge
