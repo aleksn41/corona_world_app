@@ -2,4 +2,5 @@
 <resources>
     <dimen name="font_size">15sp</dimen>
     <dimen name="font_title_size">25sp</dimen>
+    <dimen name="statistic_call_list_item_height">165dp</dimen>
 </resources>

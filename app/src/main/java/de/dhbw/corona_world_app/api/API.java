@@ -1,5 +1,11 @@
 package de.dhbw.corona_world_app.api;
 
+/**
+ * This enum contains all necessary data for the usage of an API through the APIManager. The constants "getAllCountries" and "getOneCountry" contain the url snippets used to get the according
+ * data from the API.
+ *
+ * @author Thomas Meier
+ */
 public enum API {
     HEROKU("https://coronavirus-19-api.herokuapp.com", "/countries", "/countries/", false, false, "Heroku"),
     RESTCOUNTRIES("https://restcountries.eu/rest/v2", "/all", "/alpha/", true, false, "RestCountries"),

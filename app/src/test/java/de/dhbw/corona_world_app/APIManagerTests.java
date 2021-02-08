@@ -1,19 +1,26 @@
 package de.dhbw.corona_world_app;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.API;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
+import de.dhbw.corona_world_app.api.UnavailableException;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 import static org.junit.Assert.*;
@@ -22,7 +29,7 @@ public class APIManagerTests {
 
     @Before
     public void getAPIManger() {
-        APIManager.setSettings(false, false);
+        APIManager.setSettings(false);
     }
 
     @Test
@@ -45,7 +52,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist, criteriaList);
+        List<Country<ISOCountry>> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -87,7 +94,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist, criteriaList);
+        List<Country<ISOCountry>> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -96,7 +103,7 @@ public class APIManagerTests {
     public void testGetDataWorld() throws Throwable {
         APIManager.disableLogsForTesting();
         APIManager.createAPICall("https://google.de");
-        List<Country> returnList = APIManager.getDataWorld(API.HEROKU);
+        List<Country<ISOCountry>> returnList = APIManager.getDataWorld(API.HEROKU);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -113,8 +120,25 @@ public class APIManagerTests {
     @Test
     public void testGetDataGermany() throws Throwable {
         APIManager.disableLogsForTesting();
-        List<Country> countries = APIManager.getDataGermany(API.ARCGIS);
+        List<Country<GermanyState>> countries = APIManager.getDataGermany(API.ARCGIS);
         assertNotNull(countries);
         System.out.println(countries);
+    }
+
+    @Test
+    public void testAPIAllGetEveryCountry() throws InterruptedException, TooManyRequestsException, ExecutionException, UnavailableException, JSONException {
+        APIManager.disableLogsForTesting();
+        ISOCountry[] countryArray = ISOCountry.values();
+        int cnt = 0;
+        int countriesNotAvailable = 0;
+        for (ISOCountry country: countryArray) {
+            List<TimeFramedCountry> timeList = APIManager.getData(Collections.singletonList(country), Collections.singletonList(Criteria.INFECTED), null, null);
+            if(timeList.get(0).getCountry() == null){
+                System.out.println(country.toString());
+                countriesNotAvailable++;
+            }
+            if(cnt++%10==0) Thread.sleep(1500);
+        }
+        System.out.println("Count of countries not available = "+countriesNotAvailable);
     }
 }
