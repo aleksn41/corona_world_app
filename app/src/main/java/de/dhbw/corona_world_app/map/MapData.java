@@ -41,8 +41,7 @@ public class MapData {
             "  <script type=\"text/javascript\">" +
             "  openStats = (country) => {jsinterface.setISOCountry(country)};" +
             "  google.charts.load('current', {" +
-            "  'packages':['geochart']," +
-            "  'mapsApiKey': ''});" +
+            "  'packages':['geochart']});" +
             "  google.charts.setOnLoadCallback(drawMap);" +
             "  function drawMap() {" +
             "  var dataTable = new google.visualization.DataTable();" +
