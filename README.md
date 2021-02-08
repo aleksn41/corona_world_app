@@ -134,6 +134,7 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 ## Libraries
 - Google Charts https://developers.google.com/chart (for displaying the maps)
 - MPAndroid Chart https://github.com/PhilJay/MPAndroidChart (for displaying charts)
+- okhttp3 https://square.github.io/okhttp/ (for making API requests)
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
