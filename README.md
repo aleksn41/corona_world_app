@@ -135,6 +135,34 @@ The global settings and info dropdown can be reached from all fragments. It open
 </p>
 Through clicking the user either enters the settings or info screen. In the settings screen the user can en/disable cache (WIP). In the Info screen a short description of the app and it's developers is given.
 
+### Statistic Chooser
+(WIP)
+
+### Statistic 
+If either the "GO TO STATISTICS" button in the [World Map](https://github.com/aleksn41/corona_world_app/tree/readme#starting-screen--world-map) is clicked or the user created his own statistic through the [Statistic Chooser](https://github.com/aleksn41/corona_world_app/tree/readme#statistic-chooser) a new statistic is created, saved in [History](https://github.com/aleksn41/corona_world_app/tree/readme#history) and then displayed. Example Images:
+#### Pie Chart:
+<p align="center">
+  <img src="/images/Statistic_PieChart.png" alt="Pie Chart">
+</p>
+
+#### Line Chart:
+<p align="center">
+  <img src="/images/Statistic_LineChart.png" alt="Line Chart">
+</p>
+
+#### Bar Chart:
+<p align="center">
+  <img src="/images/Statistic_BarChart.png" alt="Bar Chart">
+</p>
+
+For more info on Statistic click [here](https://github.com/aleksn41/corona_world_app/wiki/Statistic).
+
+### History
+(WIP)
+
+### Favourites
+(WIP)
+
 Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
 
 ## Roadmap
