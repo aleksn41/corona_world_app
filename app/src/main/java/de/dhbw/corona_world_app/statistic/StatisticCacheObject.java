@@ -7,6 +7,11 @@ import java.util.List;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
 
+/**
+ * This class is used to cache a statistic call it's according data and creation time.
+ *
+ * @author Thomas Meier
+ */
 public class StatisticCacheObject implements Serializable {
 
     final LocalDateTime creationTime;

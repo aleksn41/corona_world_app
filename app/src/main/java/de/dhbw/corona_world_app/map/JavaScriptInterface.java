@@ -7,6 +7,11 @@ import androidx.lifecycle.MutableLiveData;
 import de.dhbw.corona_world_app.api.Mapper;
 import de.dhbw.corona_world_app.datastructure.Displayable;
 
+/**
+ * This class is used to translate the selected country of the map from javascript to java.
+ *
+ * @author Thomas Meier
+ */
 public class JavaScriptInterface {
 
     public final MutableLiveData<Displayable> current = new MutableLiveData<>();

@@ -18,11 +18,15 @@ import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.map.MapData;
 
+/**
+ * This fragment implements the {@link GenericMapFragment} for the Germany map.
+ *
+ * @author Thomas Meier
+ */
 public class GermanyMapFragment extends GenericMapFragment<GermanyState> {
 
     private static final String TAG = GermanyMapFragment.class.getSimpleName();
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void setAdditionalWebViewSettingsOnPageFinished(WebView webView) {
         webView.zoomBy(2.15f);

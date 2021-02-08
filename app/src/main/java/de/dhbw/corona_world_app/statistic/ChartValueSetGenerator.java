@@ -14,6 +14,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class generates the data sets that are used to display data in a statistic. It automatically selects different colors from the input List.
+ *
+ * @author Thomas Meier
+ */
 public class ChartValueSetGenerator {
 
     public BarDataSet getBarChartDataSet(@NonNull List<Float> data, @NonNull String label, @NonNull List<Integer> colors) {

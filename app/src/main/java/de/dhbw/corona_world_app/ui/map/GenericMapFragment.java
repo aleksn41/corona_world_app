@@ -51,7 +51,7 @@ import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 
 /**
- * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a hot map of the Corona-virus spread
+ * This abstract Fragment is used to show the user a {@link WebView} containing a map displaying a heat map of the Corona-virus spread
  * {@link BottomSheetBehavior} is used to display more Information of a selected {@link Displayable}
  * A {@link TextView} is placed in the top right to show summarized Data
  *
@@ -160,7 +160,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     case BottomSheetBehavior.STATE_SETTLING:
                         break;
                 }
-                if (selectedCountry != null && mapViewModel.getCurrentResolution().equals(MapData.Resolution.WOLRD))
+                if (selectedCountry != null && mapViewModel.getCurrentResolution().equals(MapData.Resolution.WORLD))
                     root.findViewById(R.id.bottomSheetButton).setVisibility(View.VISIBLE);
             }
 
@@ -171,10 +171,9 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
         });
 
         boolean cacheDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("cache_deactivated", false);
-        boolean storageDisabled = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("storage_deactivated", false);
-        Log.d(getTAG(), "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + " and storage " + (storageDisabled ? "disabled" : "enabled") + "...");
+        Log.d(getTAG(), "Initiating view model with cache " + (cacheDisabled ? "disabled" : "enabled") + "...");
+        mapViewModel.init(cacheDisabled);
 
-        mapViewModel.init(cacheDisabled, storageDisabled);
         WebView myWebView = root.findViewById(R.id.map_web_view);
         WebSettings webSettings = myWebView.getSettings();
 
@@ -293,7 +292,7 @@ public abstract class GenericMapFragment<T extends Displayable> extends Fragment
                     Logger.logE(getTAG(), "Trying to ping 8.8.8.8 (Google DNS)...");
                     if (APIManager.pingGoogleDNS()) {
                         Logger.logE(getTAG(), "Success!");
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CONNECTION_TIMEOUT, null));
+                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.API_CURRENTLY_NOT_AVAILABLE, null));
                     } else {
                         Logger.logE(getTAG(), "Failure!");
                         requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));

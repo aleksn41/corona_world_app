@@ -95,8 +95,70 @@ public class StatisticRequestFragment extends Fragment {
         ChipGroup isoCountryChips = root.findViewById(R.id.isoCountryChips);
         AutoCompleteTextViewAdapter<ISOCountry> isoCountryAdapter = new AutoCompleteTextViewAdapter<>(getContext(), ISOCountry.class, APIManager.MAX_COUNTRY_LIST_SIZE, getLimitListener("Country", isoCountryTextView));
 
-        //special rule, user cannot select World for a statistic as it is not supported by the API
+        //special rules, user cannot select these for a statistic as they are not supported by the API
         isoCountryAdapter.addToBlackList(ISOCountry.World);
+        isoCountryAdapter.addToBlackList(ISOCountry.Aland_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.American_Samoa);
+        isoCountryAdapter.addToBlackList(ISOCountry.Antarctica);
+        isoCountryAdapter.addToBlackList(ISOCountry.Anguilla);
+        isoCountryAdapter.addToBlackList(ISOCountry.Aruba);
+        isoCountryAdapter.addToBlackList(ISOCountry.Bermuda);
+        isoCountryAdapter.addToBlackList(ISOCountry.Bonaire_Sint_Eustatius_and_Saba);
+        isoCountryAdapter.addToBlackList(ISOCountry.Bouvet_Island);
+        isoCountryAdapter.addToBlackList(ISOCountry.British_Indian_Ocean_Territory);
+        isoCountryAdapter.addToBlackList(ISOCountry.Cura_ao);
+        isoCountryAdapter.addToBlackList(ISOCountry.Christmas_Island);
+        isoCountryAdapter.addToBlackList(ISOCountry.Cocos);
+        isoCountryAdapter.addToBlackList(ISOCountry.Cayman_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Cook_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Falkland_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Faroe_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.French_Guiana);
+        isoCountryAdapter.addToBlackList(ISOCountry.French_Polynesia);
+        isoCountryAdapter.addToBlackList(ISOCountry.French_Southern_Territories);
+        isoCountryAdapter.addToBlackList(ISOCountry.Guam);
+        isoCountryAdapter.addToBlackList(ISOCountry.Gibraltar);
+        isoCountryAdapter.addToBlackList(ISOCountry.Greenland);
+        isoCountryAdapter.addToBlackList(ISOCountry.Guadeloupe);
+        isoCountryAdapter.addToBlackList(ISOCountry.Guernsey);
+        isoCountryAdapter.addToBlackList(ISOCountry.Hong_Kong);
+        isoCountryAdapter.addToBlackList(ISOCountry.Heard_Island_and_McDonald_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Holy_See);
+        isoCountryAdapter.addToBlackList(ISOCountry.Isle_of_Man);
+        isoCountryAdapter.addToBlackList(ISOCountry.Jersey);
+        isoCountryAdapter.addToBlackList(ISOCountry.Kiribati);
+        isoCountryAdapter.addToBlackList(ISOCountry.Macao);
+        isoCountryAdapter.addToBlackList(ISOCountry.Martinique);
+        isoCountryAdapter.addToBlackList(ISOCountry.Mayotte);
+        isoCountryAdapter.addToBlackList(ISOCountry.Montserrat);
+        isoCountryAdapter.addToBlackList(ISOCountry.New_Caledonia);
+        isoCountryAdapter.addToBlackList(ISOCountry.R_union);
+        isoCountryAdapter.addToBlackList(ISOCountry.Saint_Barth_lemy);
+        isoCountryAdapter.addToBlackList(ISOCountry.Saint_Martin);
+        isoCountryAdapter.addToBlackList(ISOCountry.Saint_Pierre_and_Miquelon);
+        isoCountryAdapter.addToBlackList(ISOCountry.Sint_Maarten);
+        isoCountryAdapter.addToBlackList(ISOCountry.Turks_and_Caicos_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.British_Virgin_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Wallis_and_Futuna);
+        isoCountryAdapter.addToBlackList(ISOCountry.Western_Sahara);
+        isoCountryAdapter.addToBlackList(ISOCountry.North_Korea);
+        isoCountryAdapter.addToBlackList(ISOCountry.Nauru);
+        isoCountryAdapter.addToBlackList(ISOCountry.Niue);
+        isoCountryAdapter.addToBlackList(ISOCountry.Norfolk_Island);
+        isoCountryAdapter.addToBlackList(ISOCountry.Northern_Mariana_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Palau);
+        isoCountryAdapter.addToBlackList(ISOCountry.Pitcairn);
+        isoCountryAdapter.addToBlackList(ISOCountry.Puerto_Rico);
+        isoCountryAdapter.addToBlackList(ISOCountry.Saint_Helena_Ascension_and_Tristan_da_Cunha);
+        isoCountryAdapter.addToBlackList(ISOCountry.South_Georgia_and_the_South_Sandwich_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Svalbard_and_Jan_Mayen);
+        isoCountryAdapter.addToBlackList(ISOCountry.Tokelau);
+        isoCountryAdapter.addToBlackList(ISOCountry.Tonga);
+        isoCountryAdapter.addToBlackList(ISOCountry.Turkmenistan);
+        isoCountryAdapter.addToBlackList(ISOCountry.Tuvalu);
+        isoCountryAdapter.addToBlackList(ISOCountry.United_States_Minor_Outlying_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.US_Virgin_Islands);
+        isoCountryAdapter.addToBlackList(ISOCountry.Republic_of_Kosovo);
 
         //When an item is selected, submit to ViewModel and change Chips
         isoCountryTextView.setOnItemClickListener((parent, view, position, id) -> {

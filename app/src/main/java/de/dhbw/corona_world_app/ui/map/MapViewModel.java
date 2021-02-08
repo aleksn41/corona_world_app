@@ -35,11 +35,18 @@ import de.dhbw.corona_world_app.map.MapData;
 import de.dhbw.corona_world_app.map.MapCacheObject;
 import de.dhbw.corona_world_app.map.MapWithBoxCacheObject;
 
+/**
+ * This ViewModel handles all data for the two map fragments (Germany, World). It can destroy, create and maintain cache, get data through the APIManger and handles ExecutionExceptions to
+ * give the user a more detailed error message.
+ *
+ * @author Thomas Meier
+ */
 public class MapViewModel extends ViewModel {
 
     private static final String TAG = MapViewModel.class.getSimpleName();
 
     private static boolean alreadyRunning = false;
+
 
     private final String WORLD_CACHE_FILENAME = "/world_cache.ser";
 
@@ -49,8 +56,8 @@ public class MapViewModel extends ViewModel {
 
     private final ExecutorService executorService = ThreadPoolHandler.getInstance();
 
-    private File pathToCacheDir;
 
+    private File pathToCacheDir;
 
 
     public final MutableLiveData<Country<? extends Displayable>> selectedCountry = new MutableLiveData<>();
@@ -63,8 +70,10 @@ public class MapViewModel extends ViewModel {
 
     public final MutableLiveData<Country<ISOCountry>> mBoxValue = new MutableLiveData<>();
 
-    public void init(boolean cacheDisabled, boolean longTermDisabled) {
-        APIManager.setSettings(!cacheDisabled, !longTermDisabled);
+
+    public void init(boolean cacheDisabled) {
+        APIManager.setSettings(!cacheDisabled);
+
     }
 
     public void cacheDataWorld(@NonNull List<Country<ISOCountry>> worldData) throws IOException {

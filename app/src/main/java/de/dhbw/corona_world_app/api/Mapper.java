@@ -8,6 +8,11 @@ import java.util.Map;
 import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
+/**
+ * This class takes care of the mapping of all country-names between app and API.
+ *
+ * @author Thomas Meier
+ */
 public class Mapper {
 
     private static Map<String, ISOCountry> herokuToStandardMap;
@@ -45,6 +50,11 @@ public class Mapper {
         }
     }
 
+    /**
+     * Initializes the map for the given API.
+     *
+     * @param api - API to create the map for
+     */
     private static void initializeMap(API api) {
         init();
         if (apisToMap.get(api).isEmpty()) {

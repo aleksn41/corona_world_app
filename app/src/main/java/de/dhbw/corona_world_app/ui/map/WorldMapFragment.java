@@ -22,6 +22,11 @@ import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
+/**
+ * This fragment implements the {@link GenericMapFragment} for the Germany map.
+ *
+ * @author Thomas Meier
+ */
 public class WorldMapFragment extends GenericMapFragment<ISOCountry> {
 
     @Override

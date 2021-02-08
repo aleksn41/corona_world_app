@@ -31,8 +31,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
+import de.dhbw.corona_world_app.Logger;
 import de.dhbw.corona_world_app.R;
 import de.dhbw.corona_world_app.ThreadPoolHandler;
+import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.TooManyRequestsException;
 import de.dhbw.corona_world_app.api.UnavailableException;
 import de.dhbw.corona_world_app.datastructure.DataException;
@@ -40,12 +42,13 @@ import de.dhbw.corona_world_app.datastructure.StatisticCall;
 import de.dhbw.corona_world_app.ui.tools.ErrorCode;
 import de.dhbw.corona_world_app.ui.tools.ErrorDialog;
 
+import de.dhbw.corona_world_app.ui.tools.LoadingScreenInterface;
 import de.dhbw.corona_world_app.ui.tools.StatisticCallViewModel;
 
 /**
- * This Class is used to show the Statistic
+ * This Fragment is used to display a statistic to the user. The statistics automatically change style according to the user's device's global theme.
  *
- * @author Thomas Meier (Logic)
+ * @author Thomas Meier (Logic and Statistics style)
  * @author Aleksandr Stankoski (Layout)
  */
 public class StatisticFragment extends Fragment {
@@ -59,6 +62,25 @@ public class StatisticFragment extends Fragment {
     private final ExecutorService service = ThreadPoolHandler.getInstance();
 
     LinearProgressIndicator progressBar;
+
+    private final LoadingScreenInterface loadingScreen = new LoadingScreenInterface() {
+        @Override
+        public void startLoadingScreen() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void endLoadingScreen() {
+            progressBar.setProgress(0);
+            progressBar.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void setProgressBar(int progress) {
+            progressBar.setProgress(progress);
+        }
+
+    };
 
     BarChart barChart;
 
@@ -111,6 +133,7 @@ public class StatisticFragment extends Fragment {
         pieChart.setVisibility(View.GONE);
         lineChart.setVisibility(View.GONE);
 
+        loadingScreen.startLoadingScreen();
         statisticViewModel.setPathToCacheDir(requireActivity().getCacheDir());
         Bundle bundle = getArguments();
         assert bundle != null;
@@ -120,11 +143,14 @@ public class StatisticFragment extends Fragment {
         setStyle(pieChart, statisticCall, requireContext());
         setStyle(lineChart, requireContext());
 
+        statisticViewModel.progress.observe(getViewLifecycleOwner(), loadingScreen::setProgressBar);
+
         service.execute(() -> {
             Thread currentThread = Thread.currentThread();
             AtomicBoolean retry = new AtomicBoolean(true);
             while (retry.get()) {
                 if (getContext() != null) {
+                    requireActivity().runOnUiThread(() -> loadingScreen.setProgressBar(20));
                     try {
                         switch (statisticCall.getChartType()) {
                             case BAR:
@@ -151,94 +177,119 @@ public class StatisticFragment extends Fragment {
                             default:
                                 throw new IllegalStateException("A not yet implemented chart type was selected!");
                         }
+                        requireActivity().runOnUiThread(loadingScreen::endLoadingScreen);
                         retry.set(false);
                     } catch (ExecutionException | InterruptedException | IllegalArgumentException e) {
                         Log.e(TAG, "An error has occurred while creating the statistic!", e);
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CREATE_STATISTIC_FAILED, (dialog, which) -> {
-                            retry.set(true);
-                            synchronized (currentThread) {
-                                currentThread.notify();
+                        if (getActivity() != null) {
+                            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CREATE_STATISTIC_FAILED, (dialog, which) -> {
+                                retry.set(true);
+                                synchronized (currentThread) {
+                                    currentThread.notify();
+                                }
+                            }, "Retry"));
+                            try {
+                                synchronized (currentThread) {
+                                    currentThread.wait();
+                                }
+                            } catch (InterruptedException interruptedException) {
+                                Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                             }
-                        }, "Retry"));
-                        try {
-                            synchronized (currentThread) {
-                                currentThread.wait();
-                            }
-                        } catch (InterruptedException interruptedException) {
-                            Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, "An error has occurred while parsing api answer!", e);
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ANSWER, (dialog, which) -> {
-                            retry.set(true);
-                            synchronized (currentThread) {
-                                currentThread.notify();
+                        if (getActivity() != null) {
+                            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ANSWER, (dialog, which) -> {
+                                retry.set(true);
+                                synchronized (currentThread) {
+                                    currentThread.notify();
+                                }
+                            }, "Retry"));
+                            try {
+                                synchronized (currentThread) {
+                                    currentThread.wait();
+                                }
+                            } catch (InterruptedException interruptedException) {
+                                Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                             }
-                        }, "Retry"));
-                        try {
-                            synchronized (currentThread) {
-                                currentThread.wait();
-                            }
-                        } catch (InterruptedException interruptedException) {
-                            Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                         }
                     } catch (UnavailableException e) {
                         Log.e(TAG, "The api is currently not available!", e);
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.UNEXPECTED_ERROR, (dialog, which) -> {
-                            retry.set(true);
-                            synchronized (currentThread) {
-                                currentThread.notify();
+                        if (getActivity() != null) {
+                            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.API_CURRENTLY_NOT_AVAILABLE, (dialog, which) -> {
+                                retry.set(true);
+                                synchronized (currentThread) {
+                                    currentThread.notify();
+                                }
+                            }, "Retry"));
+                            try {
+                                synchronized (currentThread) {
+                                    currentThread.wait();
+                                }
+                            } catch (InterruptedException interruptedException) {
+                                Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                             }
-                        }, "Retry"));
-                        try {
-                            synchronized (currentThread) {
-                                currentThread.wait();
-                            }
-                        } catch (InterruptedException interruptedException) {
-                            Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                         }
                     } catch (TooManyRequestsException e) {
                         Log.e(TAG, "Too many requests were made!", e);
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.TOO_MANY_REQUESTS, (dialog, which) -> {
-                            retry.set(true);
-                            synchronized (currentThread) {
-                                currentThread.notify();
+                        if (getActivity() != null) {
+                            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.TOO_MANY_REQUESTS, (dialog, which) -> {
+                                retry.set(true);
+                                synchronized (currentThread) {
+                                    currentThread.notify();
+                                }
+                            }, "Retry"));
+                            try {
+                                synchronized (currentThread) {
+                                    currentThread.wait();
+                                }
+                            } catch (InterruptedException interruptedException) {
+                                Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                             }
-                        }, "Retry"));
-                        try {
-                            synchronized (currentThread) {
-                                currentThread.wait();
-                            }
-                        } catch (InterruptedException interruptedException) {
-                            Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
                         }
                     } catch (IOException e) {
                         Log.v(TAG, "Exception while creating statistic!", e);
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        Log.wtf(TAG, "There are problems reading the serialized data!");
-                        requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
-                            retry.set(true);
-                            synchronized (currentThread) {
-                                currentThread.notify();
-                            }
-                        }, "Ok"));
-                        try {
-                            synchronized (currentThread) {
-                                currentThread.wait();
-                            }
+                        if (getActivity() != null) {
                             try {
-                                statisticViewModel.deleteCache();
-                            } catch (DataException dataException) {
-                                Log.e(TAG, "Could not delete local statistics cache!", dataException);
-                                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_DELETE_FILE, null, "Ok"));
+                                Logger.logE(TAG, "Trying to ping 8.8.8.8 (Google DNS)...");
+                                if (APIManager.pingGoogleDNS()) {
+                                    Logger.logE(TAG, "Success!");
+                                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.API_CURRENTLY_NOT_AVAILABLE, null));
+                                } else {
+                                    Logger.logE(TAG, "Failure!");
+                                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
+                                }
+                            } catch (IOException e1) {
+                                Logger.logE(TAG, "Failure with Exception!", e1);
+                                requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.NO_CONNECTION, null));
                             }
-                        } catch (InterruptedException interruptedException) {
-                            Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
+                        }
+                    } catch (ClassNotFoundException e) {
+                        if (getActivity() != null) {
+                            Log.wtf(TAG, "There are problems reading the serialized data!");
+                            requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.DATA_CORRUPT, (dialog, which) -> {
+                                retry.set(true);
+                                synchronized (currentThread) {
+                                    currentThread.notify();
+                                }
+                            }, "Ok"));
+                            try {
+                                synchronized (currentThread) {
+                                    currentThread.wait();
+                                }
+                                try {
+                                    statisticViewModel.deleteCache();
+                                } catch (DataException dataException) {
+                                    Log.e(TAG, "Could not delete local statistics cache!", dataException);
+                                    requireActivity().runOnUiThread(() -> ErrorDialog.showBasicErrorDialog(getContext(), ErrorCode.CANNOT_DELETE_FILE, null, "Ok"));
+                                }
+                            } catch (InterruptedException interruptedException) {
+                                Log.wtf(TAG, "It was tried to access waiting Thread!", interruptedException);
+                            }
                         }
                     }
                 } else {
-                    //this is if the user quickly changes fragment and the error dialog pops up anyway
+                    //this is if the user quickly changes fragments and the error dialog pops up anyway
                     retry.set(false);
                 }
             }

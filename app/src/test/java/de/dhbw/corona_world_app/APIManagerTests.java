@@ -1,19 +1,27 @@
 package de.dhbw.corona_world_app;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import de.dhbw.corona_world_app.api.APIManager;
 import de.dhbw.corona_world_app.api.API;
+import de.dhbw.corona_world_app.api.TooManyRequestsException;
+import de.dhbw.corona_world_app.api.UnavailableException;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Criteria;
 import de.dhbw.corona_world_app.datastructure.TimeFramedCountry;
+import de.dhbw.corona_world_app.datastructure.displayables.GermanyState;
 import de.dhbw.corona_world_app.datastructure.displayables.ISOCountry;
 
 import static org.junit.Assert.*;
@@ -22,7 +30,7 @@ public class APIManagerTests {
 
     @Before
     public void getAPIManger() {
-        APIManager.setSettings(false, false);
+        APIManager.setSettings(false);
     }
 
     @Test
@@ -45,7 +53,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist, criteriaList);
+        List<Country<ISOCountry>> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -87,7 +95,7 @@ public class APIManagerTests {
         criteriaList.add(Criteria.INFECTED);
         criteriaList.add(Criteria.RECOVERED);
         criteriaList.add(Criteria.POPULATION);
-        List<Country> returnList = APIManager.getData(clist, criteriaList);
+        List<Country<ISOCountry>> returnList = APIManager.getData(clist, criteriaList);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -96,7 +104,7 @@ public class APIManagerTests {
     public void testGetDataWorld() throws Throwable {
         APIManager.disableLogsForTesting();
         APIManager.createAPICall("https://google.de");
-        List<Country> returnList = APIManager.getDataWorld(API.HEROKU);
+        List<Country<ISOCountry>> returnList = APIManager.getDataWorld(API.HEROKU);
         assertNotNull(returnList);
         System.out.println(returnList);
     }
@@ -113,8 +121,100 @@ public class APIManagerTests {
     @Test
     public void testGetDataGermany() throws Throwable {
         APIManager.disableLogsForTesting();
-        List<Country> countries = APIManager.getDataGermany(API.ARCGIS);
+        List<Country<GermanyState>> countries = APIManager.getDataGermany(API.ARCGIS);
         assertNotNull(countries);
         System.out.println(countries);
+    }
+
+    @Test
+    //Heads up! This may take a while as it makes 10 sec pauses every 10 requests.
+    public void testAPIAllGetEveryCountry() throws InterruptedException, TooManyRequestsException, ExecutionException, UnavailableException {
+        APIManager.disableLogsForTesting();
+        List<ISOCountry> countryList = Arrays.asList(ISOCountry.values());
+        List<ISOCountry> blackList = new ArrayList<>();
+        blackList.add(ISOCountry.World);
+        blackList.add(ISOCountry.Aland_Islands);
+        blackList.add(ISOCountry.American_Samoa);
+        blackList.add(ISOCountry.Antarctica);
+        blackList.add(ISOCountry.Anguilla);
+        blackList.add(ISOCountry.Aruba);
+        blackList.add(ISOCountry.Bermuda);
+        blackList.add(ISOCountry.Bonaire_Sint_Eustatius_and_Saba);
+        blackList.add(ISOCountry.Bouvet_Island);
+        blackList.add(ISOCountry.British_Indian_Ocean_Territory);
+        blackList.add(ISOCountry.Cura_ao);
+        blackList.add(ISOCountry.Christmas_Island);
+        blackList.add(ISOCountry.Cocos);
+        blackList.add(ISOCountry.Cook_Islands);
+        blackList.add(ISOCountry.Falkland_Islands);
+        blackList.add(ISOCountry.Faroe_Islands);
+        blackList.add(ISOCountry.French_Guiana);
+        blackList.add(ISOCountry.French_Polynesia);
+        blackList.add(ISOCountry.French_Southern_Territories);
+        blackList.add(ISOCountry.Guam);
+        blackList.add(ISOCountry.Gibraltar);
+        blackList.add(ISOCountry.Greenland);
+        blackList.add(ISOCountry.Guadeloupe);
+        blackList.add(ISOCountry.Guernsey);
+        blackList.add(ISOCountry.Hong_Kong);
+        blackList.add(ISOCountry.Cayman_Islands);
+        blackList.add(ISOCountry.Heard_Island_and_McDonald_Islands);
+        blackList.add(ISOCountry.Holy_See);
+        blackList.add(ISOCountry.Isle_of_Man);
+        blackList.add(ISOCountry.Jersey);
+        blackList.add(ISOCountry.Kiribati);
+        blackList.add(ISOCountry.Macao);
+        blackList.add(ISOCountry.Martinique);
+        blackList.add(ISOCountry.Mayotte);
+        blackList.add(ISOCountry.Montserrat);
+        blackList.add(ISOCountry.New_Caledonia);
+        blackList.add(ISOCountry.R_union);
+        blackList.add(ISOCountry.Saint_Barth_lemy);
+        blackList.add(ISOCountry.Saint_Martin);
+        blackList.add(ISOCountry.Saint_Pierre_and_Miquelon);
+        blackList.add(ISOCountry.Sint_Maarten);
+        blackList.add(ISOCountry.Turks_and_Caicos_Islands);
+        blackList.add(ISOCountry.British_Virgin_Islands);
+        blackList.add(ISOCountry.Wallis_and_Futuna);
+        blackList.add(ISOCountry.Western_Sahara);
+        blackList.add(ISOCountry.North_Korea);
+        blackList.add(ISOCountry.Nauru);
+        blackList.add(ISOCountry.Niue);
+        blackList.add(ISOCountry.Norfolk_Island);
+        blackList.add(ISOCountry.Northern_Mariana_Islands);
+        blackList.add(ISOCountry.Palau);
+        blackList.add(ISOCountry.Pitcairn);
+        blackList.add(ISOCountry.Puerto_Rico);
+        blackList.add(ISOCountry.Saint_Helena_Ascension_and_Tristan_da_Cunha);
+        blackList.add(ISOCountry.South_Georgia_and_the_South_Sandwich_Islands);
+        blackList.add(ISOCountry.Svalbard_and_Jan_Mayen);
+        blackList.add(ISOCountry.Tokelau);
+        blackList.add(ISOCountry.Tonga);
+        blackList.add(ISOCountry.Turkmenistan);
+        blackList.add(ISOCountry.Tuvalu);
+        blackList.add(ISOCountry.United_States_Minor_Outlying_Islands);
+        blackList.add(ISOCountry.US_Virgin_Islands);
+        blackList.add(ISOCountry.Republic_of_Kosovo);
+        countryList = countryList.stream().filter(c -> !blackList.contains(c)).collect(Collectors.toList());
+        int cnt = 0;
+        int countriesNotAvailable = 0;
+        for (ISOCountry country: countryList) {
+            try {
+                List<TimeFramedCountry> timeList = APIManager.getData(Collections.singletonList(country), Collections.singletonList(Criteria.INFECTED), LocalDate.now().minusDays(2), null);
+                if(timeList.get(0).getCountry() == null || timeList.get(0).getInfected().length < 2){
+                    System.out.println(country.toString());
+                    countriesNotAvailable++;
+                }
+            } catch (JSONException e){
+                e.printStackTrace();
+                System.out.println(country.toString());
+                countriesNotAvailable++;
+            }
+            //needed so that the api doesn't block the requests
+            if(cnt++%10==0) Thread.sleep(5000);
+        }
+        assertEquals(0, countriesNotAvailable);
+        System.out.println("Count of countries not available = "+countriesNotAvailable);
+        Thread.sleep(10000);
     }
 }

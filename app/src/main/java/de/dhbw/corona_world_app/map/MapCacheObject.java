@@ -7,6 +7,13 @@ import java.util.List;
 import de.dhbw.corona_world_app.datastructure.Country;
 import de.dhbw.corona_world_app.datastructure.Displayable;
 
+/**
+ * This class is used for caching data and keeping track of the cache's creation time.
+ *
+ * @param <T> The {@link Displayable} type of the CacheObject
+ *
+ * @author Thomas Meier
+ */
 public class MapCacheObject<T extends Displayable> implements Serializable {
 
     private final LocalDateTime creationTime;
