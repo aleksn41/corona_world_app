@@ -114,10 +114,10 @@ If this BottomSheet is clicked another time, it extends all the way and layers o
   <img src="/images/WorldMap_Selected_FullyExpanded.png" alt="World Map - Fully Expanded BottomSheet">
 </p>
 
-For more info on the world map click [here](https://github.com/aleksn41/corona_world_app/wiki/World-Map).
+For more info on the World Map click [here](https://github.com/aleksn41/corona_world_app/wiki/World-Map).
 
 ### Map of Germany
-In this screen a map of germany and all it's states is shown. The coloring and functionalities are the same as in the World Map. In the top right corner is a summary of germany shown instead of a world overview. Image:
+In this screen a Map of Germany and all it's states is shown. The coloring and functionalities are the same as in the World Map. In the top right corner is a summary of germany shown instead of a world overview. Image:
 <p align="center">
   <img src="/images/Germany_Selected_HalfExpanded.png" alt="Map of Germany - Half Expanded BottomSheet">
 </p>
@@ -125,6 +125,15 @@ This time however it is not possible to get a quick overview by creating a pie c
 <p align="center">
   <img src="/images/Germany_Selected_FullyExpanded.png" alt="Map of Germany - Fully Expanded BottomSheet">
 </p>
+
+For more info on the Map of Germany click [here](https://github.com/aleksn41/corona_world_app/wiki/Germany-Map-(beta)).
+
+### Settings & Info
+The global settings and info dropdown can be reached from all fragments. Image (this is from the World Map but the position does not vary):
+<p align="center">
+  <img src="/images/Settings_Info_Tab.png" alt="Settings & Info Tab">
+</p>
+Through clicking the user either enters the settings or info screen. In the settings screen the user can en/disable cache (WIP). In the Info screen a short description of the app and it's developers is given.
 
 Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
 
