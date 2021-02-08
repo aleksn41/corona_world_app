@@ -103,6 +103,7 @@ This Application can only run on Android 10 or greater (API level 29 or greater)
 
 This will be filled once Documentation and Design have been finished (Screenshots will be included)
 
+Click [here](https://github.com/aleksn41/corona_world_app/wiki/Overview) for a quick overview of all features and functionalities. 
 
 ## Roadmap
 
